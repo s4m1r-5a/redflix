@@ -76,31 +76,5 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Starting
 app.listen(app.get('port'), () => {
   console.log('Server is in port', app.get('port'));
-  console.log ('se repite');
   //val.navegar('casperjs netflix.js');
 });
-// Web Scraping
-/*(async function example() {
-  let driver = await new Builder().forBrowser('firefox').build();
-  try {
-    await driver.get('https://www.netflix.com/co/login');
-    //await driver.findElement(By.name('q')).sendKeys('fecebook', Key.RETURN);
-    //await driver.wait(until.titleIs('webdriver - Google Search'), 1000);
-    await driver.findElement(By.id('id_userLoginId')).sendKeys('jhonyleon05@yopmail.com');
-    await driver.findElement(By.id('id_password')).sendKeys('12345', Key.RETURN);
-  } finally {
-    //await driver.quit();
-  }
-})();
-(async function example() {
-  let driver = await new Builder().forBrowser('firefox').build();
-  try {
-    await driver.get('https://www.facebook.com');
-    //await driver.findElement(By.name('q')).sendKeys('fecebook', Key.RETURN);
-    //await driver.wait(until.titleIs('webdriver - Google Search'), 1000);
-    await driver.findElement(By.id('email')).sendKeys('s4m1r@hotmail.es');
-    await driver.findElement(By.id('pass')).sendKeys('5a1d4rr1a9A*', Key.RETURN);
-  } finally {
-    await driver.quit();
-  }
-})();*/
