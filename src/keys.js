@@ -2,10 +2,10 @@ module.exports = {
 
     database: {
         connectionLimit: 55,
-        host: 'broohy4owasfggbk9uva-mysql.services.clever-cloud.com',
-        user: 'uremfn4kw6zkjc3y',
-        password: 'TFuiH7A6Qj2mXetssa58',
-        database: 'broohy4owasfggbk9uva'
+        host: 'remotemysql.com:3306',
+        user: '7FkgiibGMr',
+        password: 'h8cC0kkPPE',
+        database: '7FkgiibGMr'
     }
 
 };
