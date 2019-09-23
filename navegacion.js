@@ -3,14 +3,12 @@ const router = express.Router();
 const execSync = require('child_process').execSync;
 
 router.post('/navegar', async (req, res) => {
-    const { pin, usermane, password } = req.body;
-    const newLink = {
-        pin,
-        usermane,
-        password
-    };
-    //console.log('si funciona samir'); 
-            var msg = 'casperjs ' + newLink.pin;
+    const { movil, nombre, email } = req.body;
+    var nomb = nombre.replace(" ", "%20");
+
+    var newLink = 'https://iux.com.co/x/venta.php?suscp=1&movil='+movil+'&nombre='+nomb+'&email='+email;
+    console.log(req.body); 
+            var msg = 'casperjs cedula.js ' + newLink;
             console.log(msg);
             const stdout = execSync(msg);            
             req.flash('success', 'Link Saved Successfully');            

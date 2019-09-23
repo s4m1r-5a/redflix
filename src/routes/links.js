@@ -66,6 +66,19 @@ router.post('/id', async (req, res) => {
         req.flash('error', 'Id de registro incorrecto');
     }
 });
+router.post('/iux', async (req, res) => {
+    console.log(req.body);
+    /*const { pin } = req.body;
+    const rows = await pool.query('SELECT * FROM pines WHERE id = ?', pin);
+    console.log(rows);
+    if (rows.length > 0) {
+        //res.send("este pin es invalido"); AND 
+        res.send({ rows });
+    } else {
+        res.send('Pin de registro invalido, comuniquese con su distribuidor!');
+        req.flash('error', 'Id de registro incorrecto');
+    }*/
+});
 router.post('/afiliado', async (req, res) => {
     const { movil } = req.body;
     console.log(req.body);
@@ -73,8 +86,9 @@ router.post('/afiliado', async (req, res) => {
 });
 
 router.get('/', isLoggedIn, async (req, res) => {
+    console.log('jdfkjdfkdfd');
     const links = await pool.query('SELECT * FROM links WHERE user_id = ? ', [req.user.id]);
-    res.render('links/list', { links });
+    res.render('links/list', { links });    
 });
 
 router.get('/delete/:id', async (req, res) => {
@@ -103,6 +117,7 @@ router.post('/edit/:id', async (req, res) => {
     req.flash('success', 'Link Updated Successfully');
     res.redirect('/links');
 });
+
 //"a0Ab1Bc2Cd3De4Ef5Fg6Gh7Hi8Ij9Jk0KLm1Mn2No3Op4Pq5Qr6Rs7St8Tu9Uv0Vw1Wx2Xy3Yz4Z"
 function ID(chars = "0A1B2C3D4E5F6G7H8I9J0KL1M2N3O4P5Q6R7S8T9U0V1W2X3Y4Z", lon = 9) {
     let code = "";

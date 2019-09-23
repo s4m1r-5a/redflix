@@ -16,7 +16,108 @@ function init_events(ele) {
         })
     })
 }
-if ($('#login').is(':visible')) {
+
+if (window.location == "http://localhost:3000/tablero"){  
+    var ld = [0,0,0,0,0,0,0,0,0,0,0,0];  
+    // Line chart
+    $(".datos").each(function(){
+        if($(this).attr('id') == undefined){
+           if($(this).attr('class') == 'datos dos'){
+            $('#ventames').html($(this).val());
+           }else{
+            $('#utilidad').html($(this).val());
+           }           
+        } else {
+            $('#ventaprecio').html($(this).val());
+        }      
+    });
+    $('#utilidad').mask('000,000,000', { reverse: true });    
+    $('#ventaprecio').mask('000,000,000', { reverse: true }); 
+    $.ajax({
+        url: '/tablero2',
+        type: 'POST',
+        success: function (data) {
+            data.forEach(function(data, index) {
+                ld[data.Mes-1]=data.venta;
+            });
+        }
+    });  
+    console.log(ld[6]);
+
+    new Chart(document.getElementById("chartjs-line"), {
+        type: "line",
+        data: {
+            labels: ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"],
+            datasets: [{
+                label: "Ventas ($)",
+                fill: true,
+                backgroundColor: "transparent",
+                borderColor: window.theme.primary,
+                data: [
+                    $('#1').val(),
+                    $('#2').val(),
+                    $('#3').val(),
+                    $('#4').val() ,
+                    $('#5').val(),
+                    $('#6').val(),
+                    $('#7').val(),
+                    $('#8').val(),
+                    $('#9').val(),
+                    $('#10').val(),
+                    $('#11').val(),
+                    $('#12').val()
+                ]
+            }, {
+                label: "Ventas indirectas ($)",
+                fill: true,
+                backgroundColor: "transparent",
+                borderColor: window.theme.tertiary,
+                borderDash: [4, 4],
+                //data: [100000, 20000, 1000000, 400000, 500000, 300000, 700000, 100000, 500000, 100000, 150000, 1200000]
+                //data: [ld[0],ld[1],ld[2],ld[3],ld[4],ld[5],ld[6],ld[7],ld[8],ld[9],ld[10],ld[11]]
+                data: ld
+            }]
+        },
+        options: {
+            maintainAspectRatio: false,
+            legend: {
+                display: false
+            },
+            tooltips: {
+                intersect: false
+            },
+            hover: {
+                intersect: true
+            },
+            plugins: {
+                filler: {
+                    propagate: false
+                }
+            },
+            scales: {
+                xAxes: [{
+                    reverse: true,
+                    gridLines: {
+                        color: "rgba(0,0,0,0.05)"
+                    }
+                }],
+                yAxes: [{
+                    ticks: {
+                        stepSize: 1000000
+                    },
+                    display: true,
+                    borderDash: [5, 5],
+                    gridLines: {
+                        color: "rgba(0,0,0,0)",
+                        fontColor: "#fff"
+                    }
+                }]
+            }
+        }
+    });
+
+}
+if ($('#login').is(':visible') || $('.ver').is(':visible')) {
     $('.h').attr("disabled", true);
     //$("nav.navbar").css("display", "none");
     //$("nav.navbar").hide();
@@ -47,7 +148,7 @@ $('#pin').change(function () {
 })
 $('#quien').change(function () {
     //var fd = $('form').serialize();
-    var fd = {quien : $('#quien').val()};
+    var fd = { quien: $('#quien').val() };
     //alert(fd);
     $.ajax({
         url: '/links/patro',
@@ -56,6 +157,20 @@ $('#quien').change(function () {
         success: function (data) {
             $('#id').val(data[0].id);
             $('input[name="id"]').val(data[0].usuario);
+        }
+    });
+})
+$('#ventaiux').click(function () {
+    var fd = $('#formulario').serialize();
+    alert($('input[name="movil"]').val());
+    //var fd = {quien : $('#quien').val()};
+    //alert(fd);
+    $.ajax({
+        url: 'https://iux.com.co/x/venta.php',
+        data: fd,
+        type: 'POST',
+        success: function (data) {
+            alert(data);
         }
     });
 })

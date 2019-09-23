@@ -1,6 +1,5 @@
 <main class="content">
     <div class="container-fluid p-0">
-
         <div class="row">
             <div class="col-12 col-sm-6 col-xl d-flex">
                 <div class="card flex-fill">
@@ -8,10 +7,15 @@
                         <div class="media">
                             <div class="d-inline-block mt-2 mr-3">
                                 <i class="feather-lg text-primary" data-feather="shopping-cart"></i>
-                            </div>
+                            </div>                          
+                            {{#each links}}
+                            <input type="hidden" class="datos tres" value="{{utilidad}}"/>
+                            <input type="hidden" class="datos uno" id="{{Mes}}" value="{{venta}}"/>
+                            <input type="hidden" class="datos dos" value="{{CantMes}}"/>
+                            {{/each}}
                             <div class="media-body">
-                                <h3 class="mb-2">2.562</h3>
-                                <div class="mb-0">Sales Today</div>
+                                <h3 class="mb-2" id="ventames">0</h3>
+                                <div class="mb-0">Ventas Del Mes</div>
                             </div>
                         </div>
                     </div>
@@ -26,7 +30,7 @@
                             </div>
                             <div class="media-body">
                                 <h3 class="mb-2">17.212</h3>
-                                <div class="mb-0">Visitors Today</div>
+                                <div class="mb-0">Promedio de venta {{sam}}</div>
                             </div>
                         </div>
                     </div>
@@ -40,8 +44,8 @@
                                 <i class="feather-lg text-success" data-feather="dollar-sign"></i>
                             </div>
                             <div class="media-body">
-                                <h3 class="mb-2">$ 24.300</h3>
-                                <div class="mb-0">Total Earnings</div>
+                                <h3 class="mb-2" id="ventaprecio" data-mask="000,000.000.00"></h3>
+                                <div class="mb-0">Total Del Mes</div>
                             </div>
                         </div>
                     </div>
@@ -55,8 +59,8 @@
                                 <i class="feather-lg text-danger" data-feather="shopping-bag"></i>
                             </div>
                             <div class="media-body">
-                                <h3 class="mb-2">43</h3>
-                                <div class="mb-0">Pending Orders</div>
+                                <h3 class="mb-2">{{resul.venta_mes}}</h3>
+                                <div class="mb-0">Recargas Pendientes</div>
                             </div>
                         </div>
                     </div>
@@ -70,8 +74,8 @@
                                 <i class="feather-lg text-info" data-feather="dollar-sign"></i>
                             </div>
                             <div class="media-body">
-                                <h3 class="mb-2">$ 18.700</h3>
-                                <div class="mb-0">Total Revenue</div>
+                                <h3 class="mb-2" id="utilidad"></h3>
+                                <div class="mb-0">Utilida Del Mes</div>
                             </div>
                         </div>
                     </div>
@@ -88,7 +92,8 @@
                     </div>
                     <div class="card-body">
                         <div class="chart chart-lg">
-                            <canvas id="chartjs-dashboard-line"></canvas>
+                            <!--<canvas id="chartjs-dashboard-line"></canvas>-->
+                            <canvas id="chartjs-line"></canvas>
                         </div>
                     </div>
                 </div>

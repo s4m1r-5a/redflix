@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const pool = require('../database');
 
 const passport = require('passport');
 const { isLoggedIn } = require('../lib/auth');
@@ -43,9 +44,35 @@ router.get('/logout', (req, res) => {
 router.get('/profile', isLoggedIn, (req, res) => {
   res.render('profile');
 });
-router.get('/tablero', isLoggedIn, (req, res) => {
-  res.render('tablero');
+router.get('/tablero', isLoggedIn, async (req, res) => {
+  const links = await pool.query(`SELECT MONTH(v.fechadecompra) Mes, COUNT(*) CantMes, SUM(p.precio) venta, SUM(p.utilidad) utilidad
+  FROM ventas v 
+  INNER JOIN clientes c ON v.client = c.id 
+  INNER JOIN users u ON v.vendedor = u.id
+  INNER JOIN products p ON v.product = p.id
+  INNER JOIN pines pi ON u.pin = pi.id
+  WHERE u.id = ?
+      AND YEAR(v.fechadecompra) = YEAR(CURDATE()) 
+      AND MONTH(v.fechadecompra) BETWEEN 1 and 12
+  GROUP BY MONTH(v.fechadecompra)
+  ORDER BY 1 `, [req.user.id]);
+  res.render('tablero', { links });
 });
-
+router.post('/tablero2', isLoggedIn, async (req, res) => {
+  //SELECT MONTH(v.fechadecompra) Mes, COUNT(*) CantMes, FORMAT(SUM(p.precio),2) venta
+  const links = await pool.query(`SELECT MONTH(v.fechadecompra) Mes, COUNT(*) CantMes, SUM(p.precio) venta, SUM(p.utilidad) utilidad, c.nombre usari
+  FROM ventas v 
+  INNER JOIN clientes c ON v.client = c.id 
+  INNER JOIN users u ON v.vendedor = u.id
+  INNER JOIN products p ON v.product = p.id
+  INNER JOIN pines pi ON u.pin = pi.id
+  WHERE pi.usuario = ?
+      AND YEAR(v.fechadecompra) = YEAR(CURDATE()) 
+      AND MONTH(v.fechadecompra) BETWEEN 1 and 12
+  GROUP BY MONTH(v.fechadecompra)
+  ORDER BY 1`, [req.user.id]);
+    res.send(links);
+    console.log(links);
+});
 
 module.exports = router;

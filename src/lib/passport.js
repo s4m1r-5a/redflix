@@ -9,12 +9,43 @@ passport.use('local.signin', new LocalStrategy({
   passwordField: 'password',
   passReqToCallback: true
 }, async (req, username, password, done) => {
-  const rows = await pool.query('SELECT * FROM users WHERE username = ?', [username]);
+  const rows = await pool.query(`SELECT u.id,
+  u.pin,
+  u.fullname,
+  u.movil,
+  u.username,
+  u.password,
+  u.transaccion,
+  u.recarga,
+  p.usuario,
+  p.fechactivacion,
+  c.categoria,
+  t.remitente,
+  t.fecha, t.monto,
+  m.metodo, e.estado,
+  t.aprobada,
+  r.venta_mes,
+  r.saldo, g.rango,
+  g.comision,
+  g.ventas,
+  g.recargas,
+  r.ventasaldo,
+  r.acreditadas,
+  r.creditomax
+  FROM users u 
+  INNER JOIN pines p ON u.pin = p.id 
+  INNER JOIN categoria c ON p.categoria = c.id 
+  INNER JOIN transaccion t ON u.transaccion = t.id 
+  INNER JOIN estados e ON t.estado = e.id
+  INNER JOIN recargas r ON u.recarga = r.id 
+  INNER JOIN metodos m ON t.metodo = m.id 
+  INNER JOIN rangos g ON r.rango = g.id            
+  WHERE u.username = ?`, [username]);
   if (rows.length > 0) {
     const user = rows[0];
     const validPassword = await helpers.matchPassword(password, user.password)
     if (validPassword) {
-      done(null, user, req.flash('success', 'Welcome ' + user.username));
+      done(null, user, req.flash('success', 'Bienvenido ' + user.fullname));
     } else {
       done(null, false, req.flash('error', 'Incorrect Password'));
     }
