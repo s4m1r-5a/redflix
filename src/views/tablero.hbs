@@ -11,8 +11,12 @@
                             {{#each links}}
                             <input type="hidden" class="datos tres" value="{{utilidad}}"/>
                             <input type="hidden" class="datos uno" id="{{Mes}}" value="{{venta}}"/>
-                            <input type="hidden" class="datos dos" value="{{CantMes}}"/>
+                            <input type="hidden" class="datos dos" value="{{CantMes}}"/>                            
                             {{/each}}
+                            {{#each links.desendente}}                            
+                            <input type="hidden" class="dato" id="m{{Mes}}" value="{{venta}}"/>                                                        
+                            {{/each}}
+                            <div id"datoslineadesendente"></div> 
                             <div class="media-body">
                                 <h3 class="mb-2" id="ventames">0</h3>
                                 <div class="mb-0">Ventas Del Mes</div>

@@ -56,10 +56,24 @@ router.get('/tablero', isLoggedIn, async (req, res) => {
       AND MONTH(v.fechadecompra) BETWEEN 1 and 12
   GROUP BY MONTH(v.fechadecompra)
   ORDER BY 1 `, [req.user.id]);
+  const link = await pool.query(`SELECT MONTH(v.fechadecompra) Mes, COUNT(*) CantMes, SUM(p.precio) venta, SUM(p.utilidad) utilidad
+  FROM ventas v 
+  INNER JOIN clientes c ON v.client = c.id 
+  INNER JOIN users u ON v.vendedor = u.id
+  INNER JOIN products p ON v.product = p.id
+  INNER JOIN pines pi ON u.pin = pi.id
+  WHERE pi.usuario = ?
+      AND YEAR(v.fechadecompra) = YEAR(CURDATE()) 
+      AND MONTH(v.fechadecompra) BETWEEN 1 and 12
+  GROUP BY MONTH(v.fechadecompra)
+  ORDER BY 1 `, [req.user.id]);
+  links.desendente = link;
+  console.log(links);
+  //console.log(ambos);
   res.render('tablero', { links });
 });
 router.post('/tablero2', isLoggedIn, async (req, res) => {
-  //SELECT MONTH(v.fechadecompra) Mes, COUNT(*) CantMes, FORMAT(SUM(p.precio),2) venta
+  //SELECT MONTH(v.fechadecompra) Mes, COUNT(*) CantMes, FORMAT(SUM(p.precio),2) venta d
   const links = await pool.query(`SELECT MONTH(v.fechadecompra) Mes, COUNT(*) CantMes, SUM(p.precio) venta, SUM(p.utilidad) utilidad, c.nombre usari
   FROM ventas v 
   INNER JOIN clientes c ON v.client = c.id 

@@ -17,106 +17,6 @@ function init_events(ele) {
     })
 }
 
-if (window.location == "http://localhost:3000/tablero"){  
-    var ld = [0,0,0,0,0,0,0,0,0,0,0,0];  
-    // Line chart
-    $(".datos").each(function(){
-        if($(this).attr('id') == undefined){
-           if($(this).attr('class') == 'datos dos'){
-            $('#ventames').html($(this).val());
-           }else{
-            $('#utilidad').html($(this).val());
-           }           
-        } else {
-            $('#ventaprecio').html($(this).val());
-        }      
-    });
-    $('#utilidad').mask('000,000,000', { reverse: true });    
-    $('#ventaprecio').mask('000,000,000', { reverse: true }); 
-    $.ajax({
-        url: '/tablero2',
-        type: 'POST',
-        success: function (data) {
-            data.forEach(function(data, index) {
-                ld[data.Mes-1]=data.venta;
-            });
-        }
-    });  
-    console.log(ld[6]);
-
-    new Chart(document.getElementById("chartjs-line"), {
-        type: "line",
-        data: {
-            labels: ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"],
-            datasets: [{
-                label: "Ventas ($)",
-                fill: true,
-                backgroundColor: "transparent",
-                borderColor: window.theme.primary,
-                data: [
-                    $('#1').val(),
-                    $('#2').val(),
-                    $('#3').val(),
-                    $('#4').val() ,
-                    $('#5').val(),
-                    $('#6').val(),
-                    $('#7').val(),
-                    $('#8').val(),
-                    $('#9').val(),
-                    $('#10').val(),
-                    $('#11').val(),
-                    $('#12').val()
-                ]
-            }, {
-                label: "Ventas indirectas ($)",
-                fill: true,
-                backgroundColor: "transparent",
-                borderColor: window.theme.tertiary,
-                borderDash: [4, 4],
-                //data: [100000, 20000, 1000000, 400000, 500000, 300000, 700000, 100000, 500000, 100000, 150000, 1200000]
-                //data: [ld[0],ld[1],ld[2],ld[3],ld[4],ld[5],ld[6],ld[7],ld[8],ld[9],ld[10],ld[11]]
-                data: ld
-            }]
-        },
-        options: {
-            maintainAspectRatio: false,
-            legend: {
-                display: false
-            },
-            tooltips: {
-                intersect: false
-            },
-            hover: {
-                intersect: true
-            },
-            plugins: {
-                filler: {
-                    propagate: false
-                }
-            },
-            scales: {
-                xAxes: [{
-                    reverse: true,
-                    gridLines: {
-                        color: "rgba(0,0,0,0.05)"
-                    }
-                }],
-                yAxes: [{
-                    ticks: {
-                        stepSize: 1000000
-                    },
-                    display: true,
-                    borderDash: [5, 5],
-                    gridLines: {
-                        color: "rgba(0,0,0,0)",
-                        fontColor: "#fff"
-                    }
-                }]
-            }
-        }
-    });
-
-}
 if ($('#login').is(':visible') || $('.ver').is(':visible')) {
     $('.h').attr("disabled", true);
     //$("nav.navbar").css("display", "none");
@@ -215,56 +115,6 @@ $(function () {
         eventDrop: function (calEvent) { }
     });
 });
-$(function () {
-
-    // Bar chart
-    new Chart(document.getElementById("chartjs-dashboard-bar"), {
-        type: "bar",
-        data: {
-            labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-            datasets: [{
-                label: "Last year",
-                backgroundColor: window.theme.primary,
-                borderColor: window.theme.primary,
-                hoverBackgroundColor: window.theme.primary,
-                hoverBorderColor: window.theme.primary,
-                data: [54, 67, 41, 55, 62, 45, 55, 73, 60, 76, 48, 79]
-            }, {
-                label: "This year",
-                backgroundColor: "#E8EAED",
-                borderColor: "#E8EAED",
-                hoverBackgroundColor: "#E8EAED",
-                hoverBorderColor: "#E8EAED",
-                data: [69, 66, 24, 48, 52, 51, 44, 53, 62, 79, 51, 68]
-            }]
-        },
-        options: {
-            maintainAspectRatio: false,
-            legend: {
-                display: false
-            },
-            scales: {
-                yAxes: [{
-                    gridLines: {
-                        display: false
-                    },
-                    stacked: false,
-                    ticks: {
-                        stepSize: 20
-                    }
-                }],
-                xAxes: [{
-                    barPercentage: .75,
-                    categoryPercentage: .5,
-                    stacked: false,
-                    gridLines: {
-                        color: "transparent"
-                    }
-                }]
-            }
-        }
-    });
-});
 
 $(function () {
     $("#datetimepicker-dashboard").datetimepicker({
@@ -273,26 +123,67 @@ $(function () {
         format: "L"
     });
 });
-
-$(function () {
+$(document).ready(function () {
+    //if (window.location == "http://localhost:3000/tablero") {
     // Line chart
-    new Chart(document.getElementById("chartjs-dashboard-line"), {
+    $(".datos").each(function () {
+        if ($(this).attr('id') == undefined) {
+            if ($(this).attr('class') == 'datos dos') {
+                $('#ventames').html($(this).val());
+            } else {
+                $('#utilidad').html($(this).val());
+            }
+        } else {
+            $('#ventaprecio').html($(this).val());
+        }
+    });
+    $('#utilidad').mask('000,000,000', { reverse: true });
+    $('#ventaprecio').mask('000,000,000', { reverse: true });
+
+    new Chart(document.getElementById("chartjs-line"), {
         type: "line",
         data: {
-            labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+            labels: ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"],
             datasets: [{
-                label: "Sales ($)",
+                label: "Ventas ($)",
                 fill: true,
                 backgroundColor: "transparent",
                 borderColor: window.theme.primary,
-                data: [2015, 1465, 1487, 1796, 1387, 2123, 2866, 2548, 3902, 4938, 3917, 4927]
+                data: [
+                    $('#1').val(),
+                    $('#2').val(),
+                    $('#3').val(),
+                    $('#4').val(),
+                    $('#5').val(),
+                    $('#6').val(),
+                    $('#7').val(),
+                    $('#8').val(),
+                    $('#9').val(),
+                    $('#10').val(),
+                    $('#11').val(),
+                    $('#12').val()
+                ]
             }, {
-                label: "Orders",
+                label: "Ventas indirectas ($)",
                 fill: true,
                 backgroundColor: "transparent",
                 borderColor: window.theme.tertiary,
-                borderDash: [4, 4],
-                data: [928, 734, 626, 893, 921, 1202, 1396, 1232, 1524, 2102, 1506, 1887]
+                borderDash: [5, 5],
+                data: [
+                    $('#m1').val(),
+                    $('#m2').val(),
+                    $('#m3').val(),
+                    $('#m4').val(),
+                    $('#m5').val(),
+                    $('#m6').val(),
+                    $('#m7').val(),
+                    $('#m8').val(),
+                    $('#m9').val(),
+                    $('#m10').val(),
+                    $('#m11').val(),
+                    $('#m12').val()
+                ]
+                //data: datos
             }]
         },
         options: {
@@ -320,7 +211,7 @@ $(function () {
                 }],
                 yAxes: [{
                     ticks: {
-                        stepSize: 500
+                        stepSize: 1000000
                     },
                     display: true,
                     borderDash: [5, 5],
