@@ -35,9 +35,10 @@ $('.pagar').change(function () {
 })
 $('#pagar').click(function () {
     var pin = 'S1M' + ID(),
-        APIKey = '4Vj8eK4rloUd272L48hsrarnUA',
-        merchantId = '508029';
+        APIKey = 'pGO1M3MA7YziDyS3jps6NtQJAg',
+        merchantId = '825255';
     $('input[name="referenceCode"]').val(pin);
+    $('input[name="merchantId"]').val(merchantId);
     var passhash = CryptoJS.MD5(APIKey + '~' + merchantId + '~' + pin + '~' + 5000 + '~' + 'COP');
     $('input[name="signature"]').val(passhash);
 
