@@ -1,4 +1,4 @@
-
+/*
 module.exports = {
     database: {
         connectionLimit: 10,
@@ -7,8 +7,8 @@ module.exports = {
         password: 'cinetflix',
         database: 'u152781536_redf'
     }
-};
-/*module.exports = {
+};*/
+module.exports = {
 
     database: {
         connectionLimit: 10,
@@ -17,4 +17,4 @@ module.exports = {
         password: '',
         database: 'db_links'
     }
-};*/
+};

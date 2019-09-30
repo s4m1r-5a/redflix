@@ -11,7 +11,7 @@
                             {{#each links}}
                             <input type="hidden" class="datos tres" value="{{utilidad}}"/>
                             <input type="hidden" class="datos uno" id="{{Mes}}" value="{{venta}}"/>
-                            <input type="hidden" class="datos dos" value="{{CantMes}}"/>                            
+                            <input type="hidden" class="datos dos" value="{{CantMes}}"/>   
                             {{/each}}
                             {{#each links.desendente}}                            
                             <input type="hidden" class="dato" id="m{{Mes}}" value="{{venta}}"/>                                                        
@@ -33,7 +33,7 @@
                                 <i class="feather-lg text-warning" data-feather="activity"></i>
                             </div>
                             <div class="media-body">
-                                <h3 class="mb-2">17.212</h3>
+                                <h3 class="mb-2" id="promedio"></h3>
                                 <div class="mb-0">Promedio de venta {{sam}}</div>
                             </div>
                         </div>

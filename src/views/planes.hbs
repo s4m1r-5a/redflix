@@ -23,34 +23,66 @@
                         <div class="row py-4">
                             <div class="col-sm-4 mb-3 mb-md-0">
                                 <div class="card text-center h-100">
-                                    <div class="card-body d-flex flex-column">
+                                    <div class="card-body d-flex flex-column grid-block"
+                                        style="background-image: url('https://www.jing.fm/clipimg/full/101-1012250_banner-png-origami-origami-speech-bubble-png.png'); background-size: 10">
+                                        <!--<div class="card-body d-flex flex-column">-->
                                         <div class="mb-4">
-                                            <h4>Mes</h4>
-                                            <span class="display-4">$18</span>
-                                            <span>mil</span>
+                                            <h5>1 Mes</h5>
+                                            <span class="display-4">60%</span>
+                                            <span class="text-small4">dto.</span>
                                         </div>
-                                        <h3>40% -</h3>
-                                        <h6>Incluye:</h6>
-                                        <ul class="list-unstyled">
-                                            <li class="mb-2">
-                                                Todos los dispositivos dentro de una misma red
-                                            </li>
-                                            <li class="mb-2">
-                                                FULL HD
-                                            </li>
-                                            <li class="mb-2">
-                                                Adactativa
-                                            </li>
-                                        </ul>
-                                        <div class="mt-auto">
-                                            <a href="#" class="btn btn-lg btn-outline-primary">Adquirir</a>
-                                        </div>
+                                        <h6><del>$30.000</del></h6>
+                                        <h3>$18.000</h3>
+                                        <form method="post"
+                                            action="https://sandbox.checkout.payulatam.com/ppp-web-gateway-payu/">
+                                            <ul class="list-unstyled">
+                                                <li class="mb-2">
+                                                    Para todos los dispositivos dentro de una misma red
+                                                </li>
+                                                <li class="mb-4">
+                                                    <input name="merchantId" type="hidden" value="508029">
+                                                    <input name="accountId" type="hidden" value="512321">
+                                                    <input name="description" type="hidden" value="Iux suscripción 1 mes">
+                                                    <input name="referenceCode" type="hidden" value="">
+                                                    <input name="amount" type="hidden" value="5000">
+                                                    <input name="tax" type="hidden" value="0">
+                                                    <input name="taxReturnBase" type="hidden" value="0">
+                                                    <input name="currency" type="hidden" value="COP">
+                                                    <input name="signature" type="hidden" value="">
+                                                    <input name="test" type="hidden" value="1">                                                    
+                                                    <input name="responseUrl" type="hidden" value="http://localhost:3000/planes">
+                                                    <input name="confirmationUrl" type="hidden" value="http://www.test.com/confirmation">
+                                                </li>
+
+                                                <li class="mb-4">
+                                                    <input type="text" name="telephone" class="form-control pagar"
+                                                        placeholder="Movil" style="text-align:center">
+                                                </li>
+
+                                                <li class="mb-4">
+                                                    <input type="text" name="buyerFullName" class="form-control pagar"
+                                                        placeholder="Nombre completo" style="text-align:center">
+                                                </li>
+                                                <li class="mb-2">
+                                                    <input type="email" name="buyerEmail" class="form-control pagar"
+                                                        placeholder="Email" style="text-align:center">
+                                                </li>
+                                                <span class="display-4">IUX</span>
+                                                <h5>Todo lo que quieres ver cuando lo quieras ver y en un solo lugar
+                                                </h5>
+                                            </ul>
+                                            <div class="mt-auto">
+                                                <input name="Submit" id="pagar" type="submit" class="btn btn-lg btn-primary" value="Adquirir">
+                                            </div>
+                                        </form>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-sm-4 mb-3 mb-md-0">
                                 <div class="card text-center h-100">
-                                    <div class="card-body d-flex flex-column">
+                                    <div class="card-body d-flex flex-column grid-block"
+                                        style="background-image: url('https://images.vexels.com/media/users/3/129108/isolated/preview/6c5d2739edba3c900dcac8b55f43328b-bandera-de-papel-de-origami-amarillo-by-vexels.png'); background-size: 100">
+                                        <!--<div class="card-body d-flex flex-column">-->
                                         <div class="mb-4">
                                             <h4>2 Meses</h4>
                                             <span class="display-4">$30</span>
@@ -83,7 +115,9 @@
                             </div>
                             <div class="col-sm-4 mb-3 mb-md-0">
                                 <div class="card text-center h-100">
-                                    <div class="card-body d-flex flex-column">
+                                    <div class="card-body d-flex flex-column grid-block"
+                                        style="background-image: url('https://www.jing.fm/clipimg/full/101-1012250_banner-png-origami-origami-speech-bubble-png.png'); background-size: 10">
+                                        <!--<div class="card-body d-flex flex-column">-->
                                         <div class="mb-4">
                                             <h5>Plus</h5>
                                             <span class="display-4">$39</span>
@@ -126,13 +160,13 @@
                             <div class="col-sm-12 mb-3 mb-md-0">
                                 <div class="card text-center h-100">
                                     <div class="card-body d-flex flex-column grid-block"
-                                        style="background-image: url('https://img.webme.com/pic/p/peliculasdeyoutube/movies.jpg'); background-size: 100">
+                                        style="background-image: url('https://www.onlygfx.com/wp-content/uploads/2017/12/origami-banner-rectangle-5-1024x359.png'); background-size: 100">
                                         <form action="/links/recarga" method="POST">
                                             <div class="form-row">
                                                 <div class="form-group col-md-3">
                                                     <label for="monto"></label>
-                                                    <input type="text" id="pin" name="pin" class="form-control" placeholder="Ingrese Pin"
-                                                        style="text-align:center">
+                                                    <input type="text" id="pin" name="pin" class="form-control"
+                                                        placeholder="Ingrese Pin" style="text-align:center">
                                                 </div>
                                             </div>
                                             <button type="submit" class="btn btn-primary">Canjear</button>

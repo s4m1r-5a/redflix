@@ -1,4 +1,7 @@
-
+$("#smartwizard-arrows-primary").smartWizard({
+    theme: "arrows",
+    showStepURLhash: false
+});
 function init_events(ele) {
     ele.each(function () {
         // crear un objeto de evento (http://arshaw.com/fullcalendar/docs/event_data/Event_Object/)
@@ -16,6 +19,29 @@ function init_events(ele) {
         })
     })
 }
+$('#pagar').attr("disabled", true);
+$('.pagar').change(function () {
+    if ($('input[name="telephone"]').val() != "" && $('input[name="buyerFullName"]').val() != "" && $('input[name="buyerEmail"]').val() != "") {
+        var fd = $('form').serialize();
+        $.ajax({
+            url: '/links/cliente',
+            data: fd,
+            type: 'POST',
+            success: function (data) {
+                $('#pagar').attr("disabled", false);
+            }
+        });
+    }
+})
+$('#pagar').click(function () {
+    var pin = 'S1M' + ID(),
+        APIKey = '4Vj8eK4rloUd272L48hsrarnUA',
+        merchantId = '508029';
+    $('input[name="referenceCode"]').val(pin);
+    var passhash = CryptoJS.MD5(APIKey + '~' + merchantId + '~' + pin + '~' + 5000 + '~' + 'COP');
+    $('input[name="signature"]').val(passhash);
+
+});
 
 if ($('#login').is(':visible') || $('.ver').is(':visible')) {
     $('.h').attr("disabled", true);
@@ -115,6 +141,56 @@ $(function () {
         eventDrop: function (calEvent) { }
     });
 });
+$(function () {
+
+    // Bar chart
+    new Chart(document.getElementById("chartjs-dashboard-bar"), {
+        type: "bar",
+        data: {
+            labels: ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"],
+            datasets: [{
+                label: "Last year",
+                backgroundColor: window.theme.primary,
+                borderColor: window.theme.primary,
+                hoverBackgroundColor: window.theme.primary,
+                hoverBorderColor: window.theme.primary,
+                data: [54, 67, 41, 55, 62, 45, 55, 73, 60, 76, 48, 79]
+            }, {
+                label: "This year",
+                backgroundColor: "#E8EAED",
+                borderColor: "#E8EAED",
+                hoverBackgroundColor: "#E8EAED",
+                hoverBorderColor: "#E8EAED",
+                data: [69, 66, 24, 48, 52, 51, 44, 53, 62, 79, 51, 68]
+            }]
+        },
+        options: {
+            maintainAspectRatio: false,
+            legend: {
+                display: false
+            },
+            scales: {
+                yAxes: [{
+                    gridLines: {
+                        display: false
+                    },
+                    stacked: false,
+                    ticks: {
+                        stepSize: 20
+                    }
+                }],
+                xAxes: [{
+                    barPercentage: .75,
+                    categoryPercentage: .5,
+                    stacked: false,
+                    gridLines: {
+                        color: "transparent"
+                    }
+                }]
+            }
+        }
+    });
+});
 
 $(function () {
     $("#datetimepicker-dashboard").datetimepicker({
@@ -123,9 +199,14 @@ $(function () {
         format: "L"
     });
 });
-$(document).ready(function () {
-    //if (window.location == "http://localhost:3000/tablero") {
+
+if (window.location == "http://localhost:3000/tablero") {
+    var ld = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     // Line chart
+    var f = new Date(),
+        pro = 0,
+        prom = 0,
+        promedio = 0;
     $(".datos").each(function () {
         if ($(this).attr('id') == undefined) {
             if ($(this).attr('class') == 'datos dos') {
@@ -135,11 +216,18 @@ $(document).ready(function () {
             }
         } else {
             $('#ventaprecio').html($(this).val());
+            if ($(this).attr('id') <= f.getMonth()) {
+                pro += 1;
+                prom += parseFloat($(this).val());
+                prom /= pro;
+                promedio = Math.round(prom);
+            }
+            $('#promedio').html(promedio);
         }
     });
+    $('#promedio').mask('000,000,000', { reverse: true });
     $('#utilidad').mask('000,000,000', { reverse: true });
     $('#ventaprecio').mask('000,000,000', { reverse: true });
-
     new Chart(document.getElementById("chartjs-line"), {
         type: "line",
         data: {
@@ -168,7 +256,7 @@ $(document).ready(function () {
                 fill: true,
                 backgroundColor: "transparent",
                 borderColor: window.theme.tertiary,
-                borderDash: [5, 5],
+                borderDash: [4, 4],
                 data: [
                     $('#m1').val(),
                     $('#m2').val(),
@@ -183,7 +271,6 @@ $(document).ready(function () {
                     $('#m11').val(),
                     $('#m12').val()
                 ]
-                //data: datos
             }]
         },
         options: {
@@ -223,7 +310,7 @@ $(document).ready(function () {
             }
         }
     });
-});
+}
 $(function () {
     // Pie chart
     new Chart(document.getElementById("chartjs-dashboard-pie"), {
@@ -258,3 +345,12 @@ $(function () {
         autoWidth: false
     });
 });
+
+function ID(chars = "0A1B2C3D4E5F6G7H8I9J0KL1M2N3O4P5Q6R7S8T9U0V1W2X3Y4Z", lon = 6) {
+    let code = "";
+    for (x = 0; x < lon; x++) {
+        let rand = Math.floor(Math.random() * chars.length);
+        code += chars.substr(rand, 1);
+    };
+    return code;
+};

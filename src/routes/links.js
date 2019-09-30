@@ -10,6 +10,7 @@ router.get('/add', isLoggedIn, (req, res) => {
     res.render('links/add');
 });
 router.get('/calendar', isLoggedIn, (req, res) => {
+    console.log('si llega');
     res.render('links/calendar');
 });
 router.get('/ventas', isLoggedIn, (req, res) => {
@@ -84,7 +85,22 @@ router.post('/afiliado', async (req, res) => {
     console.log(req.body);
     sms('57' + movil, 'Bienvenido a RedFlix tu ID sera ' + ID());
 });
-
+router.post('/cliente', async (req, res) => {
+    const { telephone, buyerFullName, buyerEmail } = req.body;
+    var nombre = buyerFullName.toUpperCase();
+    const newLink = {
+        nombre: nombre,
+        movil: telephone,
+        email: buyerEmail     
+    };
+    const rows = await pool.query('SELECT * FROM clientes WHERE movil = ? OR email = ?', [telephone, buyerEmail]);
+    if (rows.length > 0) {
+        await pool.query('UPDATE clientes set ? WHERE movil = ? OR email = ?', [newLink, telephone, buyerEmail]);
+    } else {
+        await pool.query('INSERT INTO clientes SET ? ', newLink);
+    }
+    res.send('bien');   
+});
 router.get('/', isLoggedIn, async (req, res) => {
     console.log('jdfkjdfkdfd');
     const links = await pool.query('SELECT * FROM links WHERE user_id = ? ', [req.user.id]);
@@ -117,7 +133,6 @@ router.post('/edit/:id', async (req, res) => {
     req.flash('success', 'Link Updated Successfully');
     res.redirect('/links');
 });
-
 //"a0Ab1Bc2Cd3De4Ef5Fg6Gh7Hi8Ij9Jk0KLm1Mn2No3Op4Pq5Qr6Rs7St8Tu9Uv0Vw1Wx2Xy3Yz4Z"
 function ID(chars = "0A1B2C3D4E5F6G7H8I9J0KL1M2N3O4P5Q6R7S8T9U0V1W2X3Y4Z", lon = 9) {
     let code = "";
