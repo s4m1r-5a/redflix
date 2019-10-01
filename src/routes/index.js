@@ -5,7 +5,9 @@ const crypto = require('crypto');
 router.get('/', async (req, res) => {
     res.render('index');
 });
-
+/*router.post('/planes', async (req, res) => {
+    console.log(req.body);
+});*/
 router.get(`/planes`, async (req, res) => {
     const r = {
         transactionState: req.query.transactionState || 'samir0',
@@ -21,28 +23,34 @@ router.get(`/planes`, async (req, res) => {
         msg: '',
         estado: ''
     }
+    let venta,
+        c = req.query.iux || '';
+        
+    if(c == 'ir') {
+        res.render('respuesta');   
+    } else {
     const links = await pool.query('SELECT * FROM clientes WHERE email = ?', r.buyerEmail);
     if (links.length > 0) {
         r.nombre = links[0].nombre;
         r.movil = links[0].movil;
-        let venta = {
+        venta = {
             fechadecompra: new Date(),
             pin: r.referenceCode,
             puntodeventa: 'IUX',
             vendedor: 15,
             client: links[0].id,
             cajero: 'PAYU',
-            product: ''
+            product: 2
         }
         let clave = 'jodete cabron este codigo no esta completo aun-' + r.nombre + '-' + r.movil + '-' + r.buyerEmail + '-' + r.referenceCode,
             yave = crypto.createHash('md5').update(clave).digest("hex");
-            r.llave = yave            
+        r.llave = yave
     }
-    
+
     if (r.transactionState == 4) {
         r.estado = 'success';
         r.msg = "aprobada";
-        await pool.query('INSERT INTO clientes SET ? ', venta);
+        await pool.query('INSERT INTO ventas SET ? ', venta);
         res.render('respuesta', r);
     } else if (r.transactionState == 6) {
         r.msg = "rechazada";
@@ -60,6 +68,7 @@ router.get(`/planes`, async (req, res) => {
     } else {
         res.render('planes');
     }
+}
 });
 
 module.exports = router;

@@ -36,6 +36,9 @@ $('.pagar').change(function () {
         });
     }
 })
+if ($('#iuxemail').html() == '' && $('#iuxemail').is(':visible')) {
+    window.location.href = "https://iux.com.co/app/login";
+}
 if ($('#msg').html() == 'aprobada') {
     let fd = {
         name : $('#iuxname').html(),
@@ -52,8 +55,12 @@ if ($('#msg').html() == 'aprobada') {
             alert(data);
         }
     });
+    fd.key = "";
+    history.pushState(null, "", "planes?iux=ir");
 }
-
+$('#iriux').click(function () {
+    window.location.href = "https://iux.com.co/app/login";
+});
 if ($('#login').is(':visible') || $('.ver').is(':visible')) {
     $('.h').attr("disabled", true);
     //$("nav.navbar").css("display", "none");
