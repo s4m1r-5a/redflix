@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../database');
+const crypto = require('crypto');
 router.get('/', async (req, res) => {
     res.render('index');
 });
@@ -20,19 +21,31 @@ router.get(`/planes`, async (req, res) => {
         msg: '',
         estado: ''
     }
-
-    if (r.transactionState == 4) {
-        const links = await pool.query('SELECT * FROM clientes WHERE email = ?', r.buyerEmail);
-        if (links.length > 0) {
-            r.nombre = links[0].nombre;
-            r.movil = links[0].movil;
-            r.estado = 'success';
-            r.msg = "Transacción aprobada";
-            //console.log(r);
+    const links = await pool.query('SELECT * FROM clientes WHERE email = ?', r.buyerEmail);
+    if (links.length > 0) {
+        r.nombre = links[0].nombre;
+        r.movil = links[0].movil;
+        let venta = {
+            fechadecompra: new Date(),
+            pin: r.referenceCode,
+            puntodeventa: 'IUX',
+            vendedor: 15,
+            client: links[0].id,
+            cajero: 'PAYU',
+            product: ''
         }
+        let clave = 'jodete cabron este codigo no esta completo aun-' + r.nombre + '-' + r.movil + '-' + r.buyerEmail + '-' + r.referenceCode,
+            yave = crypto.createHash('md5').update(clave).digest("hex");
+            r.llave = yave            
+    }
+    
+    if (r.transactionState == 4) {
+        r.estado = 'success';
+        r.msg = "aprobada";
+        await pool.query('INSERT INTO clientes SET ? ', venta);
         res.render('respuesta', r);
     } else if (r.transactionState == 6) {
-        r.msg = "Transacción rechazada";
+        r.msg = "rechazada";
         r.estado = 'danger';
         res.render('respuesta', r);
     } else if (r.transactionState == 104) {
@@ -40,12 +53,12 @@ router.get(`/planes`, async (req, res) => {
         r.estado = 'danger';
         res.render('respuesta', r);
     } else if (r.transactionState == 7) {
-        r.msg = "Transacción pendiente";
+        r.msg = "pendiente";
         r.estado = 'warning';
+        await pool.query('INSERT INTO clientes SET ? ', venta);
         res.render('respuesta', r);
     } else {
-        res.render('planes');   
-        //res.render('respuesta', r);
+        res.render('planes');
     }
 });
 

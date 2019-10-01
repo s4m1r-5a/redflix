@@ -39,15 +39,15 @@
                             <tbody>
                                 <tr>
                                     <th>Nombre</th>
-                                    <td>{{nombre}}</td>
+                                    <td id="iuxname">{{nombre}}</td>
                                 </tr>
                                 <tr>
                                     <th>Email</th>
-                                    <td>{{buyerEmail}}</td>
+                                    <td id="iuxemail">{{buyerEmail}}</td>
                                 </tr>
                                 <tr>
                                     <th>Movil</th>
-                                    <td>{{movil}}</td>
+                                    <td id="iuxmovil">{{movil}}</td>
                                 </tr>
                                 <tr>
                                     <th>Producto</th>
@@ -67,11 +67,11 @@
                                 </tr>
                                 <tr>
                                     <th>Referencia de pago</th>
-                                    <td>{{transactionState}}</td>
+                                    <td id="iuxref">{{referenceCode}}</td>
                                 </tr>
                                 <tr>
                                     <th>Estado</th>
-                                    <td><span class="badge badge-{{estado}}">{{transactionState}}</span></td>
+                                    <td><span id="msg" class="badge badge-{{estado}}">{{msg}}</span></td>
                                 </tr>
                                 <tr>
                                     <th>Transaccion</th>
@@ -166,4 +166,5 @@
             </div>
         </div>
     </div>
+    <input type="hidden" id="yave" value="{{transactionState}}">
 </main>

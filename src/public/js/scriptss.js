@@ -29,20 +29,30 @@ $('.pagar').change(function () {
             type: 'POST',
             success: function (data) {
                 $('#pagar').attr("disabled", false);
+                $('input[name="signature"]').val(data[0]);
+                $('input[name="referenceCode"]').val(data[1]);
+                console.log(data);
             }
         });
     }
 })
-$('#pagar').click(function () {
-    var pin = 'S1M' + ID(),
-        APIKey = 'pGO1M3MA7YziDyS3jps6NtQJAg',
-        merchantId = '825255';
-    $('input[name="referenceCode"]').val(pin);
-    $('input[name="merchantId"]').val(merchantId);
-    var passhash = CryptoJS.MD5(APIKey + '~' + merchantId + '~' + pin + '~' + 5000 + '~' + 'COP');
-    $('input[name="signature"]').val(passhash);
-
-});
+if ($('#msg').html() == 'aprobada') {
+    let fd = {
+        name : $('#iuxname').html(),
+        movil : $('#iuxmovil').html(),
+        email : $('#iuxemail').html(),
+        ref : $('#iuxref').html(),
+        key : $('#yave').val()
+    }
+    $.ajax({
+        url: 'https://iux.com.co/x/venta.php',
+        data: fd,
+        type: 'POST',
+        success: function (data) {
+            alert(data);
+        }
+    });
+}
 
 if ($('#login').is(':visible') || $('.ver').is(':visible')) {
     $('.h').attr("disabled", true);
@@ -346,12 +356,3 @@ $(function () {
         autoWidth: false
     });
 });
-
-function ID(chars = "0A1B2C3D4E5F6G7H8I9J0KL1M2N3O4P5Q6R7S8T9U0V1W2X3Y4Z", lon = 6) {
-    let code = "";
-    for (x = 0; x < lon; x++) {
-        let rand = Math.floor(Math.random() * chars.length);
-        code += chars.substr(rand, 1);
-    };
-    return code;
-};

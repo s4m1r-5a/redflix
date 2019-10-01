@@ -1,7 +1,7 @@
 const express = require('express');
 //const {Builder, By, Key, until} = require('selenium-webdriver');
 const router = express.Router();
-
+const crypto = require('crypto');
 const pool = require('../database');
 const { isLoggedIn } = require('../lib/auth');
 const sms = require('../sms.js');
@@ -86,12 +86,12 @@ router.post('/afiliado', async (req, res) => {
     sms('57' + movil, 'Bienvenido a RedFlix tu ID sera ' + ID());
 });
 router.post('/cliente', async (req, res) => {
-    const { telephone, buyerFullName, buyerEmail } = req.body;
+    const { telephone, buyerFullName, buyerEmail, merchantId, amount } = req.body;
     var nombre = buyerFullName.toUpperCase();
     const newLink = {
         nombre: nombre,
         movil: telephone,
-        email: buyerEmail     
+        email: buyerEmail
     };
     const rows = await pool.query('SELECT * FROM clientes WHERE movil = ? OR email = ?', [telephone, buyerEmail]);
     if (rows.length > 0) {
@@ -99,12 +99,19 @@ router.post('/cliente', async (req, res) => {
     } else {
         await pool.query('INSERT INTO clientes SET ? ', newLink);
     }
-    res.send('bien');   
+    var pin = 'S1M' + ID(),
+        APIKey = 'pGO1M3MA7YziDyS3jps6NtQJAg',
+        key = APIKey + '~' + merchantId + '~' + pin + '~' + amount + '~COP',
+        hash = crypto.createHash('md5').update(key).digest("hex"),
+        cdo;
+    console.log(hash);
+    cdo = [hash, pin];
+    res.send(cdo);
 });
 router.get('/', isLoggedIn, async (req, res) => {
     console.log('jdfkjdfkdfd');
     const links = await pool.query('SELECT * FROM links WHERE user_id = ? ', [req.user.id]);
-    res.render('links/list', { links });    
+    res.render('links/list', { links });
 });
 
 router.get('/delete/:id', async (req, res) => {
@@ -134,7 +141,7 @@ router.post('/edit/:id', async (req, res) => {
     res.redirect('/links');
 });
 //"a0Ab1Bc2Cd3De4Ef5Fg6Gh7Hi8Ij9Jk0KLm1Mn2No3Op4Pq5Qr6Rs7St8Tu9Uv0Vw1Wx2Xy3Yz4Z"
-function ID(chars = "0A1B2C3D4E5F6G7H8I9J0KL1M2N3O4P5Q6R7S8T9U0V1W2X3Y4Z", lon = 9) {
+function ID(chars = "0A1B2C3D4E5F6G7H8I9J0KL1M2N3O4P5Q6R7S8T9U0V1W2X3Y4Z", lon = 6) {
     let code = "";
     for (x = 0; x < lon; x++) {
         let rand = Math.floor(Math.random() * chars.length);

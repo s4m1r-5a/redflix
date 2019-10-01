@@ -12,6 +12,7 @@ const bodyParser = require('body-parser');
 const val = require('../navegacion.js');
 const sms = require('./sms.js');
 const { database } = require('./keys');
+const crypto = require('crypto')
 
 
 // Intializations
@@ -76,5 +77,5 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Starting
 app.listen(app.get('port'), () => {
   console.log('Server is in port', app.get('port'));
-  //val.navegar('casperjs netflix.js');
+  
 });
