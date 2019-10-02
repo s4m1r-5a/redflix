@@ -6,7 +6,13 @@ router.get('/', async (req, res) => {
     res.render('index');
 });
 router.post('/confir', async (req, res) => {
-    console.log(req.body);
+    const r = {
+        fecha : req.reference_sale,
+        pin : req.reference_pol,
+        transaccion	: req.transaction_id,
+        estado : req.state_pol
+    }
+    await pool.query('INSERT INTO payu SET ? ', r);    
 });
 router.get(`/planes`, async (req, res) => {
     const r = {
@@ -25,50 +31,50 @@ router.get(`/planes`, async (req, res) => {
     }
     let venta,
         c = req.query.iux || '';
-        
-    if(c == 'ir') {
-        res.render('respuesta');   
-    } else {
-    const links = await pool.query('SELECT * FROM clientes WHERE email = ?', r.buyerEmail);
-    if (links.length > 0) {
-        r.nombre = links[0].nombre;
-        r.movil = links[0].movil;
-        venta = {
-            fechadecompra: new Date(),
-            pin: r.referenceCode,
-            puntodeventa: 'IUX',
-            vendedor: 15,
-            client: links[0].id,
-            cajero: 'PAYU',
-            product: 2
-        }
-        let clave = 'jodete cabron este codigo no esta completo aun-' + r.nombre + '-' + r.movil + '-' + r.buyerEmail + '-' + r.referenceCode,
-            yave = crypto.createHash('md5').update(clave).digest("hex");
-        r.llave = yave
-    }
 
-    if (r.transactionState == 4) {
-        r.estado = 'success';
-        r.msg = "aprobada";
-        await pool.query('INSERT INTO ventas SET ? ', venta);
-        res.render('respuesta', r);
-    } else if (r.transactionState == 6) {
-        r.msg = "rechazada";
-        r.estado = 'danger';
-        res.render('respuesta', r);
-    } else if (r.transactionState == 104) {
-        r.msg = "Error";
-        r.estado = 'danger';
-        res.render('respuesta', r);
-    } else if (r.transactionState == 7) {
-        r.msg = "pendiente";
-        r.estado = 'warning';
-        await pool.query('INSERT INTO clientes SET ? ', venta);
-        res.render('respuesta', r);
+    if (c == 'ir') {
+        res.render('respuesta');
     } else {
-        res.render('planes');
+        const links = await pool.query('SELECT * FROM clientes WHERE email = ?', r.buyerEmail);
+        if (links.length > 0) {
+            r.nombre = links[0].nombre;
+            r.movil = links[0].movil;
+            venta = {
+                fechadecompra: new Date(),
+                pin: r.referenceCode,
+                puntodeventa: 'IUX',
+                vendedor: 15,
+                client: links[0].id,
+                cajero: 'PAYU',
+                product: 2
+            }
+            let clave = 'jodete cabron este codigo no esta completo aun-' + r.nombre + '-' + r.movil + '-' + r.buyerEmail + '-' + r.referenceCode,
+                yave = crypto.createHash('md5').update(clave).digest("hex");
+            r.llave = yave
+        }
+
+        if (r.transactionState == 4) {
+            r.estado = 'success';
+            r.msg = "aprobada";
+            await pool.query('INSERT INTO ventas SET ? ', venta);
+            res.render('respuesta', r);
+        } else if (r.transactionState == 6) {
+            r.msg = "rechazada";
+            r.estado = 'danger';
+            res.render('respuesta', r);
+        } else if (r.transactionState == 104) {
+            r.msg = "Error";
+            r.estado = 'danger';
+            res.render('respuesta', r);
+        } else if (r.transactionState == 7) {
+            r.msg = "pendiente";
+            r.estado = 'warning';
+            await pool.query('INSERT INTO clientes SET ? ', venta);
+            res.render('respuesta', r);
+        } else {
+            res.render('planes');
+        }
     }
-}
 });
 
 module.exports = router;
