@@ -2,6 +2,9 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../database');
 const crypto = require('crypto');
+const sms = require('../sms.js');
+
+
 router.get('/', async (req, res) => {
     res.render('index');
 });
@@ -11,7 +14,8 @@ router.post('/confir', async (req, res) => {
         pin : req.reference_pol,
         transaccion	: req.transaction_id,
         estado : req.state_pol
-    }
+    };
+    sms('573007753983', 'todo bien '+ req.reference_pol);
     await pool.query('INSERT INTO payu SET ? ', r);    
 });
 router.get(`/planes`, async (req, res) => {
