@@ -100,7 +100,8 @@ router.post('/cliente', async (req, res) => {
         await pool.query('INSERT INTO clientes SET ? ', newLink);
     }
     var pin = 'S1M' + ID(),
-        APIKey = 'pGO1M3MA7YziDyS3jps6NtQJAg',
+        APIKey = '4Vj8eK4rloUd272L48hsrarnUA',
+        //APIKey = 'pGO1M3MA7YziDyS3jps6NtQJAg',
         key = APIKey + '~' + merchantId + '~' + pin + '~' + amount + '~COP',
         hash = crypto.createHash('md5').update(key).digest("hex"),
         cdo;
