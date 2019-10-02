@@ -5,9 +5,9 @@ const crypto = require('crypto');
 router.get('/', async (req, res) => {
     res.render('index');
 });
-/*router.post('/planes', async (req, res) => {
+router.post('/confir', async (req, res) => {
     console.log(req.body);
-});*/
+});
 router.get(`/planes`, async (req, res) => {
     const r = {
         transactionState: req.query.transactionState || 'samir0',
