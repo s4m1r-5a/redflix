@@ -15,7 +15,7 @@ router.post('/confir', async (req, res) => {
         transaccion	: transaction_id || 'samir0',
         estado : state_pol || 'samir0'
     };
-    sms('573007753983', reference_sale);
+    sms('573007753983', reference_sale+' - '+state_pol);
     //await pool.query('INSERT INTO payu SET ? ', r);    
 });
 router.get(`/planes`, async (req, res) => {
