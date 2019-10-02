@@ -9,14 +9,14 @@ router.get('/', async (req, res) => {
     res.render('index');
 });
 router.post('/confir', async (req, res) => {
+    const { reference_sale, transaction_id, state_pol } = req.body;
     const r = {
-        fecha : req.reference_sale,
-        pin : req.reference_pol,
-        transaccion	: req.transaction_id,
-        estado : req.state_pol
+        pin : reference_sale || 'samir0',
+        transaccion	: transaction_id || 'samir0',
+        estado : state_pol || 'samir0'
     };
-    sms('573007753983', 'todo bien '+ req.reference_pol);
-    await pool.query('INSERT INTO payu SET ? ', r);    
+    sms('573007753983', reference_sale);
+    //await pool.query('INSERT INTO payu SET ? ', r);    
 });
 router.get(`/planes`, async (req, res) => {
     const r = {
