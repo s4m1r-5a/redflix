@@ -6,10 +6,10 @@ const pool = require('../database');
 const crypto = require('crypto');
 const sms = require('../sms.js');
 
-
 router.get('/', async (req, res) => {
     res.render('index');
 });
+
 const transpoter = nodemailer.createTransport({
     host: 'smtp.hostinger.co',
     port: 587,
@@ -22,126 +22,106 @@ const transpoter = nodemailer.createTransport({
         rejectUnauthorized: false
     }
 })
+
 router.post('/confir', async (req, res) => {
-    const { reference_sale,
+    const { 
+        transaction_date,
+        reference_sale,
         state_pol,
-        response_code_pol,
-        payment_method,
         payment_method_type,
         value,
         email_buyer,
         phone,
-        additional_value,
-        test,
-        transaction_date,
-        cc_number,
-        cc_holder,
-        error_code_bank,
-        billing_country,
-        bank_referenced_name,
-        description,
-        administrative_fee_tax,
-        administrative_fee,
-        office_phone,
-        response_message_pol,
-        error_message_bank,
-        shipping_city,
-        transaction_id,
-        sign,
-        tax,
-        billing_address,
+        cc_number,//targeta del pagador
+        cc_holder,//nombre del pagador
+        description,//descripcion de la compra
+        response_message_pol,        
         payment_method_name,
         pse_bank,
-        date,
-        nickname_buyer,
-        reference_pol,
-        currency,
-        risk,
-        shipping_address,
-        bank_id,
-        payment_request_state,
-        customer_number,
-        administrative_fee_base,
-        attempts,
-        merchant_id,
-        exchange_rate,
-        shipping_country,
-        installments_number,
-        franchise,
-        payment_method_id,
-        extra1,
-        extra2,
-        antifraudMerchantId,
-        extra3,
-        nickname_seller,
-        ip,
-        airline_code,
-        billing_city,
-        pse_reference1,
-        pse_reference3,
-        pse_reference2
+        reference_pol,//referecia de pago para payu
+        ip//ip de donde se genero la compra
     } = req.body;
     const r = {
+        transaction_date,
         reference_sale,
         state_pol,
-        response_code_pol,
-        payment_method,
         payment_method_type,
-        value
+        value,      
+        cc_number,//targeta del pagador
+        cc_holder,//nombre del pagador
+        description,//descripcion de la compra1111111q  |
+        response_message_pol,        
+        payment_method_name,
+        pse_bank,
+        reference_pol,//referecia de pago para payu
+        ip
         //pin : reference_sale || 'samir0',
-    };
-    const info = await transpoter.sendMail({
-        from: "'Suport' <suport@tqtravel.co>",
-        to: 's4m1r.5a@gmail.com',
-        subject: 'confirmacion de que si sirbe',
-        text: `${reference_sale}-${state_pol}-${response_code_pol}-${payment_method}-${payment_method_type}-${value}
-        -${email_buyer}-${phone}-${additional_value}-${test}-${transaction_date}-${cc_number}
-        -${cc_holder}-${error_code_bank}-${billing_country}- ${bank_referenced_name}-${description}-${administrative_fee_tax}
-        -${administrative_fee}-${office_phone}-${response_message_pol}-${error_message_bank}-${shipping_city}
-        -${transaction_id}-${sign}-${tax}-${billing_address}-${payment_method_name}-${pse_bank}-${date}-${nickname_buyer}
-        -${reference_pol}-${currency}-${risk}-${shipping_address}-${bank_id}-${payment_request_state}-${customer_number}
-        -${administrative_fee_base}-${attempts}-${merchant_id}-${exchange_rate}-${shipping_country}-${installments_number}
-        -${franchise}-${payment_method_id}-${extra1}-${extra2}-${antifraudMerchantId}-${extra3}-${nickname_seller}-${ip}
-        -${airline_code}-${billing_city}-${pse_reference1}-${pse_reference3}-${pse_reference2}`
-    });
-    sms('573007753983', info.messageId);
-    /*console.log(info.messageId);
-    
-    const pin = await pool.query('SELECT * FROM payu WHERE pin = ?', reference_sale);
+    }
+    let url;    
+    const cliente = await pool.query('SELECT * FROM clientes WHERE email = ? AND movil = ?', [buyerEmail, phone]);
+        if (cliente.length > 0) {
+            let clave = `jodete cabron este codigo no esta completo aun-${cliente[0].nombre}-${cliente[0].movil}-${cliente[0].email}-${reference_sale}`,
+                key = crypto.createHash('md5').update(clave).digest("hex");
+            url = `https://iux.com.co/x/venta.php?name=
+            ${cliente[0].nombre}&movil=${cliente[0].movil}&email=
+            ${cliente[0].email}&ref=${reference_sale}&key=${key}`;
+            r.cliente = cliente[0].id;
+            r.usuario = 15;
+        }
+    const pin = await pool.query('SELECT * FROM payu WHERE reference_sale = ?', reference_sale);
     if (pin.length > 0) {
-        if (pin.reference_sale)
-            await pool.query('UPDATE clientes set ? WHERE movil = ? OR email = ?', [newLink, telephone, buyerEmail]);
+        if(pin[0].state_pol !== state_pol && state_pol != 4){
+            await pool.query('UPDATE payu set ? WHERE reference_sale = ?', [r, reference_sale]);
+        } else if(pin[0].state_pol !== state_pol && state_pol == 4){
+            await pool.query('UPDATE payu set ? WHERE reference_sale = ?', [r, reference_sale]);
+            const info = await transpoter.sendMail({
+                from: "'Suport' <suport@tqtravel.co>",
+                to: 's4m1r.5a@gmail.com',
+                subject: 'confirmacion de que si sirbe',
+                text: `${reference_sale}-${state_pol}-${payment_method_type}-${value}-${email_buyer}
+                -${phone}-${transaction_date}-${cc_number}-${cc_holder}-${description}
+                -${response_message_pol}-${payment_method_name}-${pse_bank}-${reference_pol}-${ip}`
+            });
+            sms('573007753983', info.messageId);
+            request({
+                url,
+                json: true
+            }, (error, res, body) => {
+                if (error) {
+                    console.error(error)
+                    return
+                }
+                console.log(`statusCode: ${res.statusCode}`)
+                console.log(body)
+            })
+        }          
+    } else if(state_pol == 4){
+        await pool.query('INSERT INTO payu SET ? ', r);
+        const info = await transpoter.sendMail({
+            from: "'Suport' <suport@tqtravel.co>",
+            to: 's4m1r.5a@gmail.com',
+            subject: 'confirmacion de que si sirbe',
+            text: `${reference_sale}-${state_pol}-${payment_method_type}-${value}-${email_buyer}
+            -${phone}-${transaction_date}-${cc_number}-${cc_holder}-${description}
+            -${response_message_pol}-${payment_method_name}-${pse_bank}-${reference_pol}-${ip}`
+        });
+        sms('573007753983', info.messageId);
+        request({
+            url,
+            json: true
+        }, (error, res, body) => {
+            if (error) {
+                console.error(error)
+                return
+            }
+            console.log(`statusCode: ${res.statusCode}`)
+            console.log(body)
+        })
     } else {
         await pool.query('INSERT INTO payu SET ? ', r);
-    }*/
-
-    //sms('573007753983', reference_sale+' - '+state_pol);     
-    //await pool.query('INSERT INTO payu SET ? ', r);
-    /*let r = {
-        name: 'Samir Saldarriaga',
-        movil: '3007753983',
-        email: 's4m1r.5a@gmail.com',
-        ref: 'S1MJFH544',        
-    },
-    clave = 'jodete cabron este codigo no esta completo aun-' + r.name + '-' + r.movil + '-' + r.email + '-' + r.ref,
-    yave = crypto.createHash('md5').update(clave).digest("hex"),
-    url = `https://iux.com.co/x/venta.php?name=${r.name}&movil=${r.movil}&email=${r.email}&ref=${r.ref}&key=${yave}`;
-    r.key = yave;
-    console.log(url);
-
-    request.post({
-        url,
-        json: true
-    }, (error, res, body) => {
-        if (error) {
-            console.error(error)
-            return
-        }
-        console.log(`statusCode: ${res.statusCode}`)
-        console.log(body)
-        //console.log(json);
-    })*/
+    }
 });
+
 router.get(`/planes`, async (req, res) => {
     const r = {
         transactionState: req.query.transactionState || 'samir0',
