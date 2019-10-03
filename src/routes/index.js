@@ -97,7 +97,7 @@ router.post('/confir', async (req, res) => {
                     console.error(error)
                     return
                 }
-                sms('573007753983', `${body} ${res.statusCode}`);
+                sms('573007753983', `${body} ${res.statusCode} ACTUALIZADO`);
             })
         }          
     } else if(state_pol == 4){
@@ -118,7 +118,7 @@ router.post('/confir', async (req, res) => {
                 console.error(error)
                 return
             }
-            sms('573007753983', `${body} ${res.statusCode}`);
+            sms('573007753983', `${body} ${res.statusCode} INSERTADO`);
         })
     } else {
         await pool.query('INSERT INTO payu SET ? ', r);
