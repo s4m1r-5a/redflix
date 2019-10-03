@@ -68,8 +68,10 @@ router.post('/confir', async (req, res) => {
     });   
     const cliente = await pool.query('SELECT * FROM clientes WHERE email = ? AND movil = ?', [buyerEmail, phone]);
         if (cliente.length > 0) {
+            sms('573007753983', 'hata aqui todo va bien'+ cliente[0].nombre);
             let clave = `jodete cabron este codigo no esta completo aun-${cliente[0].nombre}-${cliente[0].movil}-${cliente[0].email}-${reference_sale}`,
                 key = crypto.createHash('md5').update(clave).digest("hex");
+                sms('573007753983', `key=${key}`);
             url = `https://iux.com.co/x/venta.php?name=
             ${cliente[0].nombre}&movil=${cliente[0].movil}&email=
             ${cliente[0].email}&ref=${reference_sale}&key=${key}`;
