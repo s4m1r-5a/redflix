@@ -77,9 +77,9 @@ router.post('/confir', async (req, res) => {
         }); 
     const pin = await pool.query('SELECT * FROM payu WHERE reference_sale = ?', reference_sale);
     if (pin.length > 0) {
-        if(pin[0].reference_sale !== reference_sale && state_pol != 4){
+        if(pin[0].state_pol != state_pol && state_pol != 4){
             await pool.query('UPDATE payu set ? WHERE reference_sale = ?', [r, reference_sale]);
-        } else if(pin[0].reference_sale !== reference_sale && state_pol == 4){
+        } else if(pin[0].state_pol != state_pol && state_pol == 4){
             await pool.query('UPDATE payu set ? WHERE reference_sale = ?', [r, reference_sale]);
             await transpoter.sendMail({
                 from: "'Suport' <suport@tqtravel.co>",
