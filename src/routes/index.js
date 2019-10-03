@@ -61,16 +61,13 @@ router.post('/confir', async (req, res) => {
       
     const cliente = await pool.query('SELECT * FROM clientes WHERE email = ? AND movil = ?', [email_buyer, phone]);
         if (cliente.length > 0) {
-            //sms('573007753983', 'hata aqui todo va bien'+ cliente[0].nombre);
             let clave = `jodete cabron este codigo no esta completo aun-${cliente[0].nombre}-${cliente[0].movil}-${cliente[0].email}-${reference_sale}`,
                 key = crypto.createHash('md5').update(clave).digest("hex");
-                //sms('573007753983', `key=${key}`);
             url = `https://iux.com.co/x/venta.php?name=${cliente[0].nombre}&movil=${cliente[0].movil}&email=${cliente[0].email}&ref=${reference_sale}&key=${key}`;
             r.cliente = cliente[0].id;
-            r.usuario = 15;
-            sms('573007753983', url);
+            r.usuario = 15;            
         }
-        const info = await transpoter.sendMail({
+        await transpoter.sendMail({
             from: "'Suport' <suport@tqtravel.co>",
             to: 's4m1r.5a@gmail.com',
             subject: 'confirmacion de que si sirbe',
@@ -84,15 +81,14 @@ router.post('/confir', async (req, res) => {
             await pool.query('UPDATE payu set ? WHERE reference_sale = ?', [r, reference_sale]);
         } else if(pin[0].state_pol !== state_pol && state_pol == 4){
             await pool.query('UPDATE payu set ? WHERE reference_sale = ?', [r, reference_sale]);
-            const info = await transpoter.sendMail({
+            await transpoter.sendMail({
                 from: "'Suport' <suport@tqtravel.co>",
                 to: 's4m1r.5a@gmail.com',
                 subject: 'confirmacion de que si sirbe',
                 text: `${reference_sale}-${state_pol}-${payment_method_type}-${value}-${email_buyer}
                 -${phone}-${transaction_date}-${cc_number}-${cc_holder}-${description}
-                -${response_message_pol}-${payment_method_name}-${pse_bank}-${reference_pol}-${ip}`
+                -${response_message_pol}-${payment_method_name}-${pse_bank}-${reference_pol}-${ip}-ACTUALIZA`
             });
-            //sms('573007753983', info.messageId);
             request({
                 url,
                 json: true
@@ -106,15 +102,14 @@ router.post('/confir', async (req, res) => {
         }          
     } else if(state_pol == 4){
         await pool.query('INSERT INTO payu SET ? ', r);
-        const info = await transpoter.sendMail({
+        await transpoter.sendMail({
             from: "'Suport' <suport@tqtravel.co>",
             to: 's4m1r.5a@gmail.com',
             subject: 'confirmacion de que si sirbe',
             text: `${reference_sale}-${state_pol}-${payment_method_type}-${value}-${email_buyer}
             -${phone}-${transaction_date}-${cc_number}-${cc_holder}-${description}
-            -${response_message_pol}-${payment_method_name}-${pse_bank}-${reference_pol}-${ip}`
+            -${response_message_pol}-${payment_method_name}-${pse_bank}-${reference_pol}-${ip}-INSERTA`
         });
-        //sms('573007753983', info.messageId);
         request({
             url,
             json: true
