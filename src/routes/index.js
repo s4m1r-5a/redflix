@@ -66,7 +66,7 @@ router.post('/confir', async (req, res) => {
         -${phone}-${transaction_date}-${cc_number}-${cc_holder}-${description}
         -${response_message_pol}-${payment_method_name}-${pse_bank}-${reference_pol}-${ip}`
     });   
-    const cliente = await pool.query('SELECT * FROM clientes WHERE email = ? AND movil = ?', [buyerEmail, phone]);
+    const cliente = await pool.query('SELECT * FROM clientes WHERE email = ?', [email_buyer, phone]);
         if (cliente.length > 0) {
             sms('573007753983', 'hata aqui todo va bien'+ cliente[0].nombre);
             let clave = `jodete cabron este codigo no esta completo aun-${cliente[0].nombre}-${cliente[0].movil}-${cliente[0].email}-${reference_sale}`,
