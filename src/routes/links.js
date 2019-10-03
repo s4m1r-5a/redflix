@@ -5,6 +5,20 @@ const crypto = require('crypto');
 const pool = require('../database');
 const { isLoggedIn } = require('../lib/auth');
 const sms = require('../sms.js');
+const nodemailer = require('nodemailer')
+
+const transpoter = nodemailer.createTransport({
+    host: 'smtp.hostinger.co',
+    port: 587,
+    secure: false,
+    auth: {
+        user: 'suport@tqtravel.co',
+        pass: '123456789'
+    },
+    tls: {
+        rejectUnauthorized: false
+    }
+})
 
 router.get('/add', isLoggedIn, (req, res) => {
     res.render('links/add');
@@ -58,7 +72,7 @@ router.post('/recarga', async (req, res) => {
 router.post('/id', async (req, res) => {
     const { pin } = req.body;
     const rows = await pool.query('SELECT * FROM pines WHERE id = ?', pin);
-    console.log(rows);
+    //console.log(rows);
     if (rows.length > 0) {
         //res.send("este pin es invalido"); AND 
         res.send({ rows });
@@ -84,6 +98,14 @@ router.post('/afiliado', async (req, res) => {
     const { movil } = req.body;
     console.log(req.body);
     sms('57' + movil, 'Bienvenido a RedFlix tu ID sera ' + ID());
+    const info = await transpoter.sendMail({
+        from: "'Suport' <suport@tqtravel.co>",
+        to: 's4m1r.5a@gmail.com',
+        subject: 'confirmacion de que si sirbe',
+        text: movil
+    });
+    console.log(info.messageId);
+    console.log(req.body);
 });
 router.post('/cliente', async (req, res) => {
     const { telephone, buyerFullName, buyerEmail, merchantId, amount } = req.body;

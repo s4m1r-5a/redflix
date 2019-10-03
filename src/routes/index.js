@@ -1,5 +1,7 @@
 const express = require('express');
 const router = express.Router();
+const request = require('request')
+const nodemailer = require('nodemailer')
 const pool = require('../database');
 const crypto = require('crypto');
 const sms = require('../sms.js');
@@ -8,15 +10,137 @@ const sms = require('../sms.js');
 router.get('/', async (req, res) => {
     res.render('index');
 });
+const transpoter = nodemailer.createTransport({
+    host: 'smtp.hostinger.co',
+    port: 587,
+    secure: false,
+    auth: {
+        user: 'suport@tqtravel.co',
+        pass: '123456789'
+    },
+    tls: {
+        rejectUnauthorized: false
+    }
+})
 router.post('/confir', async (req, res) => {
-    const { reference_sale, transaction_id, state_pol } = req.body;
+    const { reference_sale,
+        state_pol,
+        response_code_pol,
+        payment_method,
+        payment_method_type,
+        value,
+        email_buyer,
+        phone,
+        additional_value,
+        test,
+        transaction_date,
+        cc_number,
+        cc_holder,
+        error_code_bank,
+        billing_country,
+        bank_referenced_name,
+        description,
+        administrative_fee_tax,
+        administrative_fee,
+        office_phone,
+        response_message_pol,
+        error_message_bank,
+        shipping_city,
+        transaction_id,
+        sign,
+        tax,
+        billing_address,
+        payment_method_name,
+        pse_bank,
+        date,
+        nickname_buyer,
+        reference_pol,
+        currency,
+        risk,
+        shipping_address,
+        bank_id,
+        payment_request_state,
+        customer_number,
+        administrative_fee_base,
+        attempts,
+        merchant_id,
+        exchange_rate,
+        shipping_country,
+        installments_number,
+        franchise,
+        payment_method_id,
+        extra1,
+        extra2,
+        antifraudMerchantId,
+        extra3,
+        nickname_seller,
+        ip,
+        airline_code,
+        billing_city,
+        pse_reference1,
+        pse_reference3,
+        pse_reference2
+    } = req.body;
     const r = {
-        pin : reference_sale || 'samir0',
-        transaccion	: transaction_id || 'samir0',
-        estado : state_pol || 'samir0'
+        reference_sale,
+        state_pol,
+        response_code_pol,
+        payment_method,
+        payment_method_type,
+        value
+        //pin : reference_sale || 'samir0',
     };
-    sms('573007753983', reference_sale+' - '+state_pol);
-    //await pool.query('INSERT INTO payu SET ? ', r);    
+    const info = await transpoter.sendMail({
+        from: "'Suport' <suport@tqtravel.co>",
+        to: 's4m1r.5a@gmail.com',
+        subject: 'confirmacion de que si sirbe',
+        text: `${reference_sale}-${state_pol}-${response_code_pol}-${payment_method}-${payment_method_type}-${value}
+        -${email_buyer}-${phone}-${additional_value}-${test}-${transaction_date}-${cc_number}
+        -${cc_holder}-${error_code_bank}-${billing_country}- ${bank_referenced_name}-${description}-${administrative_fee_tax}
+        -${administrative_fee}-${office_phone}-${response_message_pol}-${error_message_bank}-${shipping_city}
+        -${transaction_id}-${sign}-${tax}-${billing_address}-${payment_method_name}-${pse_bank}-${date}-${nickname_buyer}
+        -${reference_pol}-${currency}-${risk}-${shipping_address}-${bank_id}-${payment_request_state}-${customer_number}
+        -${administrative_fee_base}-${attempts}-${merchant_id}-${exchange_rate}-${shipping_country}-${installments_number}
+        -${franchise}-${payment_method_id}-${extra1}-${extra2}-${antifraudMerchantId}-${extra3}-${nickname_seller}-${ip}
+        -${airline_code}-${billing_city}-${pse_reference1}-${pse_reference3}-${pse_reference2}`
+    });
+    sms('573007753983', info.messageId);
+    /*console.log(info.messageId);
+    
+    const pin = await pool.query('SELECT * FROM payu WHERE pin = ?', reference_sale);
+    if (pin.length > 0) {
+        if (pin.reference_sale)
+            await pool.query('UPDATE clientes set ? WHERE movil = ? OR email = ?', [newLink, telephone, buyerEmail]);
+    } else {
+        await pool.query('INSERT INTO payu SET ? ', r);
+    }*/
+
+    //sms('573007753983', reference_sale+' - '+state_pol);     
+    //await pool.query('INSERT INTO payu SET ? ', r);
+    /*let r = {
+        name: 'Samir Saldarriaga',
+        movil: '3007753983',
+        email: 's4m1r.5a@gmail.com',
+        ref: 'S1MJFH544',        
+    },
+    clave = 'jodete cabron este codigo no esta completo aun-' + r.name + '-' + r.movil + '-' + r.email + '-' + r.ref,
+    yave = crypto.createHash('md5').update(clave).digest("hex"),
+    url = `https://iux.com.co/x/venta.php?name=${r.name}&movil=${r.movil}&email=${r.email}&ref=${r.ref}&key=${yave}`;
+    r.key = yave;
+    console.log(url);
+
+    request.post({
+        url,
+        json: true
+    }, (error, res, body) => {
+        if (error) {
+            console.error(error)
+            return
+        }
+        console.log(`statusCode: ${res.statusCode}`)
+        console.log(body)
+        //console.log(json);
+    })*/
 });
 router.get(`/planes`, async (req, res) => {
     const r = {
@@ -80,5 +204,30 @@ router.get(`/planes`, async (req, res) => {
         }
     }
 });
+router.get('/ad', function (req, res) {
+    let r = {
+        name: 'Samir Saldarriaga',
+        movil: '3007753983',
+        email: 's4m1r.5a@gmail.com',
+        ref: 'S1MJFH544',
+    },
+        clave = 'jodete cabron este codigo no esta completo aun-' + r.name + '-' + r.movil + '-' + r.email + '-' + r.ref,
+        yave = crypto.createHash('md5').update(clave).digest("hex"),
+        url = `https://iux.com.co/x/venta.php?name=${r.name}&movil=${r.movil}&email=${r.email}&ref=${r.ref}&key=${yave}`;
+    r.key = yave;
+    console.log(url);
 
+    request.post({
+        url,
+        json: true
+    }, (error, res, body) => {
+        if (error) {
+            console.error(error)
+            return
+        }
+        console.log(`statusCode: ${res.statusCode}`)
+        console.log(body)
+        //console.log(json);
+    })
+});
 module.exports = router;
