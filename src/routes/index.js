@@ -58,7 +58,6 @@ router.post('/confir', async (req, res) => {
         //pin : reference_sale || 'samir0',
     }
     let url; 
-      
     const cliente = await pool.query('SELECT * FROM clientes WHERE email = ? AND movil = ?', [email_buyer, phone]);
         if (cliente.length > 0) {
             let clave = `jodete cabron este codigo no esta completo aun-${cliente[0].nombre}-${cliente[0].movil}-${cliente[0].email}-${reference_sale}`,
@@ -67,14 +66,6 @@ router.post('/confir', async (req, res) => {
             r.cliente = cliente[0].id;
             r.usuario = 15;            
         }
-        await transpoter.sendMail({
-            from: "'Suport' <suport@tqtravel.co>",
-            to: 's4m1r.5a@gmail.com',
-            subject: 'confirmacion de que si sirbe',
-            text: `${reference_sale}-${state_pol}-${payment_method_type}-${value}-${email_buyer}
-            -${phone}-${transaction_date}-${cc_number}-${cc_holder}-${description}
-            -${response_message_pol}-${payment_method_name}-${pse_bank}-${reference_pol}-${ip}-${url}`
-        }); 
     const pin = await pool.query('SELECT * FROM payu WHERE reference_sale = ?', reference_sale);
     if (pin.length > 0) {
         if(pin[0].state_pol != state_pol && state_pol != 4){
@@ -127,16 +118,16 @@ router.post('/confir', async (req, res) => {
 
 router.get(`/planes`, async (req, res) => {
     const r = {
-        transactionState: req.query.transactionState || 'samir0',
-        referenceCode: req.query.referenceCode || 'samir1',
-        reference_pol: req.query.reference_pol || 'samir2',
-        polPaymentMethod: req.query.polPaymentMethod || 'samir3',
-        lapPaymentMethodType: req.query.lapPaymentMethodType || 'samir4',
-        TX_VALUE: req.query.TX_VALUE || 'samir5',
-        buyerEmail: req.query.buyerEmail || 's4m1r.5a@gmail.com',
-        processingDate: req.query.processingDate || 'samir7',
-        description: req.query.description || 'samir8',
-        mensaje: req.query.message || 'samir9',
+        transactionState: req.query.transactionState || '',
+        referenceCode: req.query.referenceCode || '',
+        reference_pol: req.query.reference_pol || '',
+        polPaymentMethod: req.query.polPaymentMethod || '',
+        lapPaymentMethodType: req.query.lapPaymentMethodType || '',
+        TX_VALUE: req.query.TX_VALUE || '',
+        buyerEmail: req.query.buyerEmail || '',
+        processingDate: req.query.processingDate || '',
+        description: req.query.description || '',
+        mensaje: req.query.message || '',
         msg: '',
         estado: ''
     }
@@ -186,31 +177,5 @@ router.get(`/planes`, async (req, res) => {
             res.render('planes');
         }
     }
-});
-router.get('/ad', function (req, res) {
-    let r = {
-        name: 'Samir Saldarriaga',
-        movil: '3007753983',
-        email: 's4m1r.5a@gmail.com',
-        ref: 'S1MJFH544',
-    },
-        clave = 'jodete cabron este codigo no esta completo aun-' + r.name + '-' + r.movil + '-' + r.email + '-' + r.ref,
-        yave = crypto.createHash('md5').update(clave).digest("hex"),
-        url = `https://iux.com.co/x/venta.php?name=${r.name}&movil=${r.movil}&email=${r.email}&ref=${r.ref}&key=${yave}`;
-    r.key = yave;
-    console.log(url);
-
-    request.post({
-        url,
-        json: true
-    }, (error, res, body) => {
-        if (error) {
-            console.error(error)
-            return
-        }
-        console.log(`statusCode: ${res.statusCode}`)
-        console.log(body)
-        //console.log(json);
-    })
 });
 module.exports = router;

@@ -13,7 +13,20 @@ const val = require('../navegacion.js');
 const sms = require('./sms.js');
 const { database } = require('./keys');
 const crypto = require('crypto')
+const nodemailer = require('nodemailer')
 
+const transpoter = nodemailer.createTransport({
+    host: 'smtp.hostinger.co',
+    port: 587,
+    secure: false,
+    auth: {
+        user: 'suport@tqtravel.co',
+        pass: '123456789'
+    },
+    tls: {
+        rejectUnauthorized: false
+    }
+})
 
 // Intializations
 const app = express();
@@ -73,7 +86,7 @@ app.use(require('../navegacion'));
 
 // Public
 app.use(express.static(path.join(__dirname, 'public')));
-//sms('573007753983', 'Mensaje de prueba');
+
 // Starting
 app.listen(app.get('port'), () => {
   console.log('Server is in port', app.get('port'));

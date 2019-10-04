@@ -5,20 +5,7 @@ const crypto = require('crypto');
 const pool = require('../database');
 const { isLoggedIn } = require('../lib/auth');
 const sms = require('../sms.js');
-const nodemailer = require('nodemailer')
 
-const transpoter = nodemailer.createTransport({
-    host: 'smtp.hostinger.co',
-    port: 587,
-    secure: false,
-    auth: {
-        user: 'suport@tqtravel.co',
-        pass: '123456789'
-    },
-    tls: {
-        rejectUnauthorized: false
-    }
-})
 
 router.get('/add', isLoggedIn, (req, res) => {
     res.render('links/add');
@@ -49,6 +36,7 @@ router.post('/add', async (req, res) => {
     req.flash('success', 'Link Saved Successfully');
     res.redirect('/links');
 });
+
 router.post('/patro', async (req, res) => {
     const { quien } = req.body;
     if (quien == "Patrocinador") {
@@ -56,6 +44,7 @@ router.post('/patro', async (req, res) => {
         res.send(fila);
     }
 });
+
 router.post('/recarga', async (req, res) => {
     const { monto, metodo, id } = req.body;
     const newLink = {
@@ -69,6 +58,7 @@ router.post('/recarga', async (req, res) => {
     req.flash('success', 'Solicitud exitosa');
     res.render('links/recarga');
 });
+
 router.post('/id', async (req, res) => {
     const { pin } = req.body;
     const rows = await pool.query('SELECT * FROM pines WHERE id = ?', pin);
@@ -81,6 +71,7 @@ router.post('/id', async (req, res) => {
         req.flash('error', 'Id de registro incorrecto');
     }
 });
+
 router.post('/iux', async (req, res) => {
     console.log(req.body);
     /*const { pin } = req.body;
@@ -94,19 +85,13 @@ router.post('/iux', async (req, res) => {
         req.flash('error', 'Id de registro incorrecto');
     }*/
 });
+
 router.post('/afiliado', async (req, res) => {
     const { movil } = req.body;
     console.log(req.body);
     sms('57' + movil, 'Bienvenido a RedFlix tu ID sera ' + ID());
-    const info = await transpoter.sendMail({
-        from: "'Suport' <suport@tqtravel.co>",
-        to: 's4m1r.5a@gmail.com',
-        subject: 'confirmacion de que si sirbe',
-        text: movil
-    });
-    console.log(info.messageId);
-    console.log(req.body);
 });
+
 router.post('/cliente', async (req, res) => {
     const { telephone, buyerFullName, buyerEmail, merchantId, amount } = req.body;
     var nombre = buyerFullName.toUpperCase();
@@ -122,17 +107,16 @@ router.post('/cliente', async (req, res) => {
         await pool.query('INSERT INTO clientes SET ? ', newLink);
     }
     var pin = 'S1M' + ID(),
-        APIKey = '4Vj8eK4rloUd272L48hsrarnUA',
-        //APIKey = 'pGO1M3MA7YziDyS3jps6NtQJAg',
+        //APIKey = '4Vj8eK4rloUd272L48hsrarnUA',
+        APIKey = 'pGO1M3MA7YziDyS3jps6NtQJAg',
         key = APIKey + '~' + merchantId + '~' + pin + '~' + amount + '~COP',
         hash = crypto.createHash('md5').update(key).digest("hex"),
         cdo;
-    console.log(hash);
     cdo = [hash, pin];
     res.send(cdo);
 });
+
 router.get('/', isLoggedIn, async (req, res) => {
-    console.log('jdfkjdfkdfd');
     const links = await pool.query('SELECT * FROM links WHERE user_id = ? ', [req.user.id]);
     res.render('links/list', { links });
 });
@@ -163,6 +147,7 @@ router.post('/edit/:id', async (req, res) => {
     req.flash('success', 'Link Updated Successfully');
     res.redirect('/links');
 });
+
 //"a0Ab1Bc2Cd3De4Ef5Fg6Gh7Hi8Ij9Jk0KLm1Mn2No3Op4Pq5Qr6Rs7St8Tu9Uv0Vw1Wx2Xy3Yz4Z"
 function ID(chars = "0A1B2C3D4E5F6G7H8I9J0KL1M2N3O4P5Q6R7S8T9U0V1W2X3Y4Z", lon = 6) {
     let code = "";
