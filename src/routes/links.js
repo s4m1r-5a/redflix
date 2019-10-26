@@ -5,6 +5,7 @@ const crypto = require('crypto');
 const pool = require('../database');
 const { isLoggedIn } = require('../lib/auth');
 const sms = require('../sms.js');
+const { registro } = require('../keys');
 
 
 router.get('/add', isLoggedIn, (req, res) => {
@@ -36,7 +37,39 @@ router.post('/add', async (req, res) => {
     req.flash('success', 'Link Saved Successfully');
     res.redirect('/links');
 });
-
+router.post('/movil', async (req, res) => {
+    const { movil } = req.body;    
+    const cliente = await pool.query('SELECT * FROM clientes WHERE movil = ?', movil);
+    console.log(req.body);
+    res.send(cliente);
+});
+router.post('/ventas', async (req, res) => {
+    const { prod, producto, nombre, user, movil } = req.body;
+    if(prod == 'IUX'){
+        let cel = movil.replace(/-/g, "");
+        const venta = {
+            producto,
+            pin,
+            movil : cel
+        }
+        //await pool.query('INSERT INTO transaccion SET ? ', newLink);
+        req.flash('success', 'Pin generado exitosamente');
+        res.redirect('/links/ventas');
+    } else if(producto == '' || nombre == '' || movil == ''){
+        req.flash('error', 'Existe un un error en la solicitud');
+        res.redirect('/links/ventas'); 
+    } else {
+        const venta = {
+            producto,
+            nombre,
+            user,
+            movil
+        }
+        //await pool.query('INSERT INTO transaccion SET ? ', newLink);
+        req.flash('success', 'Solicitud exitosa');
+        res.redirect('/links/ventas');
+    }      
+});
 router.post('/patro', async (req, res) => {
     const { quien } = req.body;
     if (quien == "Patrocinador") {
@@ -56,19 +89,17 @@ router.post('/recarga', async (req, res) => {
     };
     await pool.query('INSERT INTO transaccion SET ? ', newLink);
     req.flash('success', 'Solicitud exitosa');
-    res.render('links/recarga');
+    res.render('/links/recarga');
 });
 
 router.post('/id', async (req, res) => {
-    const { pin } = req.body;
+    const { pin } = req.body;    
     const rows = await pool.query('SELECT * FROM pines WHERE id = ?', pin);
-    //console.log(rows);
-    if (rows.length > 0) {
-        //res.send("este pin es invalido"); AND 
-        res.send({ rows });
+    if (rows.length > 0 && rows[0].acreedor === null) {
+        registro.pin = pin;
+        res.send('Exitoso');
     } else {
         res.send('Pin de registro invalido, comuniquese con su distribuidor!');
-        req.flash('error', 'Id de registro incorrecto');
     }
 });
 
@@ -132,7 +163,7 @@ router.get('/edit/:id', async (req, res) => {
     const links = await pool.query('SELECT * FROM links WHERE id = ?', [id]);
     const { id } = req.params;
     console.log(links);
-    res.render('links/edit', { link: links[0] });
+    res.render('/links/edit', { link: links[0] });
 });
 
 router.post('/edit/:id', async (req, res) => {

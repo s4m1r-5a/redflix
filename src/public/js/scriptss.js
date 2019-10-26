@@ -1,6 +1,45 @@
-$("#smartwizard-arrows-primary").smartWizard({
+var $validationForm = $("#smartwizard-arrows-primary");
+$validationForm.smartWizard({
     theme: "arrows",
-    showStepURLhash: false
+    showStepURLhash: false,
+    lang: {// Variables del lenguaje
+        next: 'Siguiente',
+        previous: 'Atras'
+    },
+    toolbarSettings: {
+        toolbarPosition: 'bottom', // none, top, bottom, both
+        toolbarButtonPosition: 'right', // left, right
+        showNextButton: true, // show/hide a Next button
+        showPreviousButton: false // show/hide a Previous button
+        //toolbarExtraButtons: [$("<button class=\"btn btn-submit btn-primary\" type=\"button\">Finish</button>")]
+    },
+    autoAdjustHeight: false,
+    backButtonSupport: false,
+    useURLhash: false
+}).on("leaveStep", () => {
+    var fd = $('form').serialize();
+    let skdt;
+    $.ajax({
+        url: '/links/id',
+        data: fd,
+        type: 'POST',
+        async: false,
+        success: function (data) {
+            //alert(data)
+            if (data != 'Pin de registro invalido, comuniquese con su distribuidor!') {
+                $('.h').attr("disabled", false);
+                skdt = true;
+            } else if ($('#ipin').val() != "") {
+                $(".alert").show();
+                $('.alert-message').html('<strong>Error!</strong> ' + data);
+                setTimeout(function () {
+                    $(".alert").fadeOut(3000);
+                }, 2000);
+                skdt = false;
+            }
+        }
+    });
+    return skdt;
 });
 function init_events(ele) {
     ele.each(function () {
@@ -20,6 +59,8 @@ function init_events(ele) {
     })
 }
 $('#pagar').attr("disabled", true);
+$('.ntfx').attr("disabled", true);
+$('input[name="nombre"]').attr("disabled", true);
 $('.pagar').change(function () {
     if ($('input[name="telephone"]').val() != "" && $('input[name="buyerFullName"]').val() != "" && $('input[name="buyerEmail"]').val() != "") {
         var fd = $('form').serialize();
@@ -40,56 +81,19 @@ if ($('#iuxemail').html() == '' && $('#iuxemail').is(':visible')) {
     window.location.href = "https://iux.com.co/app/login";
 }
 if ($('#msg').html() == 'aprobada') {
-    let fd = {
-        name : $('#iuxname').html(),
-        movil : $('#iuxmovil').html(),
-        email : $('#iuxemail').html(),
-        ref : $('#iuxref').html(),
-        key : $('#yave').val()
-    }
-    $.ajax({
-        url: 'https://iux.com.co/x/venta.php',
-        data: fd,
-        type: 'POST',
-        success: function (data) {
-            alert(data);
-        }
-    });
-    fd.key = "";
     history.pushState(null, "", "planes?iux=ir");
 }
 $('#iriux').click(function () {
     window.location.href = "https://iux.com.co/app/login";
 });
-if ($('#login').is(':visible') || $('.ver').is(':visible')) {
+if ($('#pin').is(':visible') || $('.ver').is(':visible')) {
     $('.h').attr("disabled", true);
     //$("nav.navbar").css("display", "none");
     //$("nav.navbar").hide();
 } else {
     $("nav.navbar").show();
 }
-$('#pin').change(function () {
-    var fd = $('form').serialize();
-    //var fd = $('#id_registro').val();  
-    //alert(fd);
-    $.ajax({
-        url: '/links/id',
-        data: fd,
-        type: 'POST',
-        success: function (data) {
-            if (data != 'Pin de registro invalido, comuniquese con su distribuidor!') {
-                $('.h').attr("disabled", false);
-            } else if ($('#ipin').val() != "") {
-                $(".alert").show();
-                $('.alert-message').html('<strong>Error!</strong> ' + data);
-                setTimeout(function () {
-                    $(".alert").fadeOut(1500);
-                }, 1000);
-            }
 
-        }
-    });
-})
 $('#quien').change(function () {
     //var fd = $('form').serialize();
     var fd = { quien: $('#quien').val() };
@@ -103,6 +107,30 @@ $('#quien').change(function () {
             $('input[name="id"]').val(data[0].usuario);
         }
     });
+})
+let formu;
+$('form').click(function () {
+    formu = $(this).attr("id");
+    //alert(formu);
+})
+$(`.movil`).change(function () {
+    //alert('si funciona');
+    $('form input[name="nombre"]').val("");
+    $('form input[name="user"]').val("");
+    var fd = { movil: $(this).val().replace(/-/g, "") };
+    $.ajax({
+        url: '/links/movil',
+        data: fd,
+        type: 'POST',
+        success: function (data) {
+            $(`#${formu} input[name="nombre"]`).val(data[0].nombre);
+            $(`#${formu} input[name="user"]`).val(data[0].id);
+        }
+    });
+    $(`form input[name="nombre"]`).attr("disabled", true);
+    $(`form .ntfx`).attr("disabled", true);
+    $(`#${formu} input[name="nombre"]`).attr("disabled", false);
+    $(`#${formu} .ntfx`).attr("disabled", false);
 })
 $('#ventaiux').click(function () {
     var fd = $('#formulario').serialize();
@@ -120,9 +148,6 @@ $('#ventaiux').click(function () {
 })
 $(function () {
     var date = new Date()
-    var d = date.getDate(),
-        m = date.getMonth(),
-        y = date.getFullYear()
     $("#fullcalendar").fullCalendar({
         locale: 'es',
         header: {
@@ -153,10 +178,10 @@ $(function () {
         eventLimit: true,
         editable: true,
         events: "https://fullcalendar.io/demo-events.json",
-        eventClick: function (calEvent, jsEvent, view) {
+        eventClick: function (calEvent) {
             alert(calEvent.title);
         },
-        eventDrop: function (calEvent) { }
+        eventDrop: function () { }
     });
 });
 $(function () {

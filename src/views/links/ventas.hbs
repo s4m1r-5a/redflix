@@ -15,7 +15,8 @@
                             <a href="#netflix" class="btn btn-outline-primary active" data-toggle="tab">Netflix</a>
                             <a href="#iux" class="btn btn-outline-primary" data-toggle="tab">Iux</a>
                             <a href="#Soat" class="btn btn-outline-primary" data-toggle="tab">Soat</a>
-                            <a href="#transferencias" class="btn btn-outline-primary" data-toggle="tab">Transferencias</a>
+                            <a href="#transferencias" class="btn btn-outline-primary"
+                                data-toggle="tab">Transferencias</a>
                             <a href="#otros" class="btn btn-outline-primary" data-toggle="tab">Otros</a>
                         </nav>
                     </div>
@@ -27,140 +28,225 @@
                             <div class="col-sm-4 mb-3 mb-md-0">
                                 <div class="card text-center h-100">
                                     <div class="card-body d-flex flex-column">
-                                        <div class="mb-4">
-                                            <h5>Paquete ?</h5>
-                                            <span class="display-4">$30</span>
-                                            <span class="text-small4">.000</span>
+                                        <div class="alert alert-danger alert-dismissible" role="alert"
+                                            style="display: none">
+                                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                            <div class="alert-icon">
+                                                <i class="far fa-fw fa-bell"></i>
+                                            </div>
+                                            <div class="alert-message">
+                                                <strong>Hola!</strong> Tienes un error!
+                                            </div>
                                         </div>
-                                        <h6>
-                                            <i class="align-middle mr-2" data-feather="monitor"></i>
-                                            <i class="align-middle mr-2" data-feather="tv"></i>
-                                        </h6>
-                                        <ul class="list-unstyled">
-                                            <li class="mb-4">
-                                                <div class="btn-group">
-                                                    <button type="button" class="btn btn-primary dropdown-toggle"
-                                                        data-toggle="dropdown" aria-haspopup="true"
-                                                        aria-expanded="false">
-                                                        Elegir Dispositivos
-                                                    </button>
-                                                    <div class="dropdown-menu">
-                                                        <a class="dropdown-item" href="#">1 Pantalla SD</a>
-                                                        <a class="dropdown-item" href="#">2 Pantalla HD</a>
-                                                        <a class="dropdown-item" href="#">4 Pantalla 4K</a>
-                                                        <div class="dropdown-divider"></div>
-                                                        <a class="dropdown-item" href="#">Mas informacion</a>
+                                        <form id="trenta" action="/links/ventas" method="POST">
+                                            <div class="mb-4">
+                                                <h5>Paquete ?</h5>
+                                                <span class="display-4 text-primary">$30</span>
+                                                <span class="text-small4 text-primary">.000</span>
+                                            </div>
+                                            <ul class="list-unstyled">
+                                                <li class="mb-4">
+                                                    <div class="text-center">
+                                                        <img src="https://miro.medium.com/max/3150/1*ty4NvNrGg4ReETxqU2N3Og.png"
+                                                            class="mx-auto" style="width: 100px;" alt="...">
                                                     </div>
-                                                </div>
-                                            </li>
-                                            <h6><i class="align-middle mr-2" data-feather="phone"></i></h6>
-                                            <li class="mb-4">
-                                                <input type="text" class="form-control" data-mask="000-000-0000"
-                                                    placeholder="Movil" style="text-align:center">
-                                            </li>
-                                            <h6><i class="align-middle mr-2" data-feather="user"></i></h6>
-                                            <li class="mb-4">
-                                                <input type="text" class="form-control" placeholder="Nombre completo"
-                                                    style="text-align:center">
-                                            </li>
-                                            <li class="mb-2">
-                                                Info del servicio:
-                                            </li>
-                                            <span class="display-4">NETFLIX</span>
-                                        </ul>
-                                        <div class="mt-auto">
-                                            <a href="#" class="btn btn-lg btn-primary">Pagar</a>
-                                        </div>
+                                                    <!--<i class="align-middle mr-2" data-feather="tv"></i>
+                                                    <h5>Dispositivos</h5>-->
+                                                </li>
+                                                <li class="mb-4">
+                                                    <label class="custom-control custom-radio">
+                                                        <input name="producto" type="radio" class="custom-control-input"
+                                                            value="1">
+                                                        <span class="custom-control-label text-success"><strong>1
+                                                                Pantalla
+                                                                SD</strong> <mark>65 Días</mark></span>
+                                                    </label>
+                                                    <label class="custom-control custom-radio">
+                                                        <input name="producto" type="radio" class="custom-control-input"
+                                                            value="2">
+                                                        <span class="custom-control-label"><strong>2 Pantalla
+                                                                HD</strong> <mark>54 Días</mark></span>
+                                                    </label>
+                                                    <label class="custom-control custom-radio">
+                                                        <input name="producto" type="radio" class="custom-control-input"
+                                                            value="3" required>
+                                                        <span class="custom-control-label"><strong>4 Pantalla
+                                                                4K</strong> <mark>47 Días</mark></span>
+                                                    </label>
+                                                </li>
+                                                <h6><i class="align-middle mr-2" data-feather="phone"></i></h6>
+                                                <li class="mb-4">
+                                                    <input type="text" class="form-control text-primary movil"
+                                                        name="movil" data-mask="000-000-0000" placeholder="Movil"
+                                                        style="text-align:center" required>
+                                                </li>
+                                                <h6><i class="align-middle mr-2" data-feather="user"></i></h6>
+                                                <li class="mb-4">
+                                                    <input type="text" class="form-control text-uppercase text-primary"
+                                                        name="nombre" placeholder="Nombre completo"
+                                                        style="text-align:center" required>
+                                                </li>
+                                                <input type="hidden" name="user">
+
+                                                <span class="display-4 text-danger">NETFLIX</span>
+                                            </ul>
+                                            <div class="mt-auto">
+                                                <!--<a href="#" class="btn btn-lg btn-primary">Activar</a>-->
+                                                <button class="btn btn-lg btn-outline-primary ntfx">Activar</button>
+                                            </div>
+                                        </form>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-sm-4 mb-3 mb-md-0">
                                 <div class="card text-center h-100">
                                     <div class="card-body d-flex flex-column">
-                                        <div class="mb-4">
-                                            <h5>Standard</h5>
-                                            <span class="display-4">$50</span>
-                                            <span class="text-small4">.000</span>
+                                        <div class="alert alert-danger alert-dismissible" role="alert"
+                                            style="display: none">
+                                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                            <div class="alert-icon">
+                                                <i class="far fa-fw fa-bell"></i>
+                                            </div>
+                                            <div class="alert-message">
+                                                <strong>Hola!</strong> Tienes un error!
+                                            </div>
                                         </div>
-                                        <h6>
-                                            <i class="align-middle mr-2" data-feather="monitor"></i>
-                                            <i class="align-middle mr-2" data-feather="tv"></i>
-                                        </h6>
-                                        <ul class="list-unstyled">
-                                            <li class="mb-4">
-                                                <div class="btn-group">
-                                                    <button type="button" class="btn btn-primary dropdown-toggle"
-                                                        data-toggle="dropdown" aria-haspopup="true"
-                                                        aria-expanded="false">
-                                                        Elegir Dispositivos
-                                                    </button>
-                                                    <div class="dropdown-menu">
-                                                        <a class="dropdown-item" href="#">1 Pantalla SD</a>
-                                                        <a class="dropdown-item" href="#">2 Pantalla HD</a>
-                                                        <a class="dropdown-item" href="#">4 Pantalla 4K</a>
-                                                        <div class="dropdown-divider"></div>
-                                                        <a class="dropdown-item" href="#">Mas informacion</a>
+                                        <form id="cincuenta" action="/links/ventas" method="POST">
+                                            <div class="mb-4">
+                                                <h5>Paquete ?</h5>
+                                                <span class="display-4 text-primary">$50</span>
+                                                <span class="text-small4 text-primary">.000</span>
+                                            </div>
+                                            <ul class="list-unstyled">
+                                                <li class="mb-4">
+                                                    <div class="text-center">
+                                                        <img src="https://miro.medium.com/max/3150/1*ty4NvNrGg4ReETxqU2N3Og.png"
+                                                            class="mx-auto" style="width: 100px;" alt="...">
                                                     </div>
-                                                </div>
-                                            </li>
-                                            <h6><i class="align-middle mr-2" data-feather="phone"></i></h6>
-                                            <li class="mb-4">
-                                                <input type="text" class="form-control" data-mask="000-000-0000"
-                                                    placeholder="Movil" style="text-align:center">
-                                            </li>
-                                            <li class="mb-2">
-                                                Info del servicio:
-                                            </li>
-                                            <span class="display-4">NETFLIX</span>
-                                        </ul>
-                                        <div class="mt-auto">
-                                            <a href="#" class="btn btn-lg btn-outline-primary">Pagar</a>
-                                        </div>
+                                                    <!--<i class="align-middle mr-2" data-feather="tv"></i>
+                                                    <h5>Dispositivos</h5>-->
+                                                </li>
+                                                <li class="mb-4">
+                                                    <label class="custom-control custom-radio">
+                                                        <input name="producto" type="radio" class="custom-control-input"
+                                                            value="1">
+                                                        <span class="custom-control-label text-success"><strong>1
+                                                                Pantalla
+                                                                SD</strong> <mark>65 Días</mark></span>
+                                                    </label>
+                                                    <label class="custom-control custom-radio">
+                                                        <input name="producto" type="radio" class="custom-control-input"
+                                                            value="2">
+                                                        <span class="custom-control-label"><strong>2 Pantalla
+                                                                HD</strong> <mark>54 Días</mark></span>
+                                                    </label>
+                                                    <label class="custom-control custom-radio">
+                                                        <input name="producto" type="radio" class="custom-control-input"
+                                                            value="3" required>
+                                                        <span class="custom-control-label"><strong>4 Pantalla
+                                                                4K</strong> <mark>47 Días</mark></span>
+                                                    </label>
+                                                </li>
+                                                <h6><i class="align-middle mr-2" data-feather="phone"></i></h6>
+                                                <li class="mb-4">
+                                                    <input type="text" class="form-control text-primary movil"
+                                                        name="movil" data-mask="000-000-0000" placeholder="Movil"
+                                                        style="text-align:center" required>
+                                                </li>
+                                                <h6><i class="align-middle mr-2" data-feather="user"></i></h6>
+                                                <li class="mb-4">
+                                                    <input type="text" class="form-control text-uppercase text-primary"
+                                                        name="nombre" placeholder="Nombre completo"
+                                                        style="text-align:center" required>
+                                                </li>
+                                                <input type="hidden" name="user">
+
+                                                <span class="display-4 text-danger">NETFLIX</span>
+                                            </ul>
+                                            <div class="mt-auto">
+                                                <!--<a href="#" class="btn btn-lg btn-primary">Activar</a>-->
+                                                <button class="btn btn-lg btn-outline-primary ntfx">Activar</button>
+                                            </div>
+                                        </form>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-sm-4 mb-3 mb-md-0">
                                 <div class="card text-center h-100">
                                     <div class="card-body d-flex flex-column">
-                                        <div class="mb-4">
-                                            <h5>Plus</h5>
-                                            <span class="display-4">$90</span>
-                                            <span class="text-small4">.000</span>
+                                        <div class="alert alert-danger alert-dismissible" role="alert"
+                                            style="display: none">
+                                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                            <div class="alert-icon">
+                                                <i class="far fa-fw fa-bell"></i>
+                                            </div>
+                                            <div class="alert-message">
+                                                <strong>Hola!</strong> Tienes un error!
+                                            </div>
                                         </div>
-                                        <h6>
-                                            <i class="align-middle mr-2" data-feather="monitor"></i>
-                                            <i class="align-middle mr-2" data-feather="tv"></i>
-                                        </h6>
-                                        <ul class="list-unstyled">
-                                            <li class="mb-4">
-                                                <div class="btn-group">
-                                                    <button type="button" class="btn btn-primary dropdown-toggle"
-                                                        data-toggle="dropdown" aria-haspopup="true"
-                                                        aria-expanded="false">
-                                                        Elegir Dispositivos
-                                                    </button>
-                                                    <div class="dropdown-menu">
-                                                        <a class="dropdown-item" href="#">1 Pantalla SD</a>
-                                                        <a class="dropdown-item" href="#">2 Pantalla HD</a>
-                                                        <a class="dropdown-item" href="#">4 Pantalla 4K</a>
-                                                        <div class="dropdown-divider"></div>
-                                                        <a class="dropdown-item" href="#">Mas informacion</a>
+                                        <form id="noventa" action="/links/ventas" method="POST">
+                                            <div class="mb-4">
+                                                <h5>Paquete ?</h5>
+                                                <span class="display-4 text-primary">$90</span>
+                                                <span class="text-small4 text-primary">.000</span>
+                                            </div>
+                                            <ul class="list-unstyled">
+                                                <li class="mb-4">
+                                                    <div class="text-center">
+                                                        <img src="https://miro.medium.com/max/3150/1*ty4NvNrGg4ReETxqU2N3Og.png"
+                                                            class="mx-auto" style="width: 100px;" alt="...">
                                                     </div>
-                                                </div>
-                                            </li>
-                                            <h6><i class="align-middle mr-2" data-feather="phone"></i></h6>
-                                            <li class="mb-4">
-                                                <input type="text" class="form-control" data-mask="000-000-0000"
-                                                    placeholder="Movil" style="text-align:center">
-                                            </li>
-                                            <li class="mb-2">
-                                                Info del servicio:
-                                            </li>
-                                            <span class="display-4">NETFLIX</span>
-                                        </ul>
-                                        <div class="mt-auto">
-                                            <button class="btn btn-lg btn-outline-primary">Activar</button>
-                                        </div>
+                                                    <!--<i class="align-middle mr-2" data-feather="tv"></i>
+                                                    <h5>Dispositivos</h5>-->
+                                                </li>
+                                                <li class="mb-4">
+                                                    <label class="custom-control custom-radio">
+                                                        <input name="producto" type="radio" class="custom-control-input"
+                                                            value="1">
+                                                        <span class="custom-control-label text-success"><strong>1
+                                                                Pantalla
+                                                                SD</strong> <mark>65 Días</mark></span>
+                                                    </label>
+                                                    <label class="custom-control custom-radio">
+                                                        <input name="producto" type="radio" class="custom-control-input"
+                                                            value="2">
+                                                        <span class="custom-control-label"><strong>2 Pantalla
+                                                                HD</strong> <mark>54 Días</mark></span>
+                                                    </label>
+                                                    <label class="custom-control custom-radio">
+                                                        <input name="producto" type="radio" class="custom-control-input"
+                                                            value="3" required>
+                                                        <span class="custom-control-label"><strong>4 Pantalla
+                                                                4K</strong> <mark>47 Días</mark></span>
+                                                    </label>
+                                                </li>
+                                                <h6><i class="align-middle mr-2" data-feather="phone"></i></h6>
+                                                <li class="mb-4">
+                                                    <input type="text" class="form-control text-primary movil"
+                                                        name="movil" data-mask="000-000-0000" placeholder="Movil"
+                                                        style="text-align:center" required>
+                                                </li>
+                                                <h6><i class="align-middle mr-2" data-feather="user"></i></h6>
+                                                <li class="mb-4">
+                                                    <input type="text" class="form-control text-uppercase text-primary"
+                                                        name="nombre" placeholder="Nombre completo"
+                                                        style="text-align:center" required>
+                                                </li>
+                                                <input type="hidden" name="user">
+
+                                                <span class="display-4 text-danger">NETFLIX</span>
+                                            </ul>
+                                            <div class="mt-auto">
+                                                <!--<a href="#" class="btn btn-lg btn-primary">Activar</a>-->
+                                                <button class="btn btn-lg btn-outline-primary ntfx">Activar</button>
+                                            </div>
+                                        </form>
                                     </div>
                                 </div>
                             </div>
@@ -170,42 +256,45 @@
                         <div class="row py-4">
                             <div class="col-sm-4 mb-3 mb-md-0">
                                 <div class="card text-center h-100">
-                                    <div class="card-body d-flex flex-column">
-                                        <div class="mb-4">
-                                            <h5>1 Mes</h5>
-                                            <span class="display-4">$18</span>
-                                            <span class="text-small4">.000</span>
+                                    <div class="card-body d-flex flex-column rounded">
+                                        <h5>1 Mes</h5>
+                                        <div class="alert alert-danger alert-dismissible" role="alert">
+                                            <div class="alert-icon">
+                                                <i class="align-middle mr-2 fas fa-fw fa-tags"></i>
+                                            </div>
+                                            <div class="alert-message">
+                                                <strong>Antes </strong><del> $30.000</del>  47% menos
+                                            </div>
                                         </div>
-                                        <h6>
-
-                                        </h6>
-                                        <form id="formulario" action="/navegar" method="POST">
-                                        <ul class="list-unstyled">  
-                                            <li class="mb-2">
-                                                Para todos los dispositivos dentro de una misma red
-                                            </li>
-                                            <li class="mb-4">
-                                                <input type="hidden" name="suscp" class="form-control" value="1">
-                                            </li>
-
-                                            <li class="mb-4">
-                                                <input type="text" name="movil" class="form-control" placeholder="Movil" style="text-align:center">
-                                            </li>
-
-                                            <li class="mb-4">
-                                                <input type="text" name="nombre" class="form-control" placeholder="Nombre completo"
-                                                    style="text-align:center">
-                                            </li>
-                                            <li class="mb-2">
-                                                <input type="email" name="email" class="form-control" placeholder="Email"
-                                                    style="text-align:center">
-                                            </li>
-                                            <span class="display-4">IUX</span>
-                                            <h5>Todo lo que quieres ver cuando lo quieras ver y en un solo lugar</h5>
-                                        </ul>
-                                        <div class="mt-auto">
-                                            <button id="ventaiux" class="btn btn-lg btn-outline-primary">Activar</button>
-                                        </div>
+                                        <form id="quince" action="/links/ventas" method="POST">
+                                            <div class="mb-4">
+                                                <h5>Ahora por tan solo</h5>
+                                                <span class="display-4 text-danger">$15</span>
+                                                <span class="text-small4"><mark>.000</mark></span>
+                                            </div>
+                                            <ul class="list-unstyled">
+                                                <li class="mb-4">
+                                                    <div class="text-center">
+                                                        <img src="/img/pp.jpg" class="mx-auto rounded-circle"
+                                                            style="width: 150px;" alt="...">
+                                                    </div>
+                                                </li>
+                                                <li class="mb-4">
+                                                    <span class="text-success"><mark>Todo lo que quieres ver cuando lo quieres ver y en un mismo lugar...</mark></span>
+                                                </li>
+                                                <h6><i class="align-middle mr-2" data-feather="phone"></i></h6>
+                                                <li class="mb-4">
+                                                    <input type="text" class="form-control text-primary"
+                                                        name="movil" data-mask="000-000-0000" placeholder="Movil"
+                                                        style="text-align:center" required>
+                                                </li>
+                                            </ul>
+                                            <input type="hidden" name="producto" value="1">
+                                            <input type="hidden" name="prod" value="IUX">
+                                            <div class="mt-auto">
+                                                <!--<a href="#" class="btn btn-lg btn-primary">Activar</a>-->
+                                                <button class="btn btn-lg btn-outline-danger">Activar</button>
+                                            </div>
                                         </form>
                                     </div>
                                 </div>
@@ -237,7 +326,7 @@
                                             </li>
                                         </ul>
                                         <div class="mt-auto">
-                                            <a href="#" class="btn btn-lg btn-primary">Try it for free</a>
+                                            <a href="#" class="btn btn-lg btn-danger">Try it for free</a>
                                         </div>
                                     </div>
                                 </div>

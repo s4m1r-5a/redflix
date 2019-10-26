@@ -1,8 +1,10 @@
 const passport = require('passport');
+const FacebookStrategy = require('passport-facebook');
+const GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 const LocalStrategy = require('passport-local').Strategy;
-//const val = require('./navegacion.js');
 const pool = require('../database');
 const helpers = require('./helpers');
+const { registro, Google, Facebook } = require('../keys');
 
 passport.use('local.signin', new LocalStrategy({
   usernameField: 'username',
@@ -23,14 +25,63 @@ passport.use('local.signin', new LocalStrategy({
   }
 }));
 
+passport.use(new FacebookStrategy({
+  clientID: Facebook.client_id,
+  clientSecret: Facebook.client_secret,
+  callbackURL: Facebook.redirect_uris[1]
+}, async (accessToken, refreshToken, profile, done) => {
+    
+  }
+));
+
+passport.use(new GoogleStrategy({
+  clientID: Google.client_id,
+  clientSecret: Google.client_secret,
+  callbackURL: Google.redirect_uris[1]
+}, async (accessToken, refreshToken, profile, email, done) => {
+  console.log(email);
+  const { id, displayName, _json } = email;
+
+  let password = '12345678',
+    username = email.emails[0].value,
+    fullname = displayName;
+
+    console.log(registro.pin);
+
+  const usuario = await pool.query('SELECT * FROM users WHERE id = ?', id);
+  if (usuario.length > 0) {
+    const user = usuario[0];
+    console.log(usuario[0]);
+    return done(null, user, ('success', 'Bienvenido'));
+  } else if (registro.pin != "hola") {
+    let newUser = {
+      id,
+      fullname,
+      pin : registro.pin,
+      username,
+      password,
+      imagen : _json.picture
+    };
+    newUser.password = await helpers.encryptPassword(password);
+    // Saving in the Database
+    const result = await pool.query('INSERT INTO users SET ? ', newUser);
+    console.log(result);
+    //newUser.id = result.insertId;
+    return done(null, newUser, ('success', 'Bienvenido'));
+  } else {
+    return done(null, false, ('error', 'Debes Proporcionar el Pin de registro.'));
+  }
+}
+));
+
 passport.use('local.signup', new LocalStrategy({
   usernameField: 'username',
   passwordField: 'password',
   passReqToCallback: true
-}, async (req, username, password, done) => {  
-  const {tipodoc, document, fullname, pin, movil } = req.body;
+}, async (req, username, password, done) => {
+  const { document, fullname, pin, movil } = req.body;
   let newUser = {
-    tipodoc,
+    id: regiId(),
     document,
     fullname,
     pin,
@@ -40,50 +91,27 @@ passport.use('local.signup', new LocalStrategy({
   };
   newUser.password = await helpers.encryptPassword(password);
   // Saving in the Database
+  console.log(newUser);
   const result = await pool.query('INSERT INTO users SET ? ', newUser);
   console.log(result);
-  newUser.id = result.insertId;
+  //newUser.id = result.insertId;
   return done(null, newUser);
 }));
 
 passport.serializeUser((user, done) => {
-  done(null, user.id); 
+  done(null, user.id);
 });
 
 passport.deserializeUser(async (id, done) => {
-  const rows = await pool.query('SELECT * FROM users WHERE id = ?', [id]);
+  const rows = await pool.query('SELECT * FROM users WHERE id = ?', id);
   done(null, rows[0]);
 });
 
-/*SELECT u.id,
-  u.pin,
-  u.fullname,
-  u.movil,
-  u.username,
-  u.password,
-  u.transaccion,
-  u.recarga,
-  p.usuario,
-  p.fechactivacion,
-  c.categoria,
-  t.remitente,
-  t.fecha, t.monto,
-  m.metodo, e.estado,
-  t.aprobada,
-  r.venta_mes,
-  r.saldo, g.rango,
-  g.comision,
-  g.ventas,
-  g.recargas,
-  r.ventasaldo,
-  r.acreditadas,
-  r.creditomax
-  FROM users u 
-  INNER JOIN pines p ON u.pin = p.id 
-  INNER JOIN categoria c ON p.categoria = c.id 
-  INNER JOIN transaccion t ON u.transaccion = t.id 
-  INNER JOIN estados e ON t.estado = e.id
-  INNER JOIN recargas r ON u.recarga = r.id 
-  INNER JOIN metodos m ON t.metodo = m.id 
-  INNER JOIN rangos g ON r.rango = g.id            
-  WHERE u.username = ?*/
+function regiId(chars = "01234567890", lon = 20) {
+  let code = "";
+  for (x = 0; x < lon; x++) {
+    let rand = Math.floor(Math.random() * chars.length);
+    code += chars.substr(rand, 1);
+  };
+  return code;
+};
