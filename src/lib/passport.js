@@ -37,7 +37,7 @@ passport.use(new FacebookStrategy({
 passport.use(new GoogleStrategy({
   clientID: Google.client_id,
   clientSecret: Google.client_secret,
-  callbackURL: Google.redirect_uris[1]
+  callbackURL: Google.redirect_uris[0]
 }, async (accessToken, refreshToken, profile, email, done) => {
   console.log(email);
   const { id, displayName, _json } = email;

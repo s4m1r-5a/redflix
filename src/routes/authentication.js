@@ -36,9 +36,16 @@ router.post('/signin', (req, res, next) => {
   })(req, res, next);
 });
 
-router.get('/auth/facebook', passport.authenticate('facebook', { scope: 'email' }));
-router.get('/auth/facebook/callback', passport.authenticate('facebook', { successRedirect: '/tablero', failureRedirect: '/signin' }),
-  (req, res) => {
+router.get('/auth/facebook',
+  passport.authenticate('facebook', {
+    scope: 'email'
+  })
+);
+router.get('/auth/facebook/callback',
+  passport.authenticate('facebook', {
+    successRedirect: '/tablero',
+    failureRedirect: '/signin'
+  }), (req, res) => {
     console.log(req.body);
     console.log('vamos bien hasta aqui');
     res.redirect('/');
@@ -48,20 +55,20 @@ router.get('/auth/google',
   passport.authenticate('google', {
     scope: [' profile ', 'email'],
     ancho: 240,
-    altura: 50,    
-    theme: 'oscuro'    
+    altura: 50,
+    theme: 'oscuro'
   }));
 
 router.get('/auth/google/callback',
-  passport.authenticate('google', { 
-    successRedirect: '/tablero', 
-    failureRedirect: '/signup', 
-    failureFlash: true 
+  passport.authenticate('google', {
+    successRedirect: '/tablero',
+    failureRedirect: '/signup',
+    failureFlash: true
   })
-  );
-  router.get('/auth/soat/callback', (req, res) => {
-    console.log(req.params)
-  });
+);
+router.get('/auth/soat/callback', (req, res) => {
+  console.log(req.params)
+});
 router.get('/logout', (req, res) => {
   req.logOut();
   res.redirect('/');
