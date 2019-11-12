@@ -172,7 +172,7 @@ $('.plancit').click(function () {
     $('.x').hide("slow");
     $('.z').show("slow");
 });
-if (window.location == "http://localhost:3000/tablero") {
+if (window.location == "http://localhost:3000/tablero" || window.location == "https://redflixx.herokuapp.com/tablero") {
     var date = new Date()
     $("#fullcalendar").fullCalendar({
         locale: 'es',
