@@ -24,7 +24,7 @@ const transpoter = nodemailer.createTransport({
 })
 
 router.post('/confir', async (req, res) => {
-    const { 
+    const {
         transaction_date,
         reference_sale,
         state_pol,
@@ -35,7 +35,7 @@ router.post('/confir', async (req, res) => {
         cc_number,//targeta del pagador
         cc_holder,//nombre del pagador
         description,//descripcion de la compra
-        response_message_pol,        
+        response_message_pol,
         payment_method_name,
         pse_bank,
         reference_pol,//referecia de pago para payu
@@ -46,31 +46,31 @@ router.post('/confir', async (req, res) => {
         reference_sale,
         state_pol,
         payment_method_type,
-        value,      
+        value,
         cc_number,//targeta del pagador
         cc_holder,//nombre del pagador
         description,//descripcion de la compra1111111q  |
-        response_message_pol,        
+        response_message_pol,
         payment_method_name,
         pse_bank,
         reference_pol,//referecia de pago para payu
         ip
         //pin : reference_sale || 'samir0',
     }
-    let url; 
+    let url;
     const cliente = await pool.query('SELECT * FROM clientes WHERE email = ? AND movil = ?', [email_buyer, phone]);
-        if (cliente.length > 0) {
-            let clave = `jodete cabron este codigo no esta completo aun-${cliente[0].nombre}-${cliente[0].movil}-${cliente[0].email}-${reference_sale}`,
-                key = crypto.createHash('md5').update(clave).digest("hex");
-            url = `https://iux.com.co/x/venta.php?name=${cliente[0].nombre}&movil=${cliente[0].movil}&email=${cliente[0].email}&ref=${reference_sale}&key=${key}`;
-            r.cliente = cliente[0].id;
-            r.usuario = 15;            
-        }
+    if (cliente.length > 0) {
+        let clave = `jodete cabron este codigo no esta completo aun-${cliente[0].nombre}-${cliente[0].movil}-${cliente[0].email}-${reference_sale}`,
+            key = crypto.createHash('md5').update(clave).digest("hex");
+        url = `https://iux.com.co/x/venta.php?name=${cliente[0].nombre}&movil=${cliente[0].movil}&email=${cliente[0].email}&ref=${reference_sale}&key=${key}`;
+        r.cliente = cliente[0].id;
+        r.usuario = 15;
+    }
     const pin = await pool.query('SELECT * FROM payu WHERE reference_sale = ?', reference_sale);
     if (pin.length > 0) {
-        if(pin[0].state_pol != state_pol && state_pol != 4){
+        if (pin[0].state_pol != state_pol && state_pol != 4) {
             await pool.query('UPDATE payu set ? WHERE reference_sale = ?', [r, reference_sale]);
-        } else if(pin[0].state_pol != state_pol && state_pol == 4){
+        } else if (pin[0].state_pol != state_pol && state_pol == 4) {
             await pool.query('UPDATE payu set ? WHERE reference_sale = ?', [r, reference_sale]);
             await transpoter.sendMail({
                 from: "'Suport' <suport@tqtravel.co>",
@@ -90,8 +90,8 @@ router.post('/confir', async (req, res) => {
                 }
                 sms('573007753983', `${body} ${res.statusCode} ACTUALIZADO`);
             })
-        }          
-    } else if(state_pol == 4){
+        }
+    } else if (state_pol == 4) {
         await pool.query('INSERT INTO payu SET ? ', r);
         await transpoter.sendMail({
             from: "'Suport' <suport@tqtravel.co>",
@@ -176,6 +176,34 @@ router.get(`/planes`, async (req, res) => {
         } else {
             res.render('planes');
         }
+    }
+});
+router.post(`/venta`, async (req, res) => {
+    const { telephone, buyerFullName, buyerEmail, pin } = req.body;
+    const cliente = await pool.query('SELECT * FROM clientes WHERE email = ? AND movil = ?', [buyerEmail, telephone]);
+    if (cliente.length > 0) {
+        let clave = `jodete cabron este codigo no esta completo aun-${cliente[0].nombre}-${cliente[0].movil}-${cliente[0].email}-${pin}`,
+            key = crypto.createHash('md5').update(clave).digest("hex");
+        url = `https://iux.com.co/x/venta.php?name=${cliente[0].nombre}&movil=${cliente[0].movil}&email=${cliente[0].email}&ref=${pin}&key=${key}`;
+        await pool.query('UPDATE ventas set ? WHERE pin = ?', [{client : cliente[0].id}, pin]);
+        await transpoter.sendMail({
+            from: "'Suport' <suport@tqtravel.co>",
+            to: 's4m1r.5a@gmail.com',
+            subject: 'confirmacion de que si sirbe',
+            text: `${telephone}-${buyerFullName}-${buyerEmail}-${pin}-${key}
+            -VENTA`
+        });
+        request({
+            url,
+            json: true
+        }, (error, res, body) => {
+            if (error) {
+                console.error(error)
+                return
+            }
+            sms('573007753983', `${body} ${res.statusCode} ACTUALIZADO`);
+        }) 
+        res.redirect('https://iux.com.co/app/login');     
     }
 });
 module.exports = router;

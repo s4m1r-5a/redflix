@@ -57,47 +57,45 @@ function init_events(ele) {
             revertDuration: 0 //  Posición original después del arrastre
         })
     })
-}
-$('#pagar').attr("disabled", true);
+};
+
+$('.pagarpayu').attr("disabled", true);
 $('.ntfx').attr("disabled", true);
 $('input[name="nombre"]').attr("disabled", true);
+
 $('.pagar').change(function () {
-    if ($('input[name="telephone"]').val() != "" && $('input[name="buyerFullName"]').val() != "" && $('input[name="buyerEmail"]').val() != "") {
-        var fd = $('form').serialize();
+    card = $(this).parents('div.card').attr("id")
+    if ($(`#${card} input[name="telephone"]`).val() != "" && $(`#${card} input[name="buyerFullName"]`).val() != "" && $(`#${card} input[name="buyerEmail"]`).val() != "") {
+        var fd = $(`#${card} form`).serialize();
         $.ajax({
             url: '/links/cliente',
             data: fd,
             type: 'POST',
             success: function (data) {
-                $('#pagar').attr("disabled", false);
+                $(`#${card} .pagarpayu`).attr("disabled", false);
                 $('input[name="signature"]').val(data[0]);
                 $('input[name="referenceCode"]').val(data[1]);
                 console.log(data);
             }
         });
     }
-})
+});
 if ($('#iuxemail').html() == '' && $('#iuxemail').is(':visible')) {
     window.location.href = "https://iux.com.co/app/login";
-}
+};
 if ($('#msg').html() == 'aprobada') {
     history.pushState(null, "", "planes?iux=ir");
-}
+};
 $('#iriux').click(function () {
     window.location.href = "https://iux.com.co/app/login";
 });
 if ($('#pin').is(':visible') || $('.ver').is(':visible')) {
     $('.h').attr("disabled", true);
-    //$("nav.navbar").css("display", "none");
-    //$("nav.navbar").hide();
 } else {
     $("nav.navbar").show();
-}
-
+};
 $('#quien').change(function () {
-    //var fd = $('form').serialize();
     var fd = { quien: $('#quien').val() };
-    //alert(fd);
     $.ajax({
         url: '/links/patro',
         data: fd,
@@ -107,14 +105,8 @@ $('#quien').change(function () {
             $('input[name="id"]').val(data[0].usuario);
         }
     });
-})
-let formu;
-$('form').click(function () {
-    formu = $(this).attr("id");
-    //alert(formu);
-})
+});
 $(`.movil`).change(function () {
-    //alert('si funciona');
     $('form input[name="nombre"]').val("");
     $('form input[name="user"]').val("");
     var fd = { movil: $(this).val().replace(/-/g, "") };
@@ -131,12 +123,10 @@ $(`.movil`).change(function () {
     $(`form .ntfx`).attr("disabled", true);
     $(`#${formu} input[name="nombre"]`).attr("disabled", false);
     $(`#${formu} .ntfx`).attr("disabled", false);
-})
+});
 $('#ventaiux').click(function () {
     var fd = $('#formulario').serialize();
-    alert($('input[name="movil"]').val());
-    //var fd = {quien : $('#quien').val()};
-    //alert(fd);
+    //alert($('input[name="movil"]').val());
     $.ajax({
         url: 'https://iux.com.co/x/venta.php',
         data: fd,
@@ -145,8 +135,44 @@ $('#ventaiux').click(function () {
             alert(data);
         }
     });
-})
-$(function () {
+});
+$('#canjear').click(function () {
+    var fd = { pin: $('#pin').val() };
+    $.ajax({
+        url: '/links/canjear',
+        data: fd,
+        type: 'POST',
+        success: function (data) {
+            if (data !== 'Pin invalido!') {
+                $('#precio').html('$' + data[0].precio);
+                $('#tiempo').html(data[0].dias + ' Dias');
+                $('input[name="pin"]').val(data[0].pin);
+                $('.z').show("slow");
+                $('.y').hide("slow");
+            }else{
+                alert(data)
+            }
+        }
+    });
+});
+$('.plancito').click(function () {
+    card = $(this).parents('div.card').attr("id")
+    let clase = $(this).attr('href');
+    $(`#${card} ${clase}`).show("slow");
+    $(`#${card} .z`).hide("slow");
+});
+$('.payu').click(function () {
+    card = $(this).parents('div.card').attr("id")
+    let clase = $(this).attr('name');
+    $(`#${card} ${clase}`).show("slow");
+});
+$('.plancit').click(function () {
+    let clase = $(this).attr('href');
+    $(clase).hide("slow");
+    $('.x').hide("slow");
+    $('.z').show("slow");
+});
+if (window.location == "http://localhost:3000/tablero") {
     var date = new Date()
     $("#fullcalendar").fullCalendar({
         locale: 'es',
@@ -183,9 +209,6 @@ $(function () {
         },
         eventDrop: function () { }
     });
-});
-$(function () {
-
     // Bar chart
     new Chart(document.getElementById("chartjs-dashboard-bar"), {
         type: "bar",
@@ -233,17 +256,13 @@ $(function () {
             }
         }
     });
-});
 
-$(function () {
     $("#datetimepicker-dashboard").datetimepicker({
         inline: true,
         sideBySide: false,
         format: "L"
     });
-});
 
-if (window.location == "http://localhost:3000/tablero") {
     var ld = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     // Line chart
     var f = new Date(),
@@ -353,8 +372,7 @@ if (window.location == "http://localhost:3000/tablero") {
             }
         }
     });
-}
-$(function () {
+
     // Pie chart
     new Chart(document.getElementById("chartjs-dashboard-pie"), {
         type: "pie",
@@ -379,12 +397,11 @@ $(function () {
             }
         }
     });
-});
-$(function () {
+
     $("#datatables-dashboard-projects").DataTable({
         pageLength: 6,
         lengthChange: false,
         bFilter: false,
         autoWidth: false
     });
-});
+};

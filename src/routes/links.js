@@ -40,7 +40,7 @@ router.post('/add', async (req, res) => {
 router.post('/movil', async (req, res) => {
     const { movil } = req.body;    
     const cliente = await pool.query('SELECT * FROM clientes WHERE movil = ?', movil);
-    console.log(req.body);
+    //console.log(req.body);
     res.send(cliente);
 });
 router.post('/ventas', async (req, res) => {
@@ -60,12 +60,13 @@ router.post('/ventas', async (req, res) => {
         res.redirect('/links/ventas'); 
     } else {
         const venta = {
-            producto,
-            nombre,
-            user,
-            movil
+            vendedor: req.user.id,
+            cliente: user,
+            producto,            
+            rango: req.user.rango           
         }
         //await pool.query('INSERT INTO transaccion SET ? ', newLink);
+        console.log(venta);
         req.flash('success', 'Solicitud exitosa');
         res.redirect('/links/ventas');
     }      
@@ -102,7 +103,16 @@ router.post('/id', async (req, res) => {
         res.send('Pin de registro invalido, comuniquese con su distribuidor!');
     }
 });
-
+router.post('/canjear', async (req, res) => {
+    const { pin } = req.body;    
+    const rows = await pool.query(`SELECT v.pin, p.producto, p.precio, p.dias 
+    FROM ventas v INNER JOIN products p ON v.product = p.id WHERE pin = ?`, pin);
+    if (rows.length > 0) {        
+        res.send(rows);
+    } else {
+        res.send('Pin invalido!');
+    }
+});
 router.post('/iux', async (req, res) => {
     console.log(req.body);
     /*const { pin } = req.body;
@@ -118,13 +128,26 @@ router.post('/iux', async (req, res) => {
 });
 
 router.post('/afiliado', async (req, res) => {
-    const { movil } = req.body;
-    console.log(req.body);
-    sms('57' + movil, 'Bienvenido a RedFlix tu ID sera ' + ID());
+    const { movil, cajero } = req.body, pin = ID(13);
+    const nuevoPin = {
+        id : pin,
+        categoria : 1,
+        usuario : req.user.id
+    }
+    console.log(pin);
+    if (cajero !== undefined){
+        console.log(pin);
+        nuevoPin.categoria = 2
+    }
+    await pool.query('INSERT INTO pines SET ? ', nuevoPin);
+    sms('57' + movil, 'Bienvenido a RedFlix tu ID sera ' + pin);
+    req.flash('success', 'Pin del afiliado exitoso');
+    res.redirect('/tablero');
 });
 
 router.post('/cliente', async (req, res) => {
-    const { telephone, buyerFullName, buyerEmail, merchantId, amount } = req.body;
+    const { telephone, buyerFullName, buyerEmail, merchantId, amount, referenceCode } = req.body;
+    console.log(buyerFullName)
     var nombre = buyerFullName.toUpperCase();
     const newLink = {
         nombre: nombre,
@@ -137,7 +160,7 @@ router.post('/cliente', async (req, res) => {
     } else {
         await pool.query('INSERT INTO clientes SET ? ', newLink);
     }
-    var pin = 'S1M' + ID(),
+    var pin = referenceCode + ID(8),
         //APIKey = '4Vj8eK4rloUd272L48hsrarnUA',
         APIKey = 'pGO1M3MA7YziDyS3jps6NtQJAg',
         key = APIKey + '~' + merchantId + '~' + pin + '~' + amount + '~COP',
@@ -180,8 +203,9 @@ router.post('/edit/:id', async (req, res) => {
 });
 
 //"a0Ab1Bc2Cd3De4Ef5Fg6Gh7Hi8Ij9Jk0KLm1Mn2No3Op4Pq5Qr6Rs7St8Tu9Uv0Vw1Wx2Xy3Yz4Z"
-function ID(chars = "0A1B2C3D4E5F6G7H8I9J0KL1M2N3O4P5Q6R7S8T9U0V1W2X3Y4Z", lon = 6) {
-    let code = "";
+function ID(lon) {
+    let chars = "0A1B2C3D4E5F6G7H8I9J0KL1M2N3O4P5Q6R7S8T9U0V1W2X3Y4Z",
+    code = "";
     for (x = 0; x < lon; x++) {
         let rand = Math.floor(Math.random() * chars.length);
         code += chars.substr(rand, 1);
