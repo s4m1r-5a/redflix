@@ -38,38 +38,48 @@ router.post('/add', async (req, res) => {
     res.redirect('/links');
 });
 router.post('/movil', async (req, res) => {
-    const { movil } = req.body;    
+    const { movil } = req.body;
     const cliente = await pool.query('SELECT * FROM clientes WHERE movil = ?', movil);
     //console.log(req.body);
     res.send(cliente);
 });
 router.post('/ventas', async (req, res) => {
-    const { prod, producto, nombre, user, movil } = req.body;
-    if(prod == 'IUX'){
-        let cel = movil.replace(/-/g, "");
+    const { prod, product, nombre, user, movil } = req.body;
+    const result = await rango(req.user.id);
+    const usua = await usuario(req.user.id);
+    let cel = movil.replace(/-/g, ""),
+        producto = product.split(" "),
+        pin = producto[0] + ID(8)
+
+    if (prod == 'IUX') {
         const venta = {
-            producto,
             pin,
-            movil : cel
+            vendedor: usua,
+            cajero: req.user.fullname,
+            idcajero: req.user.id,
+            product: producto[1],
+            rango: result
         }
-        //await pool.query('INSERT INTO transaccion SET ? ', newLink);
+        console.log(venta)
+        await pool.query('INSERT INTO ventas SET ? ', venta);
+        sms('57' + cel, 'Bienvenido a IUX tu Pin de activacion es ' + pin);
         req.flash('success', 'Pin generado exitosamente');
         res.redirect('/links/ventas');
-    } else if(producto == '' || nombre == '' || movil == ''){
+    } else if (producto == '' || nombre == '' || movil == '') {
         req.flash('error', 'Existe un un error en la solicitud');
-        res.redirect('/links/ventas'); 
+        res.redirect('/links/ventas');
     } else {
-        const venta = {
+        const venta2 = {
             vendedor: req.user.id,
             cliente: user,
-            producto,            
-            rango: req.user.rango           
+            product,
+            rango: req.user.rango
         }
         //await pool.query('INSERT INTO transaccion SET ? ', newLink);
         console.log(venta);
         req.flash('success', 'Solicitud exitosa');
         res.redirect('/links/ventas');
-    }      
+    }
 });
 router.post('/patro', async (req, res) => {
     const { quien } = req.body;
@@ -94,7 +104,7 @@ router.post('/recarga', async (req, res) => {
 });
 
 router.post('/id', async (req, res) => {
-    const { pin } = req.body;    
+    const { pin } = req.body;
     const rows = await pool.query('SELECT * FROM pines WHERE id = ?', pin);
     if (rows.length > 0 && rows[0].acreedor === null) {
         registro.pin = pin;
@@ -104,10 +114,10 @@ router.post('/id', async (req, res) => {
     }
 });
 router.post('/canjear', async (req, res) => {
-    const { pin } = req.body;    
+    const { pin } = req.body;
     const rows = await pool.query(`SELECT v.pin, p.producto, p.precio, p.dias 
     FROM ventas v INNER JOIN products p ON v.product = p.id WHERE pin = ?`, pin);
-    if (rows.length > 0) {        
+    if (rows.length > 0) {
         res.send(rows);
     } else {
         res.send('Pin invalido!');
@@ -130,12 +140,12 @@ router.post('/iux', async (req, res) => {
 router.post('/afiliado', async (req, res) => {
     const { movil, cajero } = req.body, pin = ID(13);
     const nuevoPin = {
-        id : pin,
-        categoria : 1,
-        usuario : req.user.id
+        id: pin,
+        categoria: 1,
+        usuario: req.user.id
     }
     console.log(pin);
-    if (cajero !== undefined){
+    if (cajero !== undefined) {
         console.log(pin);
         nuevoPin.categoria = 2
     }
@@ -205,12 +215,128 @@ router.post('/edit/:id', async (req, res) => {
 //"a0Ab1Bc2Cd3De4Ef5Fg6Gh7Hi8Ij9Jk0KLm1Mn2No3Op4Pq5Qr6Rs7St8Tu9Uv0Vw1Wx2Xy3Yz4Z"
 function ID(lon) {
     let chars = "0A1B2C3D4E5F6G7H8I9J0KL1M2N3O4P5Q6R7S8T9U0V1W2X3Y4Z",
-    code = "";
+        code = "";
     for (x = 0; x < lon; x++) {
         let rand = Math.floor(Math.random() * chars.length);
         code += chars.substr(rand, 1);
     };
     return code;
+};
+async function usuario(id) {
+    const usuario = await pool.query(`SELECT p.categoria, p.usuario FROM pines p WHERE p.acreedor = ? `, id);
+    if (usuario.length > 0 && usuario[0].categoria == 2) {
+        console.log(usuario[0].usuario)
+        return usuario[0].usuario;
+    } else {
+        console.log(id)
+        return id
+    }
+};
+async function rango(id) {
+    let m = new Date(),
+        month = m.getMonth() - 2,
+        d, meses = 0, mes = 0, reportes = new Array(4);
+    const reporte = await pool.query(`SELECT MONTH(v.fechadecompra) Mes, COUNT(*) CantMes, SUM(p.precio) venta, SUM(p.utilidad) utilidad, c.nombre usari
+    FROM ventas v 
+    INNER JOIN clientes c ON v.client = c.id 
+    INNER JOIN users u ON v.vendedor = u.id
+    INNER JOIN products p ON v.product = p.id
+    INNER JOIN pines pi ON u.pin = pi.id
+    WHERE pi.usuario = ?
+        AND YEAR(v.fechadecompra) = YEAR(CURDATE()) 
+        AND MONTH(v.fechadecompra) BETWEEN ${month} and 12
+    GROUP BY MONTH(v.fechadecompra)
+    ORDER BY 1`, id);
+    const reporte2 = await pool.query(`SELECT MONTH(t.fecha) Mes, COUNT(*) CanTrans, SUM(t.monto) monto
+    FROM transacciones t     
+    WHERE t.acreedor = ?
+        AND YEAR(t.fecha) = YEAR(CURDATE()) 
+        AND MONTH(t.fecha) BETWEEN ${month} and 12
+    GROUP BY MONTH(t.fecha)
+    ORDER BY 1`, id);
+
+    if (reporte.length > 0) {
+        await reporte.filter((repor) => {
+            return repor.Mes === m.getMonth()+1;
+            //return repor.Mes === 9;
+        }).map((repor) => {
+            if (repor.CantMes >= 1 && repor.CantMes <= 19) {
+                d = `${repor.Mes} ${repor.CantMes} 5`
+                return reportes[0] = 5;
+            } else if (repor.CantMes >= 20 && repor.CantMes <= 49) {
+                return reportes[0] = 4;
+            } else if (repor.CantMes >= 50 && repor.CantMes <= 99) {
+                return reportes[0] = 3;
+            } else if (repor.CantMes >= 100 && repor.CantMes <= 499) {
+                return reportes[0] = 2;
+            } else if (repor.CantMes >= 500) {
+                return reportes[0] = 1;
+            }
+        });
+        if(!reportes[0]){
+            reportes[0]=6;
+        };
+        await reporte.filter((re) => {
+            return re.Mes !== m.getMonth()+1;            
+        }).map((re) => {
+            mes += re.CantMes;
+        });
+        if (mes >= 1 && mes <= 59) {
+            reportes[1] = 5;
+        } else if (mes >= 60 && mes <= 149) {
+            reportes[1] = 4;
+        } else if (mes >= 150 && mes <= 299) {
+            reportes[1] = 3;
+        } else if (mes >= 300 && mes <= 1499) {
+            reportes[1] = 2;
+        } else if (mes >= 1500) {
+            reportes[1] = 1;
+        } else {
+            reportes[1] = 6;
+        }
+        
+        await reporte2.filter((re) => {
+            return re.Mes !== m.getMonth()+1;
+        }).map((re) => {
+            meses += re.monto;
+        });
+        if (meses <= 999000) {
+            reportes[2] = 5;
+        } else if (meses >= 1000000 && meses <= 2999000) {
+            reportes[2] = 4;
+        } else if (meses >= 3000000 && meses <= 4999000) {
+            reportes[2] = 3;
+        } else if (meses >= 5000000 && meses <= 14999000) {
+            reportes[2] = 2;
+        } else if (meses >= 15000000) {
+            reportes[2] = 1;
+        } else {
+            reportes[2] = 6;
+        }
+        await reporte2.filter((rep) => {
+            return rep.Mes === m.getMonth()+1;
+        }).map((rep) => {
+            if (rep.monto <= 599000) {
+                return reportes[3] = 5;
+            } else if (rep.monto >= 600000 && rep.monto <= 1499000) {
+                return reportes[3] = 4;
+            } else if (rep.monto >= 1500000 && rep.monto <= 2999000) {
+                return reportes[3] = 3;
+            } else if (rep.monto >= 3000000 && rep.monto <= 9999000) {
+                return reportes[3] = 2;
+            } else if (rep.monto >= 10000000) {
+                return reportes[3] = 1;
+            } else {
+                return reportes[3] = 6;
+            }
+        });
+        if(!reportes[3]){
+            reportes[3]=6;
+        };        
+        return Math.min (... reportes);
+    } else {
+        return 'No se encontro reporte';
+    };
 };
 
 module.exports = router;
