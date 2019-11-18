@@ -6,7 +6,7 @@ const pool = require('../database');
 const { isLoggedIn } = require('../lib/auth');
 const sms = require('../sms.js');
 const { registro } = require('../keys');
-
+const request = require('request')
 
 router.get('/add', isLoggedIn, (req, res) => {
     res.render('links/add');
@@ -156,28 +156,65 @@ router.post('/afiliado', async (req, res) => {
 });
 
 router.post('/cliente', async (req, res) => {
-    const { telephone, buyerFullName, buyerEmail, merchantId, amount, referenceCode } = req.body;
-    console.log(buyerFullName)
+    let respuesta = "", dat;
+    const { telephone, buyerFullName, buyerEmail, merchantId, amount, referenceCode, actualizar } = req.body;
     var nombre = buyerFullName.toUpperCase();
     const newLink = {
         nombre: nombre,
         movil: telephone,
         email: buyerEmail
     };
-    const rows = await pool.query('SELECT * FROM clientes WHERE movil = ? OR email = ?', [telephone, buyerEmail]);
-    if (rows.length > 0) {
-        await pool.query('UPDATE clientes set ? WHERE movil = ? OR email = ?', [newLink, telephone, buyerEmail]);
-    } else {
-        await pool.query('INSERT INTO clientes SET ? ', newLink);
-    }
-    var pin = referenceCode + ID(8),
-        //APIKey = '4Vj8eK4rloUd272L48hsrarnUA',
-        APIKey = 'pGO1M3MA7YziDyS3jps6NtQJAg',
-        key = APIKey + '~' + merchantId + '~' + pin + '~' + amount + '~COP',
-        hash = crypto.createHash('md5').update(key).digest("hex"),
-        cdo;
-    cdo = [hash, pin];
-    res.send(cdo);
+    let url = `https://iux.com.co/x/venta.php?name=${buyerFullName}&movil=${telephone}&email=${buyerEmail}&ref=cliente&actualiza=${actualizar}`;
+    request({
+        url,
+        json: true
+    }, async (error, res, body) => {
+        if (error) {
+            console.error(error);
+            return;
+        }
+        //console.log(Array.isArray(body))
+        if (body.length > 0) {
+            dat = await body.map((re) => {
+                if (re.id === telephone && re.email === buyerEmail) {
+                    respuesta = `Todo bien`;
+                } else if (re.email !== buyerEmail && re.id === telephone) {
+                    respuesta += `Esta cuenta <mark>${buyerEmail}</mark> no coincide con movil <mark>${telephone}</mark>, la cuenta regitrada con este movil es <mark>${re.email}</mark>. `;
+                } else if (re.id !== telephone && re.email === buyerEmail) {
+                    respuesta += `Este movil <mark>${telephone}</mark> no coincide con la cuenta <mark>${re.email}</mark> el movil registrado con esta cuenta es <mark>${re.id}</mark>. `;
+                } else {
+                    respuesta = `Todo bien`;
+                }
+                return re;
+            });
+        } else {
+            respuesta = `Todo bien`;
+        }
+    });
+    var saludo = async function () {
+        if (respuesta !== "") {
+            clearInterval(time);
+            if (respuesta === 'Todo bien') {
+                const rows = await pool.query('SELECT * FROM clientes WHERE movil = ? OR email = ?', [telephone, buyerEmail]);
+                if (rows.length > 0) {
+                    //await pool.query('UPDATE clientes SET ? WHERE movil = ? OR email = ?', [newLink, telephone, buyerEmail]);
+                } else {
+                    //await pool.query('INSERT INTO clientes SET ? ', newLink);
+                }
+                var pin = referenceCode + ID(8),
+                    //APIKey = '4Vj8eK4rloUd272L48hsrarnUA',
+                    APIKey = 'pGO1M3MA7YziDyS3jps6NtQJAg',
+                    key = APIKey + '~' + merchantId + '~' + pin + '~' + amount + '~COP',
+                    hash = crypto.createHash('md5').update(key).digest("hex"),
+                    cdo;
+                cdo = [hash, pin, dat];
+                res.send(cdo);
+            } else {
+                res.send(['smg', respuesta, dat]);
+            }
+        }
+    };
+    let time = setInterval(saludo, 500);
 });
 
 router.get('/', isLoggedIn, async (req, res) => {
@@ -257,7 +294,7 @@ async function rango(id) {
 
     if (reporte.length > 0) {
         await reporte.filter((repor) => {
-            return repor.Mes === m.getMonth()+1;
+            return repor.Mes === m.getMonth() + 1;
             //return repor.Mes === 9;
         }).map((repor) => {
             if (repor.CantMes >= 1 && repor.CantMes <= 19) {
@@ -273,11 +310,11 @@ async function rango(id) {
                 return reportes[0] = 1;
             }
         });
-        if(!reportes[0]){
-            reportes[0]=6;
+        if (!reportes[0]) {
+            reportes[0] = 6;
         };
         await reporte.filter((re) => {
-            return re.Mes !== m.getMonth()+1;            
+            return re.Mes !== m.getMonth() + 1;
         }).map((re) => {
             mes += re.CantMes;
         });
@@ -294,9 +331,9 @@ async function rango(id) {
         } else {
             reportes[1] = 6;
         }
-        
+
         await reporte2.filter((re) => {
-            return re.Mes !== m.getMonth()+1;
+            return re.Mes !== m.getMonth() + 1;
         }).map((re) => {
             meses += re.monto;
         });
@@ -314,7 +351,7 @@ async function rango(id) {
             reportes[2] = 6;
         }
         await reporte2.filter((rep) => {
-            return rep.Mes === m.getMonth()+1;
+            return rep.Mes === m.getMonth() + 1;
         }).map((rep) => {
             if (rep.monto <= 599000) {
                 return reportes[3] = 5;
@@ -330,10 +367,10 @@ async function rango(id) {
                 return reportes[3] = 6;
             }
         });
-        if(!reportes[3]){
-            reportes[3]=6;
-        };        
-        return Math.min (... reportes);
+        if (!reportes[3]) {
+            reportes[3] = 6;
+        };
+        return Math.min(...reportes);
     } else {
         return 'No se encontro reporte';
     };

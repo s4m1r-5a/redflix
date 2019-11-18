@@ -65,20 +65,75 @@ $('input[name="nombre"]').attr("disabled", true);
 
 $('.pagar').change(function () {
     card = $(this).parents('div.card').attr("id")
+    var fd = $(`#${card} form`).serialize();
+    actualizardatos(card, fd)
+});
+function actualizardatos(card, fd, ot) {
     if ($(`#${card} input[name="telephone"]`).val() != "" && $(`#${card} input[name="buyerFullName"]`).val() != "" && $(`#${card} input[name="buyerEmail"]`).val() != "") {
-        var fd = $(`#${card} form`).serialize();
         $.ajax({
             url: '/links/cliente',
             data: fd,
             type: 'POST',
+            async: false,
             success: function (data) {
-                $(`#${card} .pagarpayu`).attr("disabled", false);
-                $('input[name="signature"]').val(data[0]);
-                $('input[name="referenceCode"]').val(data[1]);
-                console.log(data);
+                if (data[0] !== 'smg') {
+                    $(`#${card} .pagarpayu`).attr("disabled", false);
+                    if (ot){
+                        $(`.pagarpayu`).attr("disabled", false);
+                        $(`input[name="telephone"]`).val(data[2][0].id);
+                        $(`input[name="buyerFullName"]`).val(data[2][0].name);
+                        $(`input[name="buyerEmail"]`).val(data[2][0].email);
+                    }                    
+                    $('input[name="signature"]').val(data[0]);
+                    $('input[name="referenceCode"]').val(data[1]);
+                } else {
+                    $('#actualizardatos').html(`${data[1]}Si desea realizar alguna modificacion a tu cuenta presione editar, en caso contrario verifique bien los datos ingresados e intentelo nuevamente, para mayor informacion puede contactarnos al 3012673944 Wtspp`)
+                    $('#actualizar').modal('toggle');
+                    let cont = 0;
+                    let dat = data[2].map((r) => {
+                        cont++
+                        return `<li class="mb-4">
+                            <input type="text" name="telephone" class="form-control pagar g${cont}" placeholder="Movil"
+                            style="text-align:center" value="${r.id}">
+                        </li>
+                        <li class="mb-4">
+							<input type="hidden" name="actualizar" class="g${cont}" value="${r.id}">
+						</li>
+                        <li class="mb-4">
+                            <input type="text" name="buyerFullName" class="form-control pagar g${cont}"
+                            placeholder="Nombre completo" style="text-align:center;" value="${r.name}">
+                        </li>
+                        <li class="mb-4">
+                            <input type="email" name="buyerEmail" class="form-control pagar g${cont}" placeholder="Email"
+                            style="text-align:center;" value="${r.email}">
+                        </li>
+                        <li class="mb-4">
+                            <hr width=400>
+                        </li>`
+                    });
+                    $('#datosactualiza').html(dat);
+                }
             }
         });
     }
+}
+$(".pagar").keydown(function() {    
+    $(`.pagarpayu`).attr("disabled", true);
+});
+$('#meterdat').on('click', function () {
+    card = $(this).parents('div.card').attr("id")
+    var fd = $(`#${card} form`).serialize(), ot = 'ot';    
+    actualizardatos(card, fd, ot)
+});
+$('#eliminard').on('click', function () {
+    $(".g2").remove('input');
+    $(".g1").remove('input');
+});
+$('#datosactualiza').on('change', '.g1', function () {
+    $(".g2").remove('input');
+});
+$('#datosactualiza').on('change', '.g2', function () {
+    $(".g1").remove('input');
 });
 if ($('#iuxemail').html() == '' && $('#iuxemail').is(':visible')) {
     window.location.href = "https://iux.com.co/app/login";
@@ -149,11 +204,15 @@ $('#canjear').click(function () {
                 $('input[name="pin"]').val(data[0].pin);
                 $('.z').show("slow");
                 $('.y').hide("slow");
-            }else{
+            } else {
                 alert(data)
             }
         }
     });
+});
+$('#ediact').click(function () {
+    $('.p').hide("slow");
+    $('.q').show("slow");
 });
 $('.plancito').click(function () {
     card = $(this).parents('div.card').attr("id")

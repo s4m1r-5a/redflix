@@ -158,9 +158,11 @@
 				</a>
 
 				<div class="dropdown-menu dropdown-menu-right">
-					<a class="dropdown-item" href="/profile"><i class="align-middle mr-1" data-feather="dollar-sign"></i>
+					<a class="dropdown-item" href="/profile"><i class="align-middle mr-1"
+							data-feather="dollar-sign"></i>
 						100.000 P.</a>
-					<a class="dropdown-item" href="/profile"><i class="align-middle mr-1" data-feather="dollar-sign"></i>
+					<a class="dropdown-item" href="/profile"><i class="align-middle mr-1"
+							data-feather="dollar-sign"></i>
 						100.000 C.</a>
 					<div class="dropdown-divider"></div>
 					<a class="dropdown-item" href="/links/recarga">Agregar saldo</a>
@@ -173,8 +175,7 @@
 				</a>
 
 				<a class="nav-link dropdown-toggle d-none d-sm-inline-block" href="#" data-toggle="dropdown">
-					<img src="{{user.imagen}}" class="avatar img-fluid rounded-circle mr-1"
-						alt="{{user.fullname}}" />
+					<img src="{{user.imagen}}" class="avatar img-fluid rounded-circle mr-1" alt="{{user.fullname}}" />
 					<span class="text-dark">{{user.fullname}}</span>
 				</a>
 				<div class="dropdown-menu dropdown-menu-right">
@@ -277,4 +278,44 @@
 		</ul>
 	</div>
 </nav>
+<!-- BEGIN primary modal -->
+<!-- <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#defaultModalPrimary">
+	Primary
+</button>-->
+<div class="modal fade" id="actualizar" tabindex="-1" role="dialog" aria-hidden="true">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content card" id="pay">
+			<div class="modal-header">
+				<h5 class="modal-title">Actualizacion de datos IUX</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body m-3">
+				<p class="mb-0 p" id="actualizardatos"></p>
+				<div class="text-right">
+					<img src="/img/pp.jpg" class="mx-auto rounded-circle q" style="width: 70px; display:none;"
+						alt="...">
+				</div>
+				<div class="text-center">
+					<img src="/img/pp.jpg" class="mx-auto rounded-circle p" style="width: 150px;" alt="...">
+				</div>
+				<form>
+					<ul class="list-unstyled">
+						<div id="datosactualiza" class="q" style="display:none;"></div>						
+					</ul>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<div class="mt-auto">
+					<button type="button" class="btn btn-danger p" id="ediact">Editar</button>
+				</div>
+				<button type="button" class="btn btn-secondary" data-dismiss="modal" id="eliminard">Cancelar</button>
+				<button type="submit" class="btn btn-primary pagar q" id="meterdat" data-dismiss="modal" style="display:none;">Ingresar</button>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- END primary modal -->
+<!-- BEGIN success modal -->
 {{/if}}

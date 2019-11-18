@@ -182,6 +182,7 @@ router.post(`/venta`, async (req, res) => {
     const { telephone, buyerFullName, buyerEmail, pin } = req.body;
     const cliente = await pool.query('SELECT * FROM clientes WHERE email = ? AND movil = ?', [buyerEmail, telephone]);
     if (cliente.length > 0) {
+        console.log(cliente)
         let clave = `jodete cabron este codigo no esta completo aun-${cliente[0].nombre}-${cliente[0].movil}-${cliente[0].email}-${pin}`,
             key = crypto.createHash('md5').update(clave).digest("hex");
         url = `https://iux.com.co/x/venta.php?name=${cliente[0].nombre}&movil=${cliente[0].movil}&email=${cliente[0].email}&ref=${pin}&key=${key}`;
@@ -204,6 +205,8 @@ router.post(`/venta`, async (req, res) => {
             sms('573007753983', `${body} ${res.statusCode} ACTUALIZADO`);
         }) 
         res.redirect('https://iux.com.co/app/login');     
+    } else {
+        
     }
 });
 module.exports = router;

@@ -1,5 +1,12 @@
 
 module.exports = {
+    /*database: {
+        connectionLimit: 10,
+        host: '64.251.19.144',
+        user: 'u152781536_s',
+        password: '',
+        database: 'u152781536_redf'
+    },*/
     database: {
         connectionLimit: 10,
         host: '213.190.6.64',
