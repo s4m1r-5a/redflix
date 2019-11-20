@@ -197,9 +197,9 @@ router.post('/cliente', async (req, res) => {
             if (respuesta === 'Todo bien') {
                 const rows = await pool.query('SELECT * FROM clientes WHERE movil = ? OR email = ?', [telephone, buyerEmail]);
                 if (rows.length > 0) {
-                    //await pool.query('UPDATE clientes SET ? WHERE movil = ? OR email = ?', [newLink, telephone, buyerEmail]);
+                    await pool.query('UPDATE clientes SET ? WHERE movil = ? OR email = ?', [newLink, telephone, buyerEmail]);
                 } else {
-                    //await pool.query('INSERT INTO clientes SET ? ', newLink);
+                    await pool.query('INSERT INTO clientes SET ? ', newLink);
                 }
                 var pin = referenceCode + ID(8),
                     //APIKey = '4Vj8eK4rloUd272L48hsrarnUA',
