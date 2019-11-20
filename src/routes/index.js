@@ -9,6 +9,12 @@ const sms = require('../sms.js');
 router.get('/', async (req, res) => {
     res.render('index');
 });
+router.get('/politicas', async (req, res) => {
+    res.render('politicas');
+});
+router.get('/condiciones', async (req, res) => {
+    res.render('condiciones');
+});
 
 const transpoter = nodemailer.createTransport({
     host: 'smtp.hostinger.co',
