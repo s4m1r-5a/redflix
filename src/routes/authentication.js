@@ -38,7 +38,7 @@ router.post('/signin', (req, res, next) => {
 
 router.get('/auth/facebook',
   passport.authenticate('facebook', {
-    scope: 'email'
+    scope: ['profile', 'email']
   })
 );
 router.get('/auth/facebook/callback',

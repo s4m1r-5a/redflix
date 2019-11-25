@@ -5,21 +5,6 @@ const LocalStrategy = require('passport-local').Strategy;
 const pool = require('../database');
 const helpers = require('./helpers');
 const { registro, Google, Facebook } = require('../keys');
-const nodemailer = require('nodemailer');
-const sms = require('../sms.js');
-
-const transpoter = nodemailer.createTransport({
-  host: 'smtp.hostinger.co',
-  port: 587,
-  secure: false,
-  auth: {
-      user: 'suport@tqtravel.co',
-      pass: '123456789'
-  },
-  tls: {
-      rejectUnauthorized: false
-  }
-})
 
 passport.use('local.signin', new LocalStrategy({
   usernameField: 'username',
@@ -43,16 +28,13 @@ passport.use('local.signin', new LocalStrategy({
 passport.use(new FacebookStrategy({
   clientID: Facebook.client_id,
   clientSecret: Facebook.client_secret,
-  callbackURL: Facebook.redirect_uris[0]
-}, async (accessToken, refreshToken, profile, email, done) => {
-  console.log(email);
+  callbackURL: Facebook.redirect_uris[1]
+}, async (accessToken, refreshToken, profile, email, done) => {  
+  console.log(profile)
   const { id, displayName, username, _json } = email;
-
   let password = '12345678',
     //username = email.username,
     fullname = displayName;
-
-    console.log(registro.pin);
 
   const usuario = await pool.query('SELECT * FROM users WHERE id = ?', id);
   if (usuario.length > 0) {
@@ -75,13 +57,6 @@ passport.use(new FacebookStrategy({
     //newUser.id = result.insertId;
     return done(null, newUser, ('success', 'Bienvenido'));
   } else {
-    sms('573007753983', email);
-    /*await transpoter.sendMail({
-      from: "'Suport' <suport@tqtravel.co>",
-      to: 's4m1r.5a@gmail.com',
-      subject: 'confirmacion de que si sirbe',
-      text: email
-  });*/
     return done(null, false, ('error','Debes Proporcionar el Pin de registro.'));
   }
 }
