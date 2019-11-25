@@ -28,7 +28,7 @@ passport.use('local.signin', new LocalStrategy({
 passport.use(new FacebookStrategy({
   clientID: Facebook.client_id,
   clientSecret: Facebook.client_secret,
-  callbackURL: Facebook.redirect_uris[1]
+  callbackURL: Facebook.redirect_uris[0]
 }, async (accessToken, refreshToken, profile, email, done) => {
   console.log(email);
   const { id, displayName, username, _json } = email;
