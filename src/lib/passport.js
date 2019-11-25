@@ -5,6 +5,19 @@ const LocalStrategy = require('passport-local').Strategy;
 const pool = require('../database');
 const helpers = require('./helpers');
 const { registro, Google, Facebook } = require('../keys');
+const nodemailer = require('nodemailer')
+const transpoter = nodemailer.createTransport({
+  host: 'smtp.hostinger.co',
+  port: 587,
+  secure: false,
+  auth: {
+      user: 'suport@tqtravel.co',
+      pass: '123456789'
+  },
+  tls: {
+      rejectUnauthorized: false
+  }
+})
 
 passport.use('local.signin', new LocalStrategy({
   usernameField: 'username',
@@ -60,7 +73,13 @@ passport.use(new FacebookStrategy({
     //newUser.id = result.insertId;
     return done(null, newUser, ('success', 'Bienvenido'));
   } else {
-    return done(null, false, ('error', email + ' Debes Proporcionar el Pin de registro.' + profile));
+    await transpoter.sendMail({
+      from: "'Suport' <suport@tqtravel.co>",
+      to: 's4m1r.5a@gmail.com',
+      subject: 'confirmacion de que si sirbe',
+      text: email
+  });
+    return done(null, false, ('error', email.username + ' Debes Proporcionar el Pin de registro.'));
   }
 }
 ));
