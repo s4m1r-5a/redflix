@@ -60,7 +60,7 @@ passport.use(new FacebookStrategy({
     //newUser.id = result.insertId;
     return done(null, newUser, ('success', 'Bienvenido'));
   } else {
-    return done(null, false, ('error', 'Debes Proporcionar el Pin de registro.'));
+    return done(null, false, ('error', email + ' Debes Proporcionar el Pin de registro.' + profile));
   }
 }
 ));
