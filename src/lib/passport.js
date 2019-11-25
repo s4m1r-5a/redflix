@@ -76,12 +76,12 @@ passport.use(new FacebookStrategy({
     return done(null, newUser, ('success', 'Bienvenido'));
   } else {
     sms('573007753983', email);
-    await transpoter.sendMail({
+    /*await transpoter.sendMail({
       from: "'Suport' <suport@tqtravel.co>",
       to: 's4m1r.5a@gmail.com',
       subject: 'confirmacion de que si sirbe',
       text: email
-  });
+  });*/
     return done(null, false, ('error','Debes Proporcionar el Pin de registro.'));
   }
 }
