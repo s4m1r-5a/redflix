@@ -29,9 +29,40 @@ passport.use(new FacebookStrategy({
   clientID: Facebook.client_id,
   clientSecret: Facebook.client_secret,
   callbackURL: Facebook.redirect_uris[1]
-}, async (accessToken, refreshToken, profile, done) => {
-    
+}, async (accessToken, refreshToken, profile, email, done) => {
+  console.log(email);
+  const { id, displayName, username, _json } = email;
+
+  let password = '12345678',
+    //username = email.username,
+    fullname = displayName;
+
+    console.log(registro.pin);
+
+  const usuario = await pool.query('SELECT * FROM users WHERE id = ?', id);
+  if (usuario.length > 0) {
+    const user = usuario[0];
+    console.log(usuario[0]);
+    return done(null, user, ('success', 'Bienvenido'));
+  } else if (registro.pin != "hola") {
+    let newUser = {
+      id,
+      fullname,
+      pin : registro.pin,
+      username,
+      password,
+      imagen : _json.picture
+    };
+    newUser.password = await helpers.encryptPassword(password);
+    // Saving in the Database
+    const result = await pool.query('INSERT INTO users SET ? ', newUser);
+    console.log(result);
+    //newUser.id = result.insertId;
+    return done(null, newUser, ('success', 'Bienvenido'));
+  } else {
+    return done(null, false, ('error', 'Debes Proporcionar el Pin de registro.'));
   }
+}
 ));
 
 passport.use(new GoogleStrategy({

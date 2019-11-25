@@ -186,6 +186,7 @@ router.get(`/planes`, async (req, res) => {
 });
 router.post(`/venta`, async (req, res) => {
     const { telephone, buyerFullName, buyerEmail, pin } = req.body;
+    
     const cliente = await pool.query('SELECT * FROM clientes WHERE email = ? AND movil = ?', [buyerEmail, telephone]);
     if (cliente.length > 0) {
         console.log(cliente)

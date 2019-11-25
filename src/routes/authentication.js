@@ -44,12 +44,9 @@ router.get('/auth/facebook',
 router.get('/auth/facebook/callback',
   passport.authenticate('facebook', {
     successRedirect: '/tablero',
-    failureRedirect: '/signin'
-  }), (req, res) => {
-    console.log(req.body);
-    console.log('vamos bien hasta aqui');
-    res.redirect('/');
-  });
+    failureRedirect: '/signup',
+    failureFlash: true
+  }));
 
 router.get('/auth/google',
   passport.authenticate('google', {
