@@ -45,36 +45,34 @@ router.post('/movil', async (req, res) => {
 });
 router.post('/ventas', async (req, res) => {
     const { prod, product, nombre, user, movil } = req.body;
+    const result = await rango(req.user.id);
+    const usua = await usuario(req.user.id);
+    const sald = await saldo(27, result, req.user.id);
     let cel = movil.replace(/-/g, ""),
         producto = product.split(" "),
         pin = producto[0] + ID(8)
+
     if (cel.length !== 10) {
         req.flash('error', 'Numero movil invalido');
         res.redirect('/links/ventas');
+    } else if (sald === 'NO') {
+        req.flash('error', 'Transacción no realizada, saldo insuficiente');
+        res.redirect('/links/ventas');
     } else {
-        const result = await rango(req.user.id);
-        const usua = await usuario(req.user.id);
-        const sald = await saldo(27, result, req.user.id);
         if (prod == 'IUX') {
-            console.log(sald)
-            if (sald === 'SI') {
-                const venta = {
-                    pin,
-                    vendedor: usua,
-                    cajero: req.user.fullname,
-                    idcajero: req.user.id,
-                    product: producto[1],
-                    rango: result
-                }
-                //console.log(venta)            
-                await pool.query('INSERT INTO ventas SET ? ', venta);
-                sms('57' + cel, 'Bienvenido a IUX tu Pin de activacion es ' + pin);
-                req.flash('success', 'Pin generado exitosamente');
-                res.redirect('/links/ventas');
-            } else {
-                req.flash('error', 'Transacción no realizada, saldo insuficiente');
-                res.redirect('/links/ventas');
+            const venta = {
+                pin,
+                vendedor: usua,
+                cajero: req.user.fullname,
+                idcajero: req.user.id,
+                product: producto[1],
+                rango: result
             }
+            //console.log(venta)            
+            await pool.query('INSERT INTO ventas SET ? ', venta);
+            sms('57' + cel, 'Bienvenido a IUX, ingrese a https://iux.com.co/app y canjea este Pin ' + pin);
+            req.flash('success', 'Pin generado exitosamente');
+            res.redirect('/links/ventas');
         } else if (producto == '' || nombre == '' || movil == '') {
             req.flash('error', 'Existe un un error en la solicitud');
             res.redirect('/links/ventas');
