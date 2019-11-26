@@ -45,46 +45,51 @@ router.post('/movil', async (req, res) => {
 });
 router.post('/ventas', async (req, res) => {
     const { prod, product, nombre, user, movil } = req.body;
-    const result = await rango(req.user.id);
-    const usua = await usuario(req.user.id);
-    const sald = await saldo(27, result, req.user.id)
     let cel = movil.replace(/-/g, ""),
         producto = product.split(" "),
         pin = producto[0] + ID(8)
-
-    if (prod == 'IUX') {
-        if (sald === 'SI') {
-            const venta = {
-                pin,
-                vendedor: usua,
-                cajero: req.user.fullname,
-                idcajero: req.user.id,
-                product: producto[1],
-                rango: result
-            }
-            //console.log(venta)            
-            await pool.query('INSERT INTO ventas SET ? ', venta);
-            sms('57' + cel, 'Bienvenido a IUX tu Pin de activacion es ' + pin);
-            req.flash('success', 'Pin generado exitosamente');
-            res.redirect('/links/ventas');
-        } else {
-            req.flash('error', 'Transacción no realizada, saldo insuficiente');
-            res.redirect('/links/ventas');
-        }        
-    } else if (producto == '' || nombre == '' || movil == '') {
-        req.flash('error', 'Existe un un error en la solicitud');
+    if (cel.length !== 10) {
+        req.flash('error', 'Numero movil invalido');
         res.redirect('/links/ventas');
     } else {
-        const venta2 = {
-            vendedor: req.user.id,
-            cliente: user,
-            product,
-            rango: req.user.rango
+        const result = await rango(req.user.id);
+        const usua = await usuario(req.user.id);
+        const sald = await saldo(27, result, req.user.id);
+        if (prod == 'IUX') {
+            console.log(sald)
+            if (sald === 'SI') {
+                /* const venta = {
+                     pin,
+                     vendedor: usua,
+                     cajero: req.user.fullname,
+                     idcajero: req.user.id,
+                     product: producto[1],
+                     rango: result
+                 }
+                 //console.log(venta)            
+                 await pool.query('INSERT INTO ventas SET ? ', venta);
+                 sms('57' + cel, 'Bienvenido a IUX tu Pin de activacion es ' + pin);*/
+                req.flash('success', 'Pin generado exitosamente');
+                res.redirect('/links/ventas');
+            } else {
+                req.flash('error', 'Transacción no realizada, saldo insuficiente');
+                res.redirect('/links/ventas');
+            }
+        } else if (producto == '' || nombre == '' || movil == '') {
+            req.flash('error', 'Existe un un error en la solicitud');
+            res.redirect('/links/ventas');
+        } else {
+            const venta2 = {
+                vendedor: req.user.id,
+                cliente: user,
+                product,
+                rango: req.user.rango
+            }
+            //await pool.query('INSERT INTO transaccion SET ? ', newLink);
+            console.log(venta);
+            req.flash('error', 'Transacción no realizada');
+            res.redirect('/links/ventas');
         }
-        //await pool.query('INSERT INTO transaccion SET ? ', newLink);
-        console.log(venta);
-        req.flash('error', 'Transacción no realizada');
-        res.redirect('/links/ventas');
     }
 });
 router.post('/patro', async (req, res) => {
@@ -278,8 +283,9 @@ async function usuario(id) {
 async function saldo(producto, rango, id) {
     const produ = await pool.query(`SELECT precio, utilidad, stock FROM products WHERE id = ?`, producto);
     const rang = await pool.query(`SELECT comision FROM rangos WHERE id = ?`, rango);
-    const saldo = await pool.query(`SELECT IF(saldoactual < (saldoactual - (${produ[0].precio} -(${produ[0].utilidad} * ${rang[0].comision}/100))),'NO','SI') Respuesta FROM users WHERE id = ? `, id);
-    return saldo[0].respuesta
+    const operacion = produ[0].precio - (produ[0].utilidad * rang[0].comision / 100);
+    const saldo = await pool.query(`SELECT IF(saldoactual < ${operacion} OR saldoactual IS NULL,'NO','SI') Respuesta FROM users WHERE id = ? `, id);
+    return saldo[0].Respuesta
 };
 async function rango(id) {
     let m = new Date(),
