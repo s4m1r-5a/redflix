@@ -67,19 +67,14 @@ passport.use(new GoogleStrategy({
   clientSecret: Google.client_secret,
   callbackURL: Google.redirect_uris[0]
 }, async (accessToken, refreshToken, profile, email, done) => {
-  console.log(email);
   const { id, displayName, _json } = email;
-
   let password = '12345678',
     username = email.emails[0].value,
     fullname = displayName;
-
-    console.log(registro.pin);
-
+    //console.log(registro.pin);
   const usuario = await pool.query('SELECT * FROM users WHERE id = ?', id);
   if (usuario.length > 0) {
     const user = usuario[0];
-    console.log(usuario[0]);
     return done(null, user, ('success', 'Bienvenido'));
   } else if (registro.pin != "hola") {
     let newUser = {
@@ -93,9 +88,8 @@ passport.use(new GoogleStrategy({
     newUser.password = await helpers.encryptPassword(password);
     // Saving in the Database
     const result = await pool.query('INSERT INTO users SET ? ', newUser);
-    console.log(result);
     //newUser.id = result.insertId;
-    return done(null, newUser, ('success', 'Bienvenido'));
+    return done(null, newUser, ('success', `Bienvenido ${fullname}`));
   } else {
     return done(null, false, ('error', 'Debes Proporcionar el Pin de registro.'));
   }
@@ -115,13 +109,14 @@ passport.use('local.signup', new LocalStrategy({
     pin,
     movil,
     username,
-    password
+    password,
+    imagen : '/img/avatars/avatar.jpg'
   };
   newUser.password = await helpers.encryptPassword(password);
   // Saving in the Database
-  console.log(newUser);
+  //console.log(newUser);
   const result = await pool.query('INSERT INTO users SET ? ', newUser);
-  console.log(result);
+  //console.log(result);
   //newUser.id = result.insertId;
   return done(null, newUser);
 }));
