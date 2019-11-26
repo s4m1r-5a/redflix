@@ -58,17 +58,17 @@ router.post('/ventas', async (req, res) => {
         if (prod == 'IUX') {
             console.log(sald)
             if (sald === 'SI') {
-                /* const venta = {
-                     pin,
-                     vendedor: usua,
-                     cajero: req.user.fullname,
-                     idcajero: req.user.id,
-                     product: producto[1],
-                     rango: result
-                 }
-                 //console.log(venta)            
-                 await pool.query('INSERT INTO ventas SET ? ', venta);
-                 sms('57' + cel, 'Bienvenido a IUX tu Pin de activacion es ' + pin);*/
+                const venta = {
+                    pin,
+                    vendedor: usua,
+                    cajero: req.user.fullname,
+                    idcajero: req.user.id,
+                    product: producto[1],
+                    rango: result
+                }
+                //console.log(venta)            
+                await pool.query('INSERT INTO ventas SET ? ', venta);
+                sms('57' + cel, 'Bienvenido a IUX tu Pin de activacion es ' + pin);
                 req.flash('success', 'Pin generado exitosamente');
                 res.redirect('/links/ventas');
             } else {
