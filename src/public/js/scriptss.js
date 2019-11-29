@@ -63,36 +63,46 @@ $('.pagarpayu').attr("disabled", true);
 $('.ntfx').attr("disabled", true);
 $('input[name="nombre"]').attr("disabled", true);
 
-$('.pagar').change(function () {
+/*$('.pagar').change(function () {
     card = $(this).parents('div.card').attr("id")
     var fd = $(`#${card} form`).serialize();
     actualizardatos(card, fd)
-});
+});*/
+
 function actualizardatos(card, fd, ot) {
-    if ($(`#${card} input[name="telephone"]`).val() != "" && $(`#${card} input[name="buyerFullName"]`).val() != "" && $(`#${card} input[name="buyerEmail"]`).val() != "") {
-        $.ajax({
-            url: '/links/cliente',
-            data: fd,
-            type: 'POST',
-            async: false,
-            success: function (data) {
-                if (data[0] !== 'smg') {
-                    $(`#${card} .pagarpayu`).attr("disabled", false);
-                    if (ot){
-                        $(`.pagarpayu`).attr("disabled", false);
-                        $(`input[name="telephone"]`).val(data[2][0].id);
-                        $(`input[name="buyerFullName"]`).val(data[2][0].name);
-                        $(`input[name="buyerEmail"]`).val(data[2][0].email);
-                    }                    
-                    $('input[name="signature"]').val(data[0]);
-                    $('input[name="referenceCode"]').val(data[1]);
-                } else {
-                    $('#actualizardatos').html(`${data[1]}Si desea realizar alguna modificacion a tu cuenta presione editar, en caso contrario verifique bien los datos ingresados e intentelo nuevamente, para mayor informacion puede contactarnos al 3012673944 Wtspp`)
-                    $('#actualizar').modal('toggle');
-                    let cont = 0;
-                    let dat = data[2].map((r) => {
-                        cont++
-                        return `<li class="mb-4">
+    $.ajax({
+        url: '/links/cliente',
+        data: fd,
+        type: 'POST',
+        async: false,
+        success: function (data) {
+            if (data[0] !== 'smg') {
+                $(`#${card} .pagarpayu`).attr("disabled", false);
+                if (ot) {
+                    $(`.pagarpayu`).attr("disabled", false);
+                    $(`input[name="telephone"]`).val(data[2][0].id);
+                    $(`input[name="buyerFullName"]`).val(data[2][0].name);
+                    $(`input[name="buyerEmail"]`).val(data[2][0].email);
+                }
+                $('input[name="signature"]').val(data[0]);
+                $('input[name="referenceCode"]').val(data[1]);
+                $(`#${card} form`).submit();
+                $('#ModalEventos').one('shown.bs.modal', function() {
+                    $('#ModalEventos').modal('hide') 
+                }).modal('show');                
+            } else {
+                $('#actualizardatos').html(`${data[1]}Si desea realizar alguna modificacion a tu cuenta presione editar, en caso contrario verifique bien los datos ingresados e intentelo nuevamente, para mayor informacion puede contactarnos al 3012673944 Wtspp`)
+                //$('#actualizar').modal('toggle');
+                $('#ModalEventos').one('shown.bs.modal', function() {
+                    $('#ModalEventos').modal('hide') 
+                }).modal('show');
+                $('#ModalEventos').one('hidden.bs.modal', function() {
+                    $('#actualizar').modal('show'); 
+                }).modal('hide');
+                let cont = 0;
+                let dat = data[2].map((r) => {
+                    cont++
+                    return `<li class="mb-4">
                             <input type="text" name="telephone" class="form-control pagar g${cont}" placeholder="Movil"
                             style="text-align:center" value="${r.id}">
                         </li>
@@ -110,19 +120,33 @@ function actualizardatos(card, fd, ot) {
                         <li class="mb-4">
                             <hr width=400>
                         </li>`
-                    });
-                    $('#datosactualiza').html(dat);
-                }
+                });
+                $('#datosactualiza').html(dat);
             }
-        });
-    }
+        }
+    });
 }
-$(".pagar").keydown(function() {    
+$('.pagarp').click(function () {
+    card = $(this).parents('div.card').attr("id")
+    if ($(`#${card} input[name="telephone"]`).val() != "" && $(`#${card} input[name="buyerFullName"]`).val() != "" && $(`#${card} input[name="buyerEmail"]`).val() != "") {
+        $('#ModalEventos').modal({
+            backdrop: 'static',
+            keyboard: true,
+            toggle: true
+        });        
+        var fd = $(`#${card} form`).serialize();
+        actualizardatos(card, fd)
+    } else {
+        alert('Debes completar todos los campos');
+    }
+});
+
+$(".pagar").keydown(function () {
     $(`.pagarpayu`).attr("disabled", true);
 });
 $('#meterdat').on('click', function () {
     card = $(this).parents('div.card').attr("id")
-    var fd = $(`#${card} form`).serialize(), ot = 'ot';    
+    var fd = $(`#${card} form`).serialize(), ot = 'ot';
     actualizardatos(card, fd, ot)
 });
 $('#eliminard').on('click', function () {
@@ -198,7 +222,7 @@ $('#canjear').click(function () {
         data: fd,
         type: 'POST',
         success: function (data) {
-            if (data !== 'Pin invalido!') {
+            if (data !== 'Pin invalido!' && data !== 'Este pin ya fue canjeado!') {
                 $('#precio').html('$' + data[0].precio);
                 $('#tiempo').html(data[0].dias + ' Dias');
                 $('input[name="pin"]').val(data[0].pin);

@@ -84,30 +84,32 @@
                                                     <input name="signature" type="hidden" value="">
                                                     <input name="test" type="hidden" value="0">
                                                     <input type="hidden" name="actualizar" value="actualizar">
-                                               
-                                                <!--<input name="responseUrl" type="hidden" value="http://localhost:3000/planes">
+
+                                                    <!--<input name="responseUrl" type="hidden" value="http://localhost:3000/planes">
                                                     <input name="confirmationUrl" type="hidden" value="http://localhost:3000/planes">-->
-                                                <input name="responseUrl" type="hidden"
-                                                    value="https://redflixx.herokuapp.com/planes">
-                                                <input name="confirmationUrl" type="hidden"
-                                                    value="https://redflixx.herokuapp.com/confir">
+                                                    <input name="responseUrl" type="hidden"
+                                                        value="https://redflixx.herokuapp.com/planes">
+                                                    <input name="confirmationUrl" type="hidden"
+                                                        value="https://redflixx.herokuapp.com/confir">
                                                 </li>
                                                 <li class="mb-4">
                                                     <input type="text" name="telephone" class="form-control pagar"
-                                                        placeholder="Movil" style="text-align:center">
+                                                        placeholder="Movil" style="text-align:center" required>
                                                 </li>
                                                 <li class="mb-4">
                                                     <input type="text" name="buyerFullName" class="form-control pagar"
-                                                        placeholder="Nombre completo" style="text-align:center;">
+                                                        placeholder="Nombre completo" style="text-align:center;"
+                                                        required>
                                                 </li>
                                                 <li class="mb-4">
                                                     <input type="email" name="buyerEmail" class="form-control pagar"
-                                                        placeholder="Email" style="text-align:center;">
+                                                        placeholder="Email" style="text-align:center;" required>
                                                 </li>
                                                 <div class="mt-auto">
-                                                    <input name="Submit" type="submit"
+                                                    <!--<input name="Submit" type="submit"
                                                         class="btn btn-lg btn-outline-danger pagarpayu"
-                                                        value="Adquirir">
+                                                        value="Adquirir">-->
+                                                    <a href="#" class="btn btn-lg btn-outline-danger pagarp" data-toggle="tab">Adquirir</a>
                                                 </div>
                                             </form>
                                             <li class="mb-3">
@@ -198,20 +200,22 @@
                                                 </li>
                                                 <li class="mb-4">
                                                     <input type="text" name="telephone" class="form-control pagar"
-                                                        placeholder="Movil" style="text-align:center">
+                                                        placeholder="Movil" style="text-align:center" required>
                                                 </li>
                                                 <li class="mb-4">
                                                     <input type="text" name="buyerFullName" class="form-control pagar"
-                                                        placeholder="Nombre completo" style="text-align:center;">
+                                                        placeholder="Nombre completo" style="text-align:center;"
+                                                        required>
                                                 </li>
                                                 <li class="mb-4">
                                                     <input type="email" name="buyerEmail" class="form-control pagar"
-                                                        placeholder="Email" style="text-align:center;">
+                                                        placeholder="Email" style="text-align:center;" required>
                                                 </li>
                                                 <div class="mt-auto">
-                                                    <input name="Submit" type="submit"
+                                                    <!--<input name="Submit" type="submit"
                                                         class="btn btn-lg btn-outline-danger pagarpayu"
-                                                        value="Adquirir">
+                                                        value="Adquirir">-->
+                                                    <a href="#" class="btn btn-lg btn-outline-danger pagarp" data-toggle="tab">Adquirir</a>
                                                 </div>
                                             </form>
                                             <li class="mb-3">
@@ -302,20 +306,22 @@
                                                 </li>
                                                 <li class="mb-4">
                                                     <input type="text" name="telephone" class="form-control pagar"
-                                                        placeholder="Movil" style="text-align:center">
+                                                        placeholder="Movil" style="text-align:center" required>
                                                 </li>
                                                 <li class="mb-4">
                                                     <input type="text" name="buyerFullName" class="form-control pagar"
-                                                        placeholder="Nombre completo" style="text-align:center;">
+                                                        placeholder="Nombre completo" style="text-align:center;"
+                                                        required>
                                                 </li>
                                                 <li class="mb-4">
                                                     <input type="email" name="buyerEmail" class="form-control pagar"
-                                                        placeholder="Email" style="text-align:center;">
+                                                        placeholder="Email" style="text-align:center;" required>
                                                 </li>
                                                 <div class="mt-auto">
-                                                    <input name="Submit" type="submit"
+                                                    <!--<input name="Submit" type="submit"
                                                         class="btn btn-lg btn-outline-danger pagarpayu"
-                                                        value="Adquirir">
+                                                        value="Adquirir">-->
+                                                    <a href="#" class="btn btn-lg btn-outline-danger pagarp" data-toggle="tab">Adquirir</a>
                                                 </div>
                                             </form>
                                             <li class="mb-3">
@@ -367,16 +373,20 @@
                                             </li>
                                             <form class="z" style="display: none;" action="/venta" method="POST">
                                                 <li class="mb-4">
-                                                    <input type="text" name="telephone" class="form-control pagar"
-                                                        placeholder="Movil" style="text-align:center">
+                                                    <input type="text" name="telephone"
+                                                        class="form-control pagar required" placeholder="Movil"
+                                                        style="text-align:center" required>
                                                 </li>
                                                 <li class="mb-4">
-                                                    <input type="text" name="buyerFullName" class="form-control pagar"
-                                                        placeholder="Nombre completo" style="text-align:center;">
+                                                    <input type="text" name="buyerFullName"
+                                                        class="form-control pagar required"
+                                                        placeholder="Nombre completo" style="text-align:center;"
+                                                        required>
                                                 </li>
                                                 <li class="mb-4">
-                                                    <input type="email" name="buyerEmail" class="form-control pagar"
-                                                        placeholder="Email" style="text-align:center;">
+                                                    <input type="email" name="buyerEmail"
+                                                        class="form-control pagar required" placeholder="Email"
+                                                        style="text-align:center;" required>
                                                 </li>
                                                 <li class="mb-4">
                                                     <span class="text-success"><mark>Todo lo que quieres ver cuando lo
@@ -387,8 +397,9 @@
                                                     <input type="hidden" name="actualizar" value="actualizar">
                                                 </li>
                                                 <div class="mt-auto">
-                                                    <input name="Submit" type="submit"
-                                                        class="btn btn-lg btn-outline-danger pagarpayu" value="Activar">
+                                                    <a href="#" class="btn btn-lg btn-outline-danger pagarp" data-toggle="tab">Activar</a>
+                                                    <!--<input name="Submit" type="submit"
+                                                        class="btn btn-lg btn-outline-danger pagarpayu" value="Activar">-->
                                                 </div>
                                             </form>
                                             <li class="mb-3">

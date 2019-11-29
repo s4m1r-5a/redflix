@@ -124,10 +124,13 @@ router.post('/id', async (req, res) => {
 });
 router.post('/canjear', async (req, res) => {
     const { pin } = req.body;
-    const rows = await pool.query(`SELECT v.pin, p.producto, p.precio, p.dias 
+    const rows = await pool.query(`SELECT v.pin, v.client, p.producto, p.precio, p.dias 
     FROM ventas v INNER JOIN products p ON v.product = p.id WHERE pin = ?`, pin);
-    if (rows.length > 0) {
+    console.log(rows)
+    if (rows.length > 0 && rows[0].client === null) {
         res.send(rows);
+    } else if(rows.length > 0 && rows[0].client !== null) {
+        res.send('Este pin ya fue canjeado!');
     } else {
         res.send('Pin invalido!');
     }
