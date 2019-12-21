@@ -61,15 +61,14 @@ router.post('/ventas', async(req, res) => {
     } else {
         if (prod == 'IUX') {
             const venta = {
-                    pin,
-                    vendedor: usua,
-                    cajero: req.user.fullname,
-                    idcajero: req.user.id,
-                    product: producto[1],
-                    rango: result,
-                    movildecompra: cel
-                }
-                //console.log(venta)            
+                pin,
+                vendedor: usua,
+                cajero: req.user.fullname,
+                idcajero: req.user.id,
+                product: producto[1],
+                rango: result,
+                movildecompra: cel
+            }
             await pool.query('INSERT INTO ventas SET ? ', venta);
             sms('57' + cel, 'Bienvenido a IUX, ingrese a https://iux.com.co/app/login y canjea este Pin ' + pin);
             req.flash('success', 'Pin generado exitosamente');
@@ -179,7 +178,6 @@ router.post('/cliente', async(req, res) => {
         movil: telephone,
         email: buyerEmail
     };
-    console.log(newLink);
     let url = `https://iux.com.co/x/venta.php?name=${buyerFullName}&movil=${telephone}&email=${buyerEmail}&ref=cliente&actualiza=${actualizar}`;
     request({
         url,
@@ -421,34 +419,4 @@ var normalize = (function() {
     }
 
 })();
-
-var reemplazarAcentos = function(cadena) {
-    var chars = {
-        "á": "a",
-        "é": "e",
-        "í": "i",
-        "ó": "o",
-        "ú": "u",
-        "à": "a",
-        "è": "e",
-        "ì": "i",
-        "ò": "o",
-        "ù": "u",
-        "ñ": "n",
-        "Á": "A",
-        "É": "E",
-        "Í": "I",
-        "Ó": "O",
-        "Ú": "U",
-        "À": "A",
-        "È": "E",
-        "Ì": "I",
-        "Ò": "O",
-        "Ù": "U",
-        "Ñ": "N"
-    }
-    var expr = /[áàéèíìóòúùñ]/ig;
-    var res = cadena.replace(expr, function(e) { return chars[e] });
-    return res;
-}
 module.exports = router;
