@@ -25,7 +25,7 @@ router.get('/recarga', isLoggedIn, (req, res) => {
     res.render('links/recarga');
 });
 
-router.post('/add', async (req, res) => {
+router.post('/add', async(req, res) => {
     const { title, url, description } = req.body;
     const newLink = {
         title,
@@ -37,13 +37,13 @@ router.post('/add', async (req, res) => {
     req.flash('success', 'Link Saved Successfully');
     res.redirect('/links');
 });
-router.post('/movil', async (req, res) => {
+router.post('/movil', async(req, res) => {
     const { movil } = req.body;
     const cliente = await pool.query('SELECT * FROM clientes WHERE movil = ?', movil);
     //console.log(req.body);
     res.send(cliente);
 });
-router.post('/ventas', async (req, res) => {
+router.post('/ventas', async(req, res) => {
     const { prod, product, nombre, user, movil } = req.body;
     const result = await rango(req.user.id);
     const usua = await usuario(req.user.id);
@@ -61,14 +61,15 @@ router.post('/ventas', async (req, res) => {
     } else {
         if (prod == 'IUX') {
             const venta = {
-                pin,
-                vendedor: usua,
-                cajero: req.user.fullname,
-                idcajero: req.user.id,
-                product: producto[1],
-                rango: result
-            }
-            //console.log(venta)            
+                    pin,
+                    vendedor: usua,
+                    cajero: req.user.fullname,
+                    idcajero: req.user.id,
+                    product: producto[1],
+                    rango: result,
+                    movildecompra: cel
+                }
+                //console.log(venta)            
             await pool.query('INSERT INTO ventas SET ? ', venta);
             sms('57' + cel, 'Bienvenido a IUX, ingrese a https://iux.com.co/app y canjea este Pin ' + pin);
             req.flash('success', 'Pin generado exitosamente');
@@ -78,19 +79,19 @@ router.post('/ventas', async (req, res) => {
             res.redirect('/links/ventas');
         } else {
             const venta2 = {
-                vendedor: req.user.id,
-                cliente: user,
-                product,
-                rango: req.user.rango
-            }
-            //await pool.query('INSERT INTO transaccion SET ? ', newLink);
+                    vendedor: req.user.id,
+                    cliente: user,
+                    product,
+                    rango: req.user.rango
+                }
+                //await pool.query('INSERT INTO transaccion SET ? ', newLink);
             console.log(venta);
             req.flash('error', 'Transacción no realizada');
             res.redirect('/links/ventas');
         }
     }
 });
-router.post('/patro', async (req, res) => {
+router.post('/patro', async(req, res) => {
     const { quien } = req.body;
     if (quien == "Patrocinador") {
         const fila = await pool.query('SELECT * FROM pines WHERE id = ?', req.user.pin);
@@ -98,7 +99,7 @@ router.post('/patro', async (req, res) => {
     }
 });
 
-router.post('/recarga', async (req, res) => {
+router.post('/recarga', async(req, res) => {
     const { monto, metodo, id } = req.body;
     const newLink = {
         remitente: id,
@@ -112,7 +113,7 @@ router.post('/recarga', async (req, res) => {
     res.render('/links/recarga');
 });
 
-router.post('/id', async (req, res) => {
+router.post('/id', async(req, res) => {
     const { pin } = req.body;
     const rows = await pool.query('SELECT * FROM pines WHERE id = ?', pin);
     if (rows.length > 0 && rows[0].acreedor === null) {
@@ -122,20 +123,20 @@ router.post('/id', async (req, res) => {
         res.send('Pin de registro invalido, comuniquese con su distribuidor!');
     }
 });
-router.post('/canjear', async (req, res) => {
+router.post('/canjear', async(req, res) => {
     const { pin } = req.body;
     const rows = await pool.query(`SELECT v.pin, v.client, p.producto, p.precio, p.dias 
     FROM ventas v INNER JOIN products p ON v.product = p.id WHERE pin = ?`, pin);
     console.log(rows)
     if (rows.length > 0 && rows[0].client === null) {
         res.send(rows);
-    } else if(rows.length > 0 && rows[0].client !== null) {
+    } else if (rows.length > 0 && rows[0].client !== null) {
         res.send('Este pin ya fue canjeado!');
     } else {
         res.send('Pin invalido!');
     }
 });
-router.post('/iux', async (req, res) => {
+router.post('/iux', async(req, res) => {
     console.log(req.body);
     /*const { pin } = req.body;
     const rows = await pool.query('SELECT * FROM pines WHERE id = ?', pin);
@@ -149,7 +150,7 @@ router.post('/iux', async (req, res) => {
     }*/
 });
 
-router.post('/afiliado', async (req, res) => {
+router.post('/afiliado', async(req, res) => {
     const { movil, cajero } = req.body, pin = ID(13);
     const nuevoPin = {
         id: pin,
@@ -167,20 +168,23 @@ router.post('/afiliado', async (req, res) => {
     res.redirect('/tablero');
 });
 
-router.post('/cliente', async (req, res) => {
-    let respuesta = "", dat;
+router.post('/cliente', async(req, res) => {
+    let respuesta = "",
+        dat;
     const { telephone, buyerFullName, buyerEmail, merchantId, amount, referenceCode, actualizar } = req.body;
-    var nombre = buyerFullName.toUpperCase();
+
+    var nombre = normalize(buyerFullName).toUpperCase();
     const newLink = {
         nombre: nombre,
         movil: telephone,
         email: buyerEmail
     };
+    console.log(newLink);
     let url = `https://iux.com.co/x/venta.php?name=${buyerFullName}&movil=${telephone}&email=${buyerEmail}&ref=cliente&actualiza=${actualizar}`;
     request({
         url,
         json: true
-    }, async (error, res, body) => {
+    }, async(error, res, body) => {
         if (error) {
             console.error(error);
             return;
@@ -203,7 +207,7 @@ router.post('/cliente', async (req, res) => {
             respuesta = `Todo bien`;
         }
     });
-    var saludo = async function () {
+    var saludo = async function() {
         if (respuesta !== "") {
             clearInterval(time);
             if (respuesta === 'Todo bien') {
@@ -229,26 +233,26 @@ router.post('/cliente', async (req, res) => {
     let time = setInterval(saludo, 500);
 });
 
-router.get('/', isLoggedIn, async (req, res) => {
+router.get('/', isLoggedIn, async(req, res) => {
     const links = await pool.query('SELECT * FROM links WHERE user_id = ? ', [req.user.id]);
     res.render('links/list', { links });
 });
 
-router.get('/delete/:id', async (req, res) => {
+router.get('/delete/:id', async(req, res) => {
     const { id } = req.params;
     await pool.query('DELETE FROM links WHERE ID = ?', [id]);
     req.flash('success', 'Link Removed Successfully');
     res.redirect('/links');
 });
 
-router.get('/edit/:id', async (req, res) => {
+router.get('/edit/:id', async(req, res) => {
     const links = await pool.query('SELECT * FROM links WHERE id = ?', [id]);
     const { id } = req.params;
     console.log(links);
     res.render('/links/edit', { link: links[0] });
 });
 
-router.post('/edit/:id', async (req, res) => {
+router.post('/edit/:id', async(req, res) => {
     const { id } = req.params;
     const { title, description, url } = req.body;
     const newLink = {
@@ -291,7 +295,9 @@ async function saldo(producto, rango, id) {
 async function rango(id) {
     let m = new Date(),
         month = m.getMonth() - 2,
-        d, meses = 0, mes = 0, reportes = new Array(4);
+        d, meses = 0,
+        mes = 0,
+        reportes = new Array(4);
     const reporte = await pool.query(`SELECT MONTH(v.fechadecompra) Mes, COUNT(*) CantMes, SUM(p.precio) venta, SUM(p.utilidad) utilidad, c.nombre usari
     FROM ventas v 
     INNER JOIN clientes c ON v.client = c.id 
@@ -394,5 +400,55 @@ async function rango(id) {
         return 5;
     };
 };
+var normalize = (function() {
+    var from = "ÃÀÁÄÂÈÉËÊÌÍÏÎÒÓÖÔÙÚÜÛãàáäâèéëêìíïîòóöôùúüûÑñÇç",
+        to = "AAAAAEEEEIIIIOOOOUUUUaaaaaeeeeiiiioooouuuuNnCc",
+        mapping = {};
 
+    for (var i = 0, j = from.length; i < j; i++)
+        mapping[from.charAt(i)] = to.charAt(i);
+
+    return function(str) {
+        var ret = [];
+        for (var i = 0, j = str.length; i < j; i++) {
+            var c = str.charAt(i);
+            if (mapping.hasOwnProperty(str.charAt(i)))
+                ret.push(mapping[c]);
+            else
+                ret.push(c);
+        }
+        return ret.join('');
+    }
+
+})();
+
+var reemplazarAcentos = function(cadena) {
+    var chars = {
+        "á": "a",
+        "é": "e",
+        "í": "i",
+        "ó": "o",
+        "ú": "u",
+        "à": "a",
+        "è": "e",
+        "ì": "i",
+        "ò": "o",
+        "ù": "u",
+        "ñ": "n",
+        "Á": "A",
+        "É": "E",
+        "Í": "I",
+        "Ó": "O",
+        "Ú": "U",
+        "À": "A",
+        "È": "E",
+        "Ì": "I",
+        "Ò": "O",
+        "Ù": "U",
+        "Ñ": "N"
+    }
+    var expr = /[áàéèíìóòúùñ]/ig;
+    var res = cadena.replace(expr, function(e) { return chars[e] });
+    return res;
+}
 module.exports = router;
