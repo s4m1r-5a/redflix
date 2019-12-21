@@ -71,7 +71,7 @@ router.post('/ventas', async(req, res) => {
                 }
                 //console.log(venta)            
             await pool.query('INSERT INTO ventas SET ? ', venta);
-            sms('57' + cel, 'Bienvenido a IUX, ingrese a https://iux.com.co/app y canjea este Pin ' + pin);
+            sms('57' + cel, 'Bienvenido a IUX, ingrese a https://iux.com.co/app/login y canjea este Pin ' + pin);
             req.flash('success', 'Pin generado exitosamente');
             res.redirect('/links/ventas');
         } else if (producto == '' || nombre == '' || movil == '') {
