@@ -3,7 +3,7 @@ const express = require('express');
 const router = express.Router();
 const crypto = require('crypto');
 const pool = require('../database');
-const { isLoggedIn } = require('../lib/auth');
+const { isLoggedIn, isLogged } = require('../lib/auth');
 const sms = require('../sms.js');
 const { registro } = require('../keys');
 const request = require('request')
@@ -15,7 +15,7 @@ router.get('/calendar', isLoggedIn, (req, res) => {
     console.log('si llega');
     res.render('links/calendar');
 });
-router.get('/ventas', isLoggedIn, (req, res) => {
+router.get('/ventas', isLogged, (req, res) => {
     res.render('links/ventas');
 });
 router.get('/social', isLoggedIn, (req, res) => {
@@ -134,19 +134,6 @@ router.post('/canjear', async(req, res) => {
     } else {
         res.send('Pin invalido!');
     }
-});
-router.post('/iux', async(req, res) => {
-    console.log(req.body);
-    /*const { pin } = req.body;
-    const rows = await pool.query('SELECT * FROM pines WHERE id = ?', pin);
-    console.log(rows);
-    if (rows.length > 0) {
-        //res.send("este pin es invalido"); AND 
-        res.send({ rows });
-    } else {
-        res.send('Pin de registro invalido, comuniquese con su distribuidor!');
-        req.flash('error', 'Id de registro incorrecto');
-    }*/
 });
 
 router.post('/afiliado', async(req, res) => {
