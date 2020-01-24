@@ -11,6 +11,19 @@ const request = require('request')
 router.get('/add', isLoggedIn, (req, res) => {
     res.render('links/add');
 });
+
+//////////////////* PRODUCTOS */////////////////////
+router.get('/productos', isLoggedIn, (req, res) => {
+    res.render('links/productos');
+});
+router.post('/productos', isLoggedIn, async (req, res) => {
+    const fila = await pool.query('SELECT * FROM products WHERE usuario = ?', req.user.id);
+    respuesta = { "data": fila };
+    console.log(respuesta)
+    res.send(respuesta);
+});
+
+/////////////////////////////////////////////////////
 router.get('/calendar', isLoggedIn, (req, res) => {
     console.log('si llega');
     res.render('links/calendar');
@@ -425,7 +438,7 @@ async function Desendentes(id) {
     GROUP BY YEAR(v.fechadecompra), MONTH(v.fechadecompra) ASC
     ORDER BY 1`);
     //console.log(reporte)
-    
+
     const lineaDos = await pool.query(`SELECT acreedor FROM pines WHERE pines.usuario = 1${linea}`);
     lDesc = '', linea = '';
     await lineaDos.map((primera) => { lDesc += ` OR pi.acreedor = ${primera.acreedor}`; linea += ` OR pines.usuario = ${primera.acreedor}` });
@@ -441,7 +454,7 @@ async function Desendentes(id) {
     GROUP BY YEAR(v.fechadecompra), MONTH(v.fechadecompra) ASC
     ORDER BY 1`);
     //console.log(reporte2)
-    
+
     const lineaTres = await pool.query(`SELECT acreedor FROM pines WHERE pines.usuario =  1${linea}`);
     lDesc = '', linea = '';
     await lineaTres.map((primera) => { lDesc += ` OR pi.acreedor = ${primera.acreedor}` });
@@ -460,17 +473,17 @@ async function Desendentes(id) {
     //console.log(reporte3)
     mapa = [reporte, reporte2, reporte3]
     //console.log(mapa) 
-   if (reporte.length > 0) {
+    if (reporte.length > 0) {
         await mapa.map((r) => {
             console.log(r)
         });
-        
+
         /*await reporte.filter((re) => {
             return re.Mes !== m.getMonth() + 1;
         }).map((re) => {
             
         });*/
-        
+
         return Math.min(...reportes);
     } else {
         return 5;
