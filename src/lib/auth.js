@@ -8,7 +8,7 @@ module.exports = {
     },
     isLogged(req, res, next) {
         if (req.isAuthenticated()) {
-            if (req.user.rango === "3") {
+            if (req.user.rango !== "5") {
                 return next();
             } else {
                 console.log(req.originalUrl)

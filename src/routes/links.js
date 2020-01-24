@@ -16,6 +16,7 @@ router.get('/calendar', isLoggedIn, (req, res) => {
     res.render('links/calendar');
 });
 router.get('/ventas', isLogged, (req, res) => {
+    Desendentes(15)
     res.render('links/ventas');
 });
 router.get('/social', isLoggedIn, (req, res) => {
@@ -25,7 +26,7 @@ router.get('/recarga', isLoggedIn, (req, res) => {
     res.render('links/recarga');
 });
 
-router.post('/add', async(req, res) => {
+router.post('/add', async (req, res) => {
     const { title, url, description } = req.body;
     const newLink = {
         title,
@@ -37,13 +38,13 @@ router.post('/add', async(req, res) => {
     req.flash('success', 'Link Saved Successfully');
     res.redirect('/links');
 });
-router.post('/movil', async(req, res) => {
+router.post('/movil', async (req, res) => {
     const { movil } = req.body;
     const cliente = await pool.query('SELECT * FROM clientes WHERE movil = ?', movil);
     //console.log(req.body);
     res.send(cliente);
 });
-router.post('/ventas', async(req, res) => {
+router.post('/ventas', async (req, res) => {
     const { prod, product, nombre, user, movil } = req.body;
     const result = await rango(req.user.id);
     const usua = await usuario(req.user.id);
@@ -78,19 +79,19 @@ router.post('/ventas', async(req, res) => {
             res.redirect('/links/ventas');
         } else {
             const venta2 = {
-                    vendedor: req.user.id,
-                    cliente: user,
-                    product,
-                    rango: req.user.rango
-                }
-                //await pool.query('INSERT INTO transaccion SET ? ', newLink);
+                vendedor: req.user.id,
+                cliente: user,
+                product,
+                rango: req.user.rango
+            }
+            //await pool.query('INSERT INTO transaccion SET ? ', newLink);
             console.log(venta);
             req.flash('error', 'Transacción no realizada');
             res.redirect('/links/ventas');
         }
     }
 });
-router.post('/patro', async(req, res) => {
+router.post('/patro', async (req, res) => {
     const { quien } = req.body;
     if (quien == "Patrocinador") {
         const fila = await pool.query('SELECT * FROM pines WHERE id = ?', req.user.pin);
@@ -98,7 +99,7 @@ router.post('/patro', async(req, res) => {
     }
 });
 
-router.post('/recarga', async(req, res) => {
+router.post('/recarga', async (req, res) => {
     const { monto, metodo, id } = req.body;
     const newLink = {
         remitente: id,
@@ -112,7 +113,7 @@ router.post('/recarga', async(req, res) => {
     res.render('/links/recarga');
 });
 
-router.post('/id', async(req, res) => {
+router.post('/id', async (req, res) => {
     const { pin } = req.body;
     const rows = await pool.query('SELECT * FROM pines WHERE id = ?', pin);
     if (rows.length > 0 && rows[0].acreedor === null) {
@@ -122,7 +123,7 @@ router.post('/id', async(req, res) => {
         res.send('Pin de registro invalido, comuniquese con su distribuidor!');
     }
 });
-router.post('/canjear', async(req, res) => {
+router.post('/canjear', async (req, res) => {
     const { pin } = req.body;
     const rows = await pool.query(`SELECT v.pin, v.client, p.producto, p.precio, p.dias 
     FROM ventas v INNER JOIN products p ON v.product = p.id WHERE pin = ?`, pin);
@@ -136,7 +137,7 @@ router.post('/canjear', async(req, res) => {
     }
 });
 
-router.post('/afiliado', async(req, res) => {
+router.post('/afiliado', async (req, res) => {
     const { movil, cajero } = req.body, pin = ID(13);
     const nuevoPin = {
         id: pin,
@@ -154,7 +155,7 @@ router.post('/afiliado', async(req, res) => {
     res.redirect('/tablero');
 });
 
-router.post('/cliente', async(req, res) => {
+router.post('/cliente', async (req, res) => {
     let respuesta = "",
         dat;
     const { telephone, buyerFullName, buyerEmail, merchantId, amount, referenceCode, actualizar } = req.body;
@@ -169,7 +170,7 @@ router.post('/cliente', async(req, res) => {
     request({
         url,
         json: true
-    }, async(error, res, body) => {
+    }, async (error, res, body) => {
         if (error) {
             console.error(error);
             return;
@@ -192,7 +193,7 @@ router.post('/cliente', async(req, res) => {
             respuesta = `Todo bien`;
         }
     });
-    var saludo = async function() {
+    var saludo = async function () {
         if (respuesta !== "") {
             clearInterval(time);
             if (respuesta === 'Todo bien') {
@@ -218,26 +219,26 @@ router.post('/cliente', async(req, res) => {
     let time = setInterval(saludo, 500);
 });
 
-router.get('/', isLoggedIn, async(req, res) => {
+router.get('/', isLoggedIn, async (req, res) => {
     const links = await pool.query('SELECT * FROM links WHERE user_id = ? ', [req.user.id]);
     res.render('links/list', { links });
 });
 
-router.get('/delete/:id', async(req, res) => {
+router.get('/delete/:id', async (req, res) => {
     const { id } = req.params;
     await pool.query('DELETE FROM links WHERE ID = ?', [id]);
     req.flash('success', 'Link Removed Successfully');
     res.redirect('/links');
 });
 
-router.get('/edit/:id', async(req, res) => {
+router.get('/edit/:id', async (req, res) => {
     const links = await pool.query('SELECT * FROM links WHERE id = ?', [id]);
     const { id } = req.params;
     console.log(links);
     res.render('/links/edit', { link: links[0] });
 });
 
-router.post('/edit/:id', async(req, res) => {
+router.post('/edit/:id', async (req, res) => {
     const { id } = req.params;
     const { title, description, url } = req.body;
     const newLink = {
@@ -289,7 +290,7 @@ async function rango(id) {
     INNER JOIN users u ON v.vendedor = u.id
     INNER JOIN products p ON v.product = p.id
     INNER JOIN pines pi ON u.pin = pi.id
-    WHERE pi.usuario = ?
+    WHERE pi.acreedor = ?
         AND YEAR(v.fechadecompra) = YEAR(CURDATE()) 
         AND MONTH(v.fechadecompra) BETWEEN ${month} and 12
     GROUP BY MONTH(v.fechadecompra)
@@ -385,7 +386,7 @@ async function rango(id) {
         return 5;
     };
 };
-var normalize = (function() {
+var normalize = (function () {
     var from = "ÃÀÁÄÂÈÉËÊÌÍÏÎÒÓÖÔÙÚÜÛãàáäâèéëêìíïîòóöôùúüûÑñÇç",
         to = "AAAAAEEEEIIIIOOOOUUUUaaaaaeeeeiiiioooouuuuNnCc",
         mapping = {};
@@ -393,7 +394,7 @@ var normalize = (function() {
     for (var i = 0, j = from.length; i < j; i++)
         mapping[from.charAt(i)] = to.charAt(i);
 
-    return function(str) {
+    return function (str) {
         var ret = [];
         for (var i = 0, j = str.length; i < j; i++) {
             var c = str.charAt(i);
@@ -406,4 +407,73 @@ var normalize = (function() {
     }
 
 })();
+async function Desendentes(id) {
+    let reportes = new Array(4)
+    let linea = '', lDesc = '';
+
+    const lineaUno = await pool.query(`SELECT acreedor FROM pines WHERE pines.usuario = ?`, id);
+    await lineaUno.map((primera) => { lDesc += ` OR pi.acreedor = ${primera.acreedor}`; linea += ` OR pines.usuario = ${primera.acreedor}` });
+    const reporte = await pool.query(`SELECT YEAR(v.fechadecompra) Año, MONTH(v.fechadecompra) Mes, COUNT(*) CantMes, ((p.utilidad*r.comision/100)*100/p.utilidad) Porcentag, SUM((p.utilidad*r.comision/100)) Comision, SUM(p.precio) venta, SUM(p.utilidad) utilidad
+    FROM ventas v 
+    INNER JOIN clientes c ON v.client = c.id 
+    INNER JOIN users u ON v.vendedor = u.id
+    INNER JOIN products p ON v.product = p.id
+    INNER JOIN rangos r ON v.rango = r.id
+    INNER JOIN pines pi ON u.pin = pi.id
+    WHERE pi.acreedor = 1${lDesc}
+    AND MONTH(v.fechadecompra) BETWEEN 1 and 12
+    GROUP BY YEAR(v.fechadecompra), MONTH(v.fechadecompra) ASC
+    ORDER BY 1`);
+    //console.log(reporte)
+    
+    const lineaDos = await pool.query(`SELECT acreedor FROM pines WHERE pines.usuario = 1${linea}`);
+    lDesc = '', linea = '';
+    await lineaDos.map((primera) => { lDesc += ` OR pi.acreedor = ${primera.acreedor}`; linea += ` OR pines.usuario = ${primera.acreedor}` });
+    const reporte2 = await pool.query(`SELECT YEAR(v.fechadecompra) Año, MONTH(v.fechadecompra) Mes, COUNT(*) CantMes, SUM(((p.utilidad*90/100)-(p.utilidad*r.comision/100))) Rango, SUM(p.precio) venta, SUM(p.utilidad) utilidad
+    FROM ventas v 
+    INNER JOIN clientes c ON v.client = c.id 
+    INNER JOIN users u ON v.vendedor = u.id
+    INNER JOIN products p ON v.product = p.id
+    INNER JOIN rangos r ON v.rango = r.id
+    INNER JOIN pines pi ON u.pin = pi.id
+    WHERE pi.acreedor = 1${lDesc}
+    AND MONTH(v.fechadecompra) BETWEEN 1 and 12
+    GROUP BY YEAR(v.fechadecompra), MONTH(v.fechadecompra) ASC
+    ORDER BY 1`);
+    //console.log(reporte2)
+    
+    const lineaTres = await pool.query(`SELECT acreedor FROM pines WHERE pines.usuario =  1${linea}`);
+    lDesc = '', linea = '';
+    await lineaTres.map((primera) => { lDesc += ` OR pi.acreedor = ${primera.acreedor}` });
+    const reporte3 = await pool.query(`SELECT YEAR(v.fechadecompra) Año, MONTH(v.fechadecompra) Mes, COUNT(*) CantMes, SUM(((p.utilidad*90/100)-(p.utilidad*r.comision/100))) Rango, SUM((p.utilidad*r.comision/100)) Comision, SUM(p.precio) venta, SUM(p.utilidad) utilidad
+    FROM ventas v 
+    INNER JOIN clientes c ON v.client = c.id 
+    INNER JOIN users u ON v.vendedor = u.id
+    INNER JOIN products p ON v.product = p.id
+
+    INNER JOIN rangos r ON v.rango = r.id
+    INNER JOIN pines pi ON u.pin = pi.id
+    WHERE pi.acreedor = 1${lDesc}
+    AND MONTH(v.fechadecompra) BETWEEN 1 and 12
+    GROUP BY YEAR(v.fechadecompra), MONTH(v.fechadecompra) ASC
+    ORDER BY 1`);
+    //console.log(reporte3)
+    mapa = [reporte, reporte2, reporte3]
+    //console.log(mapa) 
+   if (reporte.length > 0) {
+        await mapa.map((r) => {
+            console.log(r)
+        });
+        
+        /*await reporte.filter((re) => {
+            return re.Mes !== m.getMonth() + 1;
+        }).map((re) => {
+            
+        });*/
+        
+        return Math.min(...reportes);
+    } else {
+        return 5;
+    };
+};
 module.exports = router;
