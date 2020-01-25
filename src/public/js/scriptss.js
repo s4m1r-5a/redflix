@@ -242,6 +242,10 @@ $('#quien').change(function () {
         }
     });
 });
+var formu
+$('form').click(function(){
+    formu = $(this).attr('id')
+})
 $(`.movil`).change(function () {
     $('form input[name="nombre"]').val("");
     $('form input[name="user"]').val("");

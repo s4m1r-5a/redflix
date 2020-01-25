@@ -62,9 +62,7 @@ router.post('/ventas', async (req, res) => {
     const result = await rango(req.user.id);
     const usua = await usuario(req.user.id);
     const sald = await saldo(27, result, req.user.id);
-    let cel = movil.replace(/-/g, ""),
-        producto = product.split(" "),
-        pin = producto[0] + ID(8)
+    let cel = movil.replace(/-/g, "")
 
     if (cel.length !== 10) {
         req.flash('error', 'Numero movil invalido');
@@ -74,6 +72,8 @@ router.post('/ventas', async (req, res) => {
         res.redirect('/links/ventas');
     } else {
         if (prod == 'IUX') {
+            let producto = product.split(" "),
+                pin = producto[0] + ID(8)
             const venta = {
                 pin,
                 vendedor: usua,
@@ -87,7 +87,7 @@ router.post('/ventas', async (req, res) => {
             sms('57' + cel, 'Bienvenido a IUX, ingrese a https://iux.com.co/app/login y canjea este Pin ' + pin);
             req.flash('success', 'Pin generado exitosamente');
             res.redirect('/links/ventas');
-        } else if (producto == '' || nombre == '' || movil == '') {
+        } else if (product == '' || nombre == '' || movil == '') {
             req.flash('error', 'Existe un un error en la solicitud');
             res.redirect('/links/ventas');
         } else {
@@ -95,11 +95,12 @@ router.post('/ventas', async (req, res) => {
                 vendedor: req.user.id,
                 cliente: user,
                 product,
-                rango: req.user.rango
+                rango: result,
+                movildecompra: cel
             }
             //await pool.query('INSERT INTO transaccion SET ? ', newLink);
-            console.log(venta);
-            req.flash('error', 'Transacción no realizada');
+            console.log(venta2);
+            req.flash('error', 'Transacción realizada correctamente');
             res.redirect('/links/ventas');
         }
     }
