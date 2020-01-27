@@ -236,7 +236,36 @@ router.post('/recarga', isLoggedIn, async (req, res) => {
     req.flash('success', 'Solicitud de saldo exitosa exitosa');
     res.redirect('/links/recarga');
 });
-/////////////////////////* *////////////////////////////////////////
+/////////////////////////* AFILIACION *////////////////////////////////////////
+router.post('/afiliado', async (req, res) => {
+    const result = await rango(req.user.id);
+    const usua = await usuario(req.user.id);
+    const { movil, cajero } = req.body, pin = ID(13);
+    const nuevoPin = {
+        id: pin,
+        categoria: 1,
+        usuario: req.user.id
+    }
+    if (cajero !== undefined) {
+        nuevoPin.categoria = 2
+    } else {
+        const venta = {
+            fechadecompra: new Date(),
+            pin,
+            vendedor: usua,
+            cajero: req.user.fullname,
+            idcajero: req.user.id,
+            product: 26,
+            rango: result,
+            movildecompra: movil
+        }
+        await pool.query('INSERT INTO ventas SET ? ', venta);
+    }
+    await pool.query('INSERT INTO pines SET ? ', nuevoPin);
+    sms('57' + movil, 'Bienvenido a ser parte de nuestro equipo RedFlix tu ID sera ' + pin);
+    req.flash('success', 'Pin enviado satisfactoriamente, comuniquese con el afiliado para que se registre');
+    res.redirect('/tablero');
+});
 router.post('/id', async (req, res) => {
     const { pin } = req.body;
     const rows = await pool.query('SELECT * FROM pines WHERE id = ?', pin);
@@ -247,11 +276,11 @@ router.post('/id', async (req, res) => {
         res.send('Pin de registro invalido, comuniquese con su distribuidor!');
     }
 });
+///////////////////////* */////////////////////////////////////////////////////////
 router.post('/canjear', async (req, res) => {
     const { pin } = req.body;
     const rows = await pool.query(`SELECT v.pin, v.client, p.producto, p.precio, p.dias 
     FROM ventas v INNER JOIN products p ON v.product = p.id_producto WHERE pin = ?`, pin);
-    console.log(rows)
     if (rows.length > 0 && rows[0].client === null) {
         res.send(rows);
     } else if (rows.length > 0 && rows[0].client !== null) {
@@ -260,25 +289,6 @@ router.post('/canjear', async (req, res) => {
         res.send('Pin invalido!');
     }
 });
-
-router.post('/afiliado', async (req, res) => {
-    const { movil, cajero } = req.body, pin = ID(13);
-    const nuevoPin = {
-        id: pin,
-        categoria: 1,
-        usuario: req.user.id
-    }
-    console.log(pin);
-    if (cajero !== undefined) {
-        console.log(pin);
-        nuevoPin.categoria = 2
-    }
-    await pool.query('INSERT INTO pines SET ? ', nuevoPin);
-    sms('57' + movil, 'Bienvenido a RedFlix tu ID sera ' + pin);
-    req.flash('success', 'Pin del afiliado exitoso');
-    res.redirect('/tablero');
-});
-
 router.post('/cliente', async (req, res) => {
     let respuesta = "",
         dat;
@@ -388,10 +398,8 @@ function ID(lon) {
 async function usuario(id) {
     const usuario = await pool.query(`SELECT p.categoria, p.usuario FROM pines p WHERE p.acreedor = ? `, id);
     if (usuario.length > 0 && usuario[0].categoria == 2) {
-        console.log(usuario[0].usuario)
         return usuario[0].usuario;
     } else {
-        console.log(id)
         return id
     }
 };

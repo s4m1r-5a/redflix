@@ -29,7 +29,7 @@ passport.use(new FacebookStrategy({
   clientID: Facebook.client_id,
   clientSecret: Facebook.client_secret,
   callbackURL: Facebook.redirect_uris[1]
-}, async (accessToken, refreshToken, profile, email, done) => {  
+}, async (accessToken, refreshToken, profile, email, done) => {
   console.log(profile)
   const { id, displayName, username, _json } = email;
   let password = '12345678',
@@ -45,10 +45,10 @@ passport.use(new FacebookStrategy({
     let newUser = {
       id,
       fullname,
-      pin : registro.pin,
+      pin: registro.pin,
       username,
       password,
-      imagen : _json.picture
+      imagen: _json.picture
     };
     newUser.password = await helpers.encryptPassword(password);
     // Saving in the Database
@@ -57,7 +57,7 @@ passport.use(new FacebookStrategy({
     //newUser.id = result.insertId;
     return done(null, newUser, ('success', 'Bienvenido'));
   } else {
-    return done(null, false, ('error','Debes Proporcionar el Pin de registro.'));
+    return done(null, false, ('error', 'Debes Proporcionar el Pin de registro.'));
   }
 }
 ));
@@ -67,23 +67,31 @@ passport.use(new GoogleStrategy({
   clientSecret: Google.client_secret,
   callbackURL: Google.redirect_uris[0]
 }, async (accessToken, refreshToken, profile, email, done) => {
+
   const { id, displayName, _json } = email;
   let password = '12345678',
     username = email.emails[0].value,
     fullname = displayName;
-    //console.log(registro.pin);
+
   const usuario = await pool.query('SELECT * FROM users WHERE id = ?', id);
+
   if (usuario.length > 0) {
+
     const user = usuario[0];
-    return done(null, user, ('success', 'Bienvenido'));
+    if (_json.picture !== usuario[0].imagen) {
+      await pool.query('UPDATE users SET ? WHERE id = ?', [{ imagen: _json.picture }, id]);
+    }
+    return done(null, user, ('success', `Bienvenido ${fullname}`));
+
   } else if (registro.pin != "hola") {
+
     let newUser = {
       id,
       fullname,
-      pin : registro.pin,
+      pin: registro.pin,
       username,
       password,
-      imagen : _json.picture
+      imagen: _json.picture
     };
     newUser.password = await helpers.encryptPassword(password);
     // Saving in the Database
@@ -110,7 +118,7 @@ passport.use('local.signup', new LocalStrategy({
     movil,
     username,
     password,
-    imagen : '/img/avatars/avatar.jpg'
+    imagen: '/img/avatars/avatar.jpg'
   };
   newUser.password = await helpers.encryptPassword(password);
   // Saving in the Database
