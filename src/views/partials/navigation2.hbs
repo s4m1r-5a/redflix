@@ -158,12 +158,8 @@
 				</a>
 
 				<div class="dropdown-menu dropdown-menu-right">
-					<a class="dropdown-item" href="/profile"><i class="align-middle mr-1"
-							data-feather="dollar-sign"></i>
-						100.000 P.</a>
-					<a class="dropdown-item" href="/profile"><i class="align-middle mr-1"
-							data-feather="dollar-sign"></i>
-						100.000 C.</a>
+					<a class="dropdown-item"><i class="align-middle mr-1" data-feather="dollar-sign"></i><span
+							id="saldoactual">{{user.saldoactual}}</span></a>
 					<div class="dropdown-divider"></div>
 					<a class="dropdown-item" href="/links/recarga">Agregar saldo</a>
 					<a class="dropdown-item" data-toggle="modal" data-target="#afiliar">Afiliar persona</a>
@@ -302,7 +298,7 @@
 				</div>
 				<form>
 					<ul class="list-unstyled">
-						<div id="datosactualiza" class="q" style="display:none;"></div>						
+						<div id="datosactualiza" class="q" style="display:none;"></div>
 					</ul>
 				</form>
 			</div>
@@ -311,7 +307,8 @@
 					<button type="button" class="btn btn-danger p" id="ediact">Editar</button>
 				</div>
 				<button type="button" class="btn btn-secondary" data-dismiss="modal" id="eliminard">Cancelar</button>
-				<button type="submit" class="btn btn-primary pagar q" id="meterdat" data-dismiss="modal" style="display:none;">Ingresar</button>
+				<button type="submit" class="btn btn-primary pagar q" id="meterdat" data-dismiss="modal"
+					style="display:none;">Ingresar</button>
 			</div>
 		</div>
 	</div>
@@ -320,9 +317,9 @@
 <!-- BEGIN success modal -->
 {{/if}}
 <div class="modal fade" id="ModalEventos" tabindex="-0" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
-        <div class="spinner-grow text-dark" role="status">
-            <span class="sr-only"></span>
-        </div>
-    </div>
+	<div class="modal-dialog modal-dialog-centered modal-sm" role="document">
+		<div class="spinner-grow text-dark" role="status">
+			<span class="sr-only"></span>
+		</div>
+	</div>
 </div>

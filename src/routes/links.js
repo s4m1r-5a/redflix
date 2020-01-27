@@ -3,20 +3,21 @@ const express = require('express');
 const router = express.Router();
 const crypto = require('crypto');
 const pool = require('../database');
-const { isLoggedIn, isLogged } = require('../lib/auth');
+const { isLoggedIn, isLogged, Admins } = require('../lib/auth');
 const sms = require('../sms.js');
 const { registro } = require('../keys');
 const request = require('request')
+const moment = require('moment');
 
 router.get('/add', isLoggedIn, (req, res) => {
     res.render('links/add');
 });
 
 //////////////////* PRODUCTOS */////////////////////
-router.get('/productos', isLoggedIn, (req, res) => {
+router.get('/productos', Admins, (req, res) => {
     res.render('links/productos');
 });
-router.post('/productos', isLoggedIn, async (req, res) => {
+router.post('/productos', Admins, async (req, res) => {
     const fila = await pool.query('SELECT * FROM products WHERE usuario = ?', req.user.id);
     respuesta = { "data": fila };
     console.log(respuesta)
@@ -28,10 +29,7 @@ router.get('/calendar', isLoggedIn, (req, res) => {
     console.log('si llega');
     res.render('links/calendar');
 });
-router.get('/ventas', isLogged, (req, res) => {
-    Desendentes(15)
-    res.render('links/ventas');
-});
+
 router.get('/social', isLoggedIn, (req, res) => {
     res.render('links/social');
 });
@@ -57,8 +55,52 @@ router.post('/movil', async (req, res) => {
     //console.log(req.body);
     res.send(cliente);
 });
-router.post('/ventas', async (req, res) => {
-    const { prod, product, nombre, user, movil } = req.body;
+//////////////* REPORTES *//////////////////////////////////
+router.get('/reportes', Admins, (req, res) => {
+    //Desendentes(15)
+    res.render('links/reportes');
+});
+router.post('/reportes', Admins, async (req, res) => {
+    const ventas = await pool.query(`SELECT * FROM ventas v INNER JOIN products p ON v.product = p.id_producto 
+    WHERE YEAR(v.fechadecompra) = YEAR(CURDATE()) AND MONTH(v.fechadecompra) BETWEEN 1 and 12`);
+    respuesta = { "data": ventas };
+    res.send(respuesta);
+});
+//////////////* SOLICITUDES *//////////////////////////////////
+router.get('/solicitudes', isLoggedIn, (req, res) => {
+    res.render('links/solicitudes');
+});
+router.post('/solicitudes', isLoggedIn, async (req, res) => {
+    const solicitudes = await pool.query(`SELECT t.id, u.fullname, us.id tu, us.fullname venefactor, t.fecha, t.monto, m.metodo, t.creador, t.estado idestado, e.estado, t.recibo 
+    FROM transacciones t INNER JOIN users u ON t.remitente = u.id INNER JOIN users us ON t.acreedor = us.id INNER JOIN metodos m ON t.metodo = m.id 
+    INNER JOIN estados e ON t.estado = e.id WHERE t.remitente = ? OR t.acreedor = ?`,[req.user.id, req.user.id]);
+    //YEAR(v.fechadecompra) = YEAR(CURDATE()) AND MONTH(v.fechadecompra) BETWEEN 1 AND 12
+    respuesta = { "data": solicitudes };
+    res.send(respuesta);
+});
+router.put('/solicitudes', isLoggedIn, async (req, res) => {
+    const {id, estado, mg} = req.body
+    const d = {estado}
+    console.log(req.body)
+    await pool.query('UPDATE transacciones set ? WHERE id = ?', [d, id]);
+    res.send(mg);
+});
+/////////////* VENTAS */////////////////////////////////////
+router.get('/ventas', isLoggedIn, (req, res) => {
+    res.render('links/ventas');
+});
+router.put('/ventas', isLoggedIn, async (req, res) => {
+    const { id_venta, correo, clave, client, smss, movil, fechadevencimiento, fechadeactivacion } = req.body
+    const venta = { correo, fechadeactivacion, fechadevencimiento }
+    const cliente = await pool.query('SELECT * FROM clientes WHERE id = ?', client);
+    const nombre = cliente[0].nombre.split(" ")
+    const msg = `${nombre[0]} tu usuario sera ${correo} clave ${clave}, ${smss}`
+    sms('57' + movil, msg);
+    await pool.query('UPDATE ventas set ? WHERE id = ?', [venta, id_venta]);
+    res.send(true);
+});
+router.post('/ventas', isLoggedIn, async (req, res) => {
+    const { prod, product, nombre, user, movil, nompro } = req.body;
     const result = await rango(req.user.id);
     const usua = await usuario(req.user.id);
     const sald = await saldo(27, result, req.user.id);
@@ -75,6 +117,7 @@ router.post('/ventas', async (req, res) => {
             let producto = product.split(" "),
                 pin = producto[0] + ID(8)
             const venta = {
+                fechadecompra: new Date(),
                 pin,
                 vendedor: usua,
                 cajero: req.user.fullname,
@@ -90,43 +133,84 @@ router.post('/ventas', async (req, res) => {
         } else if (product == '' || nombre == '' || movil == '') {
             req.flash('error', 'Existe un un error en la solicitud');
             res.redirect('/links/ventas');
-        } else {
+        } else if (prod == 'NTFX') {
+            let nombr = nombre.split(" ");
+            var correo = nombre.replace(/ /g, "").slice(0, 9) + ID(3) + '@yopmail.com';
+            correo = correo.toLowerCase();
             const venta2 = {
-                vendedor: req.user.id,
-                cliente: user,
+                fechadecompra: new Date(),
+                vendedor: usua,
+                cajero: req.user.fullname,
+                idcajero: req.user.id,
+                client: user,
                 product,
+                correo,
                 rango: result,
                 movildecompra: cel
             }
-            //await pool.query('INSERT INTO transaccion SET ? ', newLink);
-            console.log(venta2);
-            req.flash('error', 'Transacción realizada correctamente');
+            const cliente = await pool.query('SELECT * FROM ventas WHERE client = ? AND fechadevencimiento >= ?', [user, new Date()]);
+            if (cliente.length) {
+                fech = moment(cliente[0].fechadevencimiento).format('YYYY-MM-DD');
+                venta2.fechadevencimiento = fech;
+                sms('57' + cel, `${nombr[0].toUpperCase()} tu actual membresia aun no vence, el dia ${fech} activaremos esta recarga que estas realizando, para mas info escribenos al 3012673944. RedFlix`);
+            } else {
+                sms('57' + cel, `${nombr[0].toUpperCase()} adquiriste ${prod} ${nompro} en el lapso del día recibirás  tus datos. Si tenes alguna duda escríbenos al 3012673944 Whatsapp. RedFlix`);
+            }
+            await pool.query('INSERT INTO ventas SET ? ', venta2);
+            req.flash('success', 'Transacción realizada correctamente');
             res.redirect('/links/ventas');
         }
     }
 });
-router.post('/patro', async (req, res) => {
+//////////////////////* RECARGAS *//////////////////////////
+router.post('/patro', isLoggedIn, async (req, res) => {
     const { quien } = req.body;
     if (quien == "Patrocinador") {
         const fila = await pool.query('SELECT * FROM pines WHERE id = ?', req.user.pin);
         res.send(fila);
     }
 });
-
-router.post('/recarga', async (req, res) => {
-    const { monto, metodo, id } = req.body;
-    const newLink = {
-        remitente: id,
+router.post('/recarga', isLoggedIn, async (req, res) => {
+    console.log(req.body)
+    console.log()
+    const { monto, metodo, id, quien, pin } = req.body;
+    const Transaccion = {
         acreedor: req.user.id,
+        fecha: new Date(),
         monto,
         metodo,
         creador: req.user.id,
     };
-    await pool.query('INSERT INTO transaccion SET ? ', newLink);
-    req.flash('success', 'Solicitud exitosa');
-    res.render('/links/recarga');
+    if (monto < 600000) {
+        Transaccion.rango = 5;
+    } else if (monto >= 600000 || monto < 1500000 ) {
+        Transaccion.rango = 4;
+    } else if (monto >= 1500000 || monto < 3000000 ) {
+        Transaccion.rango = 3;
+    } else if (monto >= 3000000 || monto < 10000000 ) {
+        Transaccion.rango = 2;
+    } else if (monto >= 10000000) {
+        Transaccion.rango = 1;
+    }
+    if (quien === 'Patrocinador') {
+        Transaccion.remitente = id;
+    } else if (quien === 'Redflix') {
+        Transaccion.remitente = 15;
+        Transaccion.recibo = pin;
+    } else {
+        const quins = await pool.query('SELECT * FROM pines WHERE id = ?', pin);
+        if (quins.length) {
+            Transaccion.remitente = quins[0].acreedor;
+        } else {
+            req.flash('error', 'ID no existe porfavor verifique el ID que esta ingresando e intentelo nuevamente');
+            res.redirect('/links/recarga');
+        };
+    };
+    await pool.query('INSERT INTO transacciones SET ? ', Transaccion);
+    req.flash('success', 'Solicitud de saldo exitosa exitosa');
+    res.redirect('/links/recarga');
 });
-
+/////////////////////////* *////////////////////////////////////////
 router.post('/id', async (req, res) => {
     const { pin } = req.body;
     const rows = await pool.query('SELECT * FROM pines WHERE id = ?', pin);
@@ -140,7 +224,7 @@ router.post('/id', async (req, res) => {
 router.post('/canjear', async (req, res) => {
     const { pin } = req.body;
     const rows = await pool.query(`SELECT v.pin, v.client, p.producto, p.precio, p.dias 
-    FROM ventas v INNER JOIN products p ON v.product = p.id WHERE pin = ?`, pin);
+    FROM ventas v INNER JOIN products p ON v.product = p.id_producto WHERE pin = ?`, pin);
     console.log(rows)
     if (rows.length > 0 && rows[0].client === null) {
         res.send(rows);
@@ -286,7 +370,7 @@ async function usuario(id) {
     }
 };
 async function saldo(producto, rango, id) {
-    const produ = await pool.query(`SELECT precio, utilidad, stock FROM products WHERE id = ?`, producto);
+    const produ = await pool.query(`SELECT precio, utilidad, stock FROM products WHERE id_producto = ?`, producto);
     const rang = await pool.query(`SELECT comision FROM rangos WHERE id = ?`, rango);
     const operacion = produ[0].precio - (produ[0].utilidad * rang[0].comision / 100);
     const saldo = await pool.query(`SELECT IF(saldoactual < ${operacion} OR saldoactual IS NULL,'NO','SI') Respuesta FROM users WHERE id = ? `, id);
@@ -302,7 +386,7 @@ async function rango(id) {
     FROM ventas v 
     INNER JOIN clientes c ON v.client = c.id 
     INNER JOIN users u ON v.vendedor = u.id
-    INNER JOIN products p ON v.product = p.id
+    INNER JOIN products p ON v.product = p.id_producto
     INNER JOIN pines pi ON u.pin = pi.id
     WHERE pi.acreedor = ?
         AND YEAR(v.fechadecompra) = YEAR(CURDATE()) 
@@ -431,7 +515,7 @@ async function Desendentes(id) {
     FROM ventas v 
     INNER JOIN clientes c ON v.client = c.id 
     INNER JOIN users u ON v.vendedor = u.id
-    INNER JOIN products p ON v.product = p.id
+    INNER JOIN products p ON v.product = p.id_producto
     INNER JOIN rangos r ON v.rango = r.id
     INNER JOIN pines pi ON u.pin = pi.id
     WHERE pi.acreedor = 1${lDesc}
@@ -447,7 +531,7 @@ async function Desendentes(id) {
     FROM ventas v 
     INNER JOIN clientes c ON v.client = c.id 
     INNER JOIN users u ON v.vendedor = u.id
-    INNER JOIN products p ON v.product = p.id
+    INNER JOIN products p ON v.product = p.id_producto
     INNER JOIN rangos r ON v.rango = r.id
     INNER JOIN pines pi ON u.pin = pi.id
     WHERE pi.acreedor = 1${lDesc}
@@ -463,8 +547,7 @@ async function Desendentes(id) {
     FROM ventas v 
     INNER JOIN clientes c ON v.client = c.id 
     INNER JOIN users u ON v.vendedor = u.id
-    INNER JOIN products p ON v.product = p.id
-
+    INNER JOIN products p ON v.product = p.id_producto
     INNER JOIN rangos r ON v.rango = r.id
     INNER JOIN pines pi ON u.pin = pi.id
     WHERE pi.acreedor = 1${lDesc}

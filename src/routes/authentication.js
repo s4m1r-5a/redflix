@@ -79,7 +79,7 @@ router.get('/tablero', isLoggedIn, async (req, res) => {
   FROM ventas v 
   INNER JOIN clientes c ON v.client = c.id 
   INNER JOIN users u ON v.vendedor = u.id
-  INNER JOIN products p ON v.product = p.id
+  INNER JOIN products p ON v.product = p.id_producto
   INNER JOIN pines pi ON u.pin = pi.id
   WHERE u.id = ?
       AND YEAR(v.fechadecompra) = YEAR(CURDATE()) 
@@ -90,7 +90,7 @@ router.get('/tablero', isLoggedIn, async (req, res) => {
   FROM ventas v 
   INNER JOIN clientes c ON v.client = c.id 
   INNER JOIN users u ON v.vendedor = u.id
-  INNER JOIN products p ON v.product = p.id
+  INNER JOIN products p ON v.product = p.id_producto
   INNER JOIN pines pi ON u.pin = pi.id
   WHERE pi.usuario = ?
       AND YEAR(v.fechadecompra) = YEAR(CURDATE()) 
@@ -108,7 +108,7 @@ router.post('/tablero2', isLoggedIn, async (req, res) => {
   FROM ventas v 
   INNER JOIN clientes c ON v.client = c.id 
   INNER JOIN users u ON v.vendedor = u.id
-  INNER JOIN products p ON v.product = p.id
+  INNER JOIN products p ON v.product = p.id_producto
   INNER JOIN pines pi ON u.pin = pi.id
   WHERE pi.usuario = ?
       AND YEAR(v.fechadecompra) = YEAR(CURDATE()) 

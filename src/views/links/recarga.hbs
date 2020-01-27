@@ -12,15 +12,15 @@
                 <div class="row justify-content-center mt-3 mb-2">
                     <div class="col-auto">
                         <nav class="nav btn-group">
-                            <a href="#Soat" class="btn btn-outline-primary active" data-toggle="tab">Solicitar saldo</a>
-                            <a href="#Soat" class="btn btn-outline-primary" data-toggle="tab">Pasar saldo</a>
-                            <a href="#iux" class="btn btn-outline-primary" data-toggle="tab">Esquema</a>
+                            <a href="#solicitar" class="btn btn-outline-primary active" data-toggle="tab">Solicitar
+                                saldo</a>
+                            <a href="" id="disable" class="btn btn-outline-primary" data-toggle="tab" disabled>Pasar saldo</a>                            
                         </nav>
                     </div>
                 </div>
 
                 <div class="tab-content">
-                    <div class="tab-pane fade show active" id="Soat">
+                    <div class="tab-pane fade show active" id="solicitar">
                         <!-- <div class="tab-pane fade" id="Soat"> -->
                         <div class="row py-4">
                             <div class="col-sm-12 mb-3 mb-md-0">
@@ -32,29 +32,29 @@
                                                     <label for="monto">Monto</label>
                                                     <input type="text" id="monto" name="monto" class="form-control"
                                                         placeholder="Ingrese valor a recargar"
-                                                        style="text-align:center" />
+                                                        style="text-align:center" required />
                                                 </div>
                                                 <div class="form-group col-md-3">
                                                     <label for="metodo">Forma de pago</label>
-                                                    <select id="metodo" class="form-control" name="metodo">
-                                                        <option value="2" selected>Consignacion</option>
-                                                        <option value="3" >Transferencia</option>
-                                                        <option value="5" >Nequi</option>
-                                                        <option value="4" >Efectivo</option>
+                                                    <select id="metodo" class="form-control" name="metodo" required>
+                                                        <option value="3" selected>Consignacion</option>
+                                                        <option value="2">Transferencia</option>
+                                                        <option value="5">Nequi</option>
+                                                        <option value="4">Efectivo</option>
                                                     </select>
                                                 </div>
                                                 <div class="form-group col-md-2">
                                                     <label for="quien">Solicitar a?</label>
-                                                    <select id="quien" class="form-control" name="quien">
-                                                        <option selected>RedFlix</option>
+                                                    <select id="quien" class="form-control" name="quien" required>
+                                                        <option value="Redflix" selected>RedFlix</option>
                                                         <option value="Patrocinador">Patrocinador</option>
-                                                        <option>Otro</option>
+                                                        <option value="pin">Otro</option>
                                                     </select>
                                                 </div>
                                                 <div class="form-group col-md-2">
-                                                    <label for="id">ID?</label>
-                                                    <input type="text" class="form-control" id="id" name="pin">
-                                                     <input type="text" class="form-control" name="id" style="display: none">
+                                                    <label for="id">ID? || Recibo?</label>
+                                                    <input type="text" class="form-control" id="id" name="pin" required>
+                                                    <input type="hidden" name="id" value="">
                                                 </div>
                                             </div>
                                             <button type="submit" class="btn btn-primary">Enviar solicitud</button>

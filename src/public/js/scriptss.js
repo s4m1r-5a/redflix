@@ -7,7 +7,7 @@ function Moneda(valor) {
 //mensajes
 function SMSj(tipo, mensaje) {
     var message = mensaje;
-    var title = "Tq Travel";
+    var title = "RedFlix";
     var type = tipo;
     toastr[type](message, title, {
         positionClass: "toast-top-right",
@@ -20,6 +20,11 @@ function SMSj(tipo, mensaje) {
 };
 $(document).ready(function () {
     moment.locale('es');
+    $('#disable').on('click', function () {
+        SMSj('error', 'Aun no se encuentra habilitada esta opcion, trabajamos en ello. RedFlix...')
+    })
+    var saldoact = $('#saldoactual').text()
+    $('#saldoactual').html(Moneda(saldoact))
     $('a.r').css("color", "#bfbfbf");
     $("a.r").hover(function () {
         $(this).next('div.reditarh').show();
@@ -231,19 +236,28 @@ if ($('#pin').is(':visible') || $('.ver').is(':visible')) {
     $("nav.navbar").show();
 };
 $('#quien').change(function () {
-    var fd = { quien: $('#quien').val() };
-    $.ajax({
-        url: '/links/patro',
-        data: fd,
-        type: 'POST',
-        success: function (data) {
-            $('#id').val(data[0].id);
-            $('input[name="id"]').val(data[0].usuario);
-        }
-    });
+    if ($(this).val() === 'Patrocinador') {
+        var fd = { quien: $('#quien').val() };
+        $.ajax({
+            url: '/links/patro',
+            data: fd,
+            type: 'POST',
+            success: function (data) {
+                if (!data[0].usuario) {
+                    SMSj('error', 'Esta cuenta es Administrativa y no puede recargarse asimisma, ponte en contacto con el encargado del sistema')
+                } else {
+                    $('#id').val(data[0].id);
+                    $('input[name="id"]').val(data[0].usuario);
+                }
+            }
+        });
+    } else {
+        $('#id').val('');
+        $('#id').focus();
+    }
 });
 var formu
-$('form').click(function(){
+$('form').click(function () {
     formu = $(this).attr('id')
 })
 $(`.movil`).change(function () {
@@ -549,7 +563,275 @@ if (window.location == "http://localhost:3000/tablero" || window.location == "ht
         autoWidth: false
     });
 };
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////* REPORTES */////////////////////////////////////////////////////////////
+if (window.location.pathname == `/links/reportes`) {
+    let p = '', fecha = new Date(), fechs = new Date();
+    fecha.setDate(fecha.getDate() + 30)
+    function RecogerDatos() {
+        dts = {
+            id_venta: $('#idsms').val(),
+            correo: $('#correo').val(),
+            clave: $('#contraseña').val(),
+            client: $('#cliente').val(),
+            smss: $('#smsdescripcion').text(),
+            movil: $("#cels").val(),
+            fechadeactivacion: moment.utc(fechs).format('YYYY-MM-DD'),
+            fechadevencimiento: moment.utc(fecha).format('YYYY-MM-DD')
+        };
+    };
+    $(".edi").on({
+        focus: function () {
+            $(this).css("background-color", "#FFFFCC");
+            $(this).next('div.reditarh').show("slow");
+            this.select();
+        },
+        blur: function () {
+            $(this).css({
+                "background-color": "transparent"
+            });
+            $('.reditarh').hide("slow");
+            $('.item').hide("slow");
+        },
+        change: function () {
+            //$(this).val($(this).val().toLowerCase().trim().split(' ').map(v => v[0].toUpperCase() + v.substr(1)).join(' '))
+        }
+    });
+    minDateFilter = "";
+    maxDateFilter = "";
+    $.fn.dataTableExt.afnFiltering.push(
+        function (oSettings, aData, iDataIndex) {
+            if (typeof aData._date == 'undefined') {
+                aData._date = new Date(aData[1]).getTime();
+            }
+            if (minDateFilter && !isNaN(minDateFilter)) {
+                if (aData._date < minDateFilter) {
+                    return false;
+                }
+            }
+            if (maxDateFilter && !isNaN(maxDateFilter)) {
+                if (aData._date > maxDateFilter) {
+                    return false;
+                }
+            }
+            return true;
+        }
+    );
+    $('#datatable2').on('click', '.te', function () {
+        var fila = $(this).parents('tr');
+        if ($(fila).hasClass('selected')) {
+            $(fila).removeClass('selected');
+        } else {
+            $('#datatable2').DataTable().$('tr.selected').removeClass('selected');
+            $(fila).addClass('selected');
+        }
+        var data = $('#datatable2').DataTable().row(fila).data();
+        $("#idsms").val(data.id);
+        $("#car").attr("src", data.imagenes);
+        $("#cliente").val(data.client);
+        $("#correo").val(data.correo);
+        $("#cels").val(data.movildecompra);
+        $('#ModalOrden').modal('toggle');
+    });
+
+    $('#ModalOrden').on('hidden.bs.modal', function () {
+        $('#datatable2 tr.selected').toggleClass('selected');
+        $("#ModalOrden input").val('');
+        $("#car").attr("src", '/img/car.jpg');
+    });
+
+    // Guardar o Actualizar Orden
+    $('#guardarOrden').on('click', function () {
+        RecogerDatos()
+        $.ajax({
+            type: 'PUT',
+            url: '/links/ventas',
+            data: dts,
+            success: function (data) {
+                tableOrden.ajax.reload(function (json) {
+                    $('#ModalOrden').modal('toggle');
+                    SMSj('success', 'Cuenta enviada exitosamente')
+                });
+            }
+        })
+    });
+
+    // Ver Orden de servicio
+    $('#mostrarOrden').on('click', function () {
+        var data = $('#datatable2').DataTable().row('.selected').data();
+        var url = `/links/orden?id=${data.id}&f=${data.start}`;
+        $(location).attr('href', url);
+    });
+
+    var tableOrden = $('#datatable2').DataTable({
+        dom: 'Bfrtip',
+        buttons: ['pageLength',
+            {
+                text: `<div class="mb-0">
+                    <i class="align-middle mr-2" data-feather="calendar"></i> <span class="align-middle">Fecha</span>
+               </div>`,
+                attr: {
+                    title: 'Fecha',
+                    id: 'Date'
+                },
+                className: 'btn btn-secondary fech',
+            }
+        ],
+        deferRender: true,
+        paging: true,
+        search: {
+            regex: true,
+            caseInsensitive: false,
+        },
+        responsive: {
+            details: {
+                type: 'column'
+            }
+        },
+        columnDefs: [{
+            className: 'control',
+            orderable: true,
+            targets: 0
+        }],
+        order: [[0, "desc"]],
+        language: {
+            "lengthMenu": "Mostrar 10 filas",
+            "sProcessing": "Procesando...",
+            "sLengthMenu": "Mostrar _MENU_ registros",
+            "sZeroRecords": "No se encontraron resultados",
+            "sEmptyTable": "Ningún dato disponible en esta tabla",
+            "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
+            "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+            "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+            "sInfoPostFix": "",
+            "sSearch": "Buscar : ",
+            "sUrl": "",
+            "sInfoThousands": ",",
+            "sLoadingRecords": "Cargando...",
+            "oPaginate": {
+                "sFirst": "Primero",
+                "sLast": "Último",
+                "sNext": "Siguiente",
+                "sPrevious": "Anterior"
+            },
+            "oAria": {
+                "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+            }
+        },
+        ajax: {
+            method: "POST",
+            url: "/links/reportes",
+            dataSrc: "data"
+        },
+        columns: [
+            { data: "id" },
+            {
+                data: "fechadecompra",
+                className: 'te',
+                render: function (data, method, row) {
+                    return moment(data).format('YYYY-MM-DD hh:mm A') //pone la fecha en un formato entendible
+                }
+            },
+            {
+                data: "pin",
+                className: 'te'
+            },
+            {
+                data: "vendedor",
+                className: 'te'
+            },
+            {
+                data: "client",
+                className: 'te'
+            },
+            {
+                data: "cajero",
+                className: 'te'
+            },
+            {
+                data: "producto",
+                className: 'te'
+            },
+            {
+                data: "correo",
+                className: 'te'
+            },
+            {
+                data: "fechadeactivacion",
+                className: 'te',
+                render: function (data, method, row) {
+                    if (data) {
+                        return moment(data).format('YYYY-MM-DD') || '' //pone la fecha en un formato entendible
+                    } else {
+                        return ''
+                    }
+                }
+            },
+            {
+                data: "fechadevencimiento",
+                className: 'te',
+                render: function (data, method, row) {
+                    if (data) {
+                        return moment(data).format('YYYY-MM-DD') || '' //pone la fecha en un formato entendible
+                    } else {
+                        return ''
+                    }
+                }
+            },
+            {
+                data: "movildecompra",
+                className: 'te'
+            },
+            {
+                data: "anular",
+                className: 'te'
+            },
+            {
+                data: "descripcion",
+                className: 'te'
+            }
+        ]
+    });
+    // Daterangepicker  
+    var start = moment().subtract(29, "days").startOf("hour");
+    var end = moment().startOf("hour").add(32, "hour");
+    $(".fech").daterangepicker({
+        locale: {
+            'format': 'YYYY-MM-DD HH:mm',
+            'separator': ' a ',
+            'applyLabel': 'Aplicar',
+            'cancelLabel': 'Cancelar',
+            'fromLabel': 'De',
+            'toLabel': 'A',
+            'customRangeLabel': 'Personalizado',
+            'weekLabel': 'S',
+            'daysOfWeek': ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
+            'monthNames': ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+            'firstDay': 1
+        },
+        opens: "center",
+        timePicker: true,
+        timePicker24Hour: true,
+        timePickerIncrement: 15,
+        opens: "right",
+        alwaysShowCalendars: false,
+        startDate: start,
+        endDate: end,
+        ranges: {
+            'Ayer': [moment().subtract(1, 'days').startOf("days"), moment().subtract(1, 'days').endOf("days")],
+            'Ultimos 7 Días': [moment().subtract(6, 'days'), moment().endOf("days")],
+            'Ultimos 30 Días': [moment().subtract(29, 'days'), moment().endOf("days")],
+            'Mes Pasado': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')],
+            'Este Mes': [moment().startOf('month'), moment().endOf('month')],
+            'Hoy': [moment().startOf('days'), moment().endOf("days")]
+        }
+    }, function (start, end, label) {
+        maxDateFilter = end;
+        minDateFilter = start;
+        tableOrden.draw();
+    });
+}
+//////////////////////////////////* PRODUCTOS */////////////////////////////////////////////////////////////
 if (window.location == `${window.location.origin}/links/productos`) {
     minDateFilter = "";
     maxDateFilter = "";
@@ -582,6 +864,12 @@ if (window.location == `${window.location.origin}/links/productos`) {
         });
 
     });
+    /*cont = parseFloat($('.cont').html())
+    $('.edi').keyup(function () {
+        cont--
+        console.log(cont)
+        $('.cont').html(cont)
+    });*/
     var Color = (val) => {
         var elemen = $(`#t-${val}`);
         if (elemen.hasClass('i')) {
@@ -679,7 +967,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
             dataSrc: "data"
         },
         columns: [
-            { data: "id" },
+            { data: "id_producto" },
             { data: "categoria" },
             { data: "producto" },
             {
@@ -708,6 +996,265 @@ if (window.location == `${window.location.origin}/links/productos`) {
         ]
     }); //table.buttons().container().appendTo("#datatable_wrapper .col-sm-12 .col-md-6");
 
+    // Daterangepicker 
+    /*var start = moment().subtract(29, "days").startOf("hour");
+    var end = moment().startOf("hour").add(32, "hour");*/
+    $(".fech").daterangepicker({
+        locale: {
+            'format': 'YYYY-MM-DD HH:mm',
+            'separator': ' a ',
+            'applyLabel': 'Aplicar',
+            'cancelLabel': 'Cancelar',
+            'fromLabel': 'De',
+            'toLabel': 'A',
+            'customRangeLabel': 'Personalizado',
+            'weekLabel': 'S',
+            'daysOfWeek': ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
+            'monthNames': ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+            'firstDay': 1
+        },
+        opens: "center",
+        timePicker: true,
+        timePicker24Hour: true,
+        timePickerIncrement: 15,
+        opens: "right",
+        alwaysShowCalendars: false,
+        //autoApply: false,
+        startDate: moment().subtract(29, "days"),
+        endDate: moment(),
+        ranges: {
+            'Ayer': [moment().subtract(1, 'days').startOf("days"), moment().subtract(1, 'days').endOf("days")],
+            'Ultimos 7 Días': [moment().subtract(6, 'days'), moment().endOf("days")],
+            'Ultimos 30 Días': [moment().subtract(29, 'days'), moment().endOf("days")],
+            'Mes Pasado': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')],
+            'Este Mes': [moment().startOf('month'), moment().endOf('month')],
+            'Hoy': [moment().startOf('days'), moment().endOf("days")],
+            'Mañana': [moment().add(1, 'days').startOf('days'), moment().add(1, 'days').endOf('days')],
+            'Proximos 30 Días': [moment().startOf('days'), moment().add(29, 'days').endOf("days")],
+            'Próximo Mes': [moment().add(1, 'month').startOf('month'), moment().add(1, 'month').endOf('month')]
+        }
+    }, function (start, end, label) {
+        maxDateFilter = end;
+        minDateFilter = start;
+        table.draw();
+        $("#Date_search").val(start.format('YYYY-MM-DD') + ' a ' + end.format('YYYY-MM-DD'));
+    });
+};
+/////////////////////////////* SOLICITUDES *////////////////////////////////////////////////////////////
+if (window.location == `${window.location.origin}/links/solicitudes`) {
+    minDateFilter = "";
+    maxDateFilter = "";
+    $.fn.dataTableExt.afnFiltering.push(
+        function (oSettings, aData, iDataIndex) {
+            if (typeof aData._date == 'undefined') {
+                aData._date = new Date(aData[3]).getTime();
+            }
+            if (minDateFilter && !isNaN(minDateFilter)) {
+                if (aData._date < minDateFilter) {
+                    return false;
+                }
+            }
+            if (maxDateFilter && !isNaN(maxDateFilter)) {
+                if (aData._date > maxDateFilter) {
+                    return false;
+                }
+            }
+            return true;
+        }
+    );
+    $(document).ready(function () {
+        $("#Date_search").html("");
+        $('a.toggle-vis').on('click', function (e) {
+            e.preventDefault();
+            // Get the column API object
+            var column = table.column($(this).attr('data-column'));
+            // Toggle the visibility
+            column.visible(!column.visible());
+        });
+
+    });
+    /*cont = parseFloat($('.cont').html())
+    $('.edi').keyup(function () {
+        cont--
+        console.log(cont)
+        $('.cont').html(cont)
+    });*/
+    var Color = (val) => {
+        var elemen = $(`#t-${val}`);
+        if (elemen.hasClass('i')) {
+            elemen.css('background-color', 'transparent');
+            elemen.removeClass('.i');
+        } else {
+            elemen.css('background-color', '#FFFFCC');
+            elemen.addClass('i');
+        }
+    }
+
+    var table = $('#datatable').DataTable({
+        dom: 'Bfrtip',
+        lengthMenu: [
+            [10, 25, 50, -1],
+            ['10 filas', '25 filas', '50 filas', 'Ver todo']
+        ],
+        buttons: ['pageLength',
+            {
+                text: `<div class="mb-0">
+                            <i class="align-middle mr-2" data-feather="calendar"></i> <span class="align-middle">Fecha</span>
+                       </div>`,
+                attr: {
+                    title: 'Fecha',
+                    id: 'Date'
+                },
+                className: 'btn btn-secondary fech'
+            }
+        ],
+        deferRender: true,
+        autoWidth: true,
+        paging: true,
+        search: {
+            regex: true,
+            caseInsensitive: false,
+        },
+        responsive: true,
+        order: [[0, 'desc']],
+        language: {
+            "lengthMenu": "Mostrar 10 filas",
+            "sProcessing": "Procesando...",
+            "sLengthMenu": "Mostrar _MENU_ registros",
+            "sZeroRecords": "No se encontraron resultados",
+            "sEmptyTable": "Ningún dato disponible en esta tabla",
+            "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
+            "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+            "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+            "sInfoPostFix": "",
+            "sSearch": "Buscar : ",
+            "sUrl": "",
+            "sInfoThousands": ",",
+            "sLoadingRecords": "Cargando...",
+            "oPaginate": {
+                "sFirst": "Primero",
+                "sLast": "Último",
+                "sNext": "Siguiente",
+                "sPrevious": "Anterior"
+            },
+            "oAria": {
+                "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+            }
+        },
+        ajax: {
+            method: "POST",
+            url: "/links/solicitudes",
+            dataSrc: "data"
+        },
+        /*initComplete: function (settings, json, row) {
+            alert(row);
+        },*/
+        columns: [
+            { data: "id" },
+            { data: "fullname" },
+            { data: "venefactor" },
+            {
+                data: "fecha",
+                render: function (data, method, row) {
+                    return moment.utc(data).format('YYYY-MM-DD HH:mm A') //pone la fecha en un formato entendible
+                }
+            },
+            {
+                data: "monto",
+                render: function (data, method, row) {
+                    return '$' + Moneda(parseFloat(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
+                }
+            },
+            { data: "metodo" },
+            { data: "creador" },
+            { data: "recibo" },
+            {
+                data: "estado",
+                render: function (data, method, row) {
+                    switch (data) {
+                        case 'Aprobada':
+                            return `<span class="badge badge-pill badge-success">${data}</span>`
+                            break;
+                        case 'Declinada':
+                            return `<span class="badge badge-pill badge-danger">${data}</span>`
+                            break;
+                        case 'Procesando':
+                            return `<span class="badge badge-pill badge-info">${data}</span>`
+                            break;
+                        case 'Pendiente':
+                            return `<span class="badge badge-pill badge-warning">${data}</span>`
+                            break;
+                        default:
+                            return `<span class="badge badge-pill badge-secondary">${data}</span>`
+                    }
+                }
+            },
+            {
+                defaultContent: `<button type="button" class="btn btn-secondary dropdown-toggle btnaprobar" data-toggle="dropdown" 
+                              aria-haspopup="true" aria-expanded="false">Acción</button>
+							<div class="dropdown-menu">								                                
+                            </div>`
+            }
+        ]
+    }); //table.buttons().container().appendTo("#datatable_wrapper .col-sm-12 .col-md-6");    
+    table.on('click', '.btnaprobar', function () {
+        var fila = $(this).parents('tr');
+        var data = table.row(fila).data();
+        if ($('#tu').val() !== data.tu) {
+            switch (data.estado) {
+                case 'Procesando':
+                    $(this).attr('data-toggle', "dropdown")
+                    $(this).next().html(`<a class="dropdown-item">Aprobar</a>
+                    <a class="dropdown-item">Declinar</a>
+                    <a class="dropdown-item">Procesando</a>`);
+                    break;
+                case 'Pendiente':
+                    $(this).attr('data-toggle', "dropdown")
+                    $(this).next().html(`<a class="dropdown-item">Aprobar</a>
+                    <a class="dropdown-item">Declinar</a>
+                    <a class="dropdown-item">Procesando</a>`);
+                    break;
+                default:
+                    $(this).removeAttr('data-toggle')
+                    SMSj('info', 'Despues de aprobada o declinada no se puede editar la solicitud.')
+            }
+        } else {
+            if (data.estado === 'Pendiente') {
+                $(this).attr('data-toggle', "dropdown")
+                $(this).next().html(`<a class="dropdown-item">Declinar</a>`);
+            } else {
+                $(this).attr('disabled', true)
+                SMSj('warning', 'No tienes permiso para realizar cambios en esta solicitud, solo el Benefactor podra realizar los cambios')
+            }
+        }
+    })
+    table.on('click', '.dropdown-item', function () {
+        var fila = $(this).parents('tr');
+        var data = table.row(fila).data();
+        var dts = { id: data.id, mg: data.estado }
+        switch ($(this).text()) {
+            case 'Aprobar':
+                dts.estado = 4;
+                break;
+            case 'Declinar':
+                dts.estado = 6;
+                break;
+            case 'Procesando':
+                dts.estado = 1;
+                break;
+        }
+        $.ajax({
+            type: 'PUT',
+            url: '/links/solicitudes',
+            data: dts,
+            success: function (data) {
+                table.ajax.reload(function (json) {
+                    SMSj('success', `Solicitud procesada correctamente`)
+                });
+            }
+        })
+    })
     // Daterangepicker 
     /*var start = moment().subtract(29, "days").startOf("hour");
     var end = moment().startOf("hour").add(32, "hour");*/
