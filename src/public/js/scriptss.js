@@ -8,6 +8,31 @@ function Moneda(valor) {
 let languag = {
     "lengthMenu": "Ver 10 filas",
     "sProcessing": "Procesando...",
+    "sLengthMenu": "",
+    "sZeroRecords": "No se encontraron resultados",
+    "sEmptyTable": "Ningún dato disponible",
+    "sInfo": "",
+    "sInfoEmpty": "",
+    "sInfoFiltered": "",
+    "sInfoPostFix": "",
+    "sSearch": "",
+    "sUrl": "",
+    "sInfoThousands": ",",
+    "sLoadingRecords": "Cargando...",
+    "oPaginate": {
+        "sFirst": "Pri",
+        "sLast": "Últ",
+        "sNext": "Sig",
+        "sPrevious": "Ant"
+    },
+    "oAria": {
+        "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+        "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+    }
+};
+/*let languag = {
+    "lengthMenu": "Ver 10 filas",
+    "sProcessing": "Procesando...",
     "sLengthMenu": "Ver _MENU_ filas",
     "sZeroRecords": "No se encontraron resultados",
     "sEmptyTable": "Ningún dato disponible",
@@ -29,7 +54,7 @@ let languag = {
         "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
         "sSortDescending": ": Activar para ordenar la columna de manera descendente"
     }
-};
+};*/
 //mensajes
 function SMSj(tipo, mensaje) {
     var message = mensaje;
