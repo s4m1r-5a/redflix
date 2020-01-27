@@ -60,36 +60,7 @@ router.get('/reportes', Admins, (req, res) => {
     //Desendentes(15)
     res.render('links/reportes');
 });
-router.post('/reportes', Admins, async (req, res) => {
-    const ventas = await pool.query(`SELECT * FROM ventas v INNER JOIN products p ON v.product = p.id_producto 
-    WHERE YEAR(v.fechadecompra) = YEAR(CURDATE()) AND MONTH(v.fechadecompra) BETWEEN 1 and 12`);
-    respuesta = { "data": ventas };
-    res.send(respuesta);
-});
-//////////////* SOLICITUDES *//////////////////////////////////
-router.get('/solicitudes', isLoggedIn, (req, res) => {
-    res.render('links/solicitudes');
-});
-router.post('/solicitudes', isLoggedIn, async (req, res) => {
-    const solicitudes = await pool.query(`SELECT t.id, u.fullname, us.id tu, us.fullname venefactor, t.fecha, t.monto, m.metodo, t.creador, t.estado idestado, e.estado, t.recibo 
-    FROM transacciones t INNER JOIN users u ON t.remitente = u.id INNER JOIN users us ON t.acreedor = us.id INNER JOIN metodos m ON t.metodo = m.id 
-    INNER JOIN estados e ON t.estado = e.id WHERE t.remitente = ? OR t.acreedor = ?`,[req.user.id, req.user.id]);
-    //YEAR(v.fechadecompra) = YEAR(CURDATE()) AND MONTH(v.fechadecompra) BETWEEN 1 AND 12
-    respuesta = { "data": solicitudes };
-    res.send(respuesta);
-});
-router.put('/solicitudes', isLoggedIn, async (req, res) => {
-    const {id, estado, mg} = req.body
-    const d = {estado}
-    console.log(req.body)
-    await pool.query('UPDATE transacciones set ? WHERE id = ?', [d, id]);
-    res.send(mg);
-});
-/////////////* VENTAS */////////////////////////////////////
-router.get('/ventas', isLoggedIn, (req, res) => {
-    res.render('links/ventas');
-});
-router.put('/ventas', isLoggedIn, async (req, res) => {
+router.put('/reportes', isLoggedIn, async (req, res) => {
     const { id_venta, correo, clave, client, smss, movil, fechadevencimiento, fechadeactivacion } = req.body
     const venta = { correo, fechadeactivacion, fechadevencimiento }
     const cliente = await pool.query('SELECT * FROM clientes WHERE id = ?', client);
@@ -98,6 +69,61 @@ router.put('/ventas', isLoggedIn, async (req, res) => {
     sms('57' + movil, msg);
     await pool.query('UPDATE ventas set ? WHERE id = ?', [venta, id_venta]);
     res.send(true);
+});
+router.post('/reportes/:id', isLoggedIn, async (req, res) => {
+    const { id } = req.params;
+    if (id == 'table2') {
+
+        const ventas = await pool.query(`SELECT * FROM ventas v INNER JOIN products p ON v.product = p.id_producto 
+        WHERE v.vendedor = ? AND v.product != 25 AND YEAR(v.fechadecompra) = YEAR(CURDATE()) AND MONTH(v.fechadecompra) BETWEEN 1 and 12`, req.user.id);
+        respuesta = { "data": ventas };
+        res.send(respuesta);
+
+    } else if (id == 'table3') {
+
+        const solicitudes = await pool.query(`SELECT t.id, u.fullname, us.id tu, us.fullname venefactor, 
+        t.fecha, t.monto, m.metodo, t.creador, t.estado idestado, e.estado, t.recibo, r.id idrecarga, 
+        r.transaccion, r.fecha fechtrans, r.saldoanterior, r.numeroventas FROM transacciones t 
+        INNER JOIN users u ON t.remitente = u.id INNER JOIN users us ON t.acreedor = us.id 
+        INNER JOIN recargas r ON r.transaccion = t.id INNER JOIN metodos m ON t.metodo = m.id 
+        INNER JOIN estados e ON t.estado = e.id WHERE t.acreedor = ? AND  YEAR(t.fecha) = YEAR(CURDATE()) 
+        AND MONTH(t.fecha) BETWEEN 1 and 12`, req.user.id);
+        respuesta = { "data": solicitudes };
+        res.send(respuesta);
+
+    } else if (id == 'table4') {
+
+        const ventas = await pool.query(`SELECT v.id, v.fechadecompra, p.producto, v.transaccion, u.fullname, t.fecha fechsolicitud, 
+        t.monto, m.metodo, t.estado FROM ventas v INNER JOIN products p ON v.product = p.id_producto 
+        INNER JOIN transacciones t ON v.transaccion = t.id INNER JOIN users u ON t.acreedor = u.id INNER JOIN metodos m ON t.metodo = m.id
+        WHERE v.vendedor = ? AND v.product = 25 AND YEAR(v.fechadecompra) = YEAR(CURDATE()) AND MONTH(v.fechadecompra) BETWEEN 1 and 12`, req.user.id);
+        respuesta = { "data": ventas };
+        res.send(respuesta);
+    }
+
+});
+//////////////* SOLICITUDES *//////////////////////////////////
+router.get('/solicitudes', isLoggedIn, (req, res) => {
+    res.render('links/solicitudes');
+});
+router.post('/solicitudes', isLoggedIn, async (req, res) => {
+    const solicitudes = await pool.query(`SELECT t.id, u.fullname, us.id tu, us.fullname venefactor, t.fecha, t.monto, m.metodo, t.creador, t.estado idestado, e.estado, t.recibo 
+    FROM transacciones t INNER JOIN users u ON t.remitente = u.id INNER JOIN users us ON t.acreedor = us.id INNER JOIN metodos m ON t.metodo = m.id 
+    INNER JOIN estados e ON t.estado = e.id WHERE t.remitente = ? OR t.acreedor = ?`, [req.user.id, req.user.id]);
+    //YEAR(v.fechadecompra) = YEAR(CURDATE()) AND MONTH(v.fechadecompra) BETWEEN 1 AND 12
+    respuesta = { "data": solicitudes };
+    res.send(respuesta);
+});
+router.put('/solicitudes', isLoggedIn, async (req, res) => {
+    const { id, estado, mg } = req.body
+    const d = { estado }
+    console.log(req.body)
+    await pool.query('UPDATE transacciones set ? WHERE id = ?', [d, id]);
+    res.send(mg);
+});
+/////////////* VENTAS */////////////////////////////////////
+router.get('/ventas', isLoggedIn, (req, res) => {
+    res.render('links/ventas');
 });
 router.post('/ventas', isLoggedIn, async (req, res) => {
     const { prod, product, nombre, user, movil, nompro } = req.body;
@@ -183,11 +209,11 @@ router.post('/recarga', isLoggedIn, async (req, res) => {
     };
     if (monto < 600000) {
         Transaccion.rango = 5;
-    } else if (monto >= 600000 || monto < 1500000 ) {
+    } else if (monto >= 600000 || monto < 1500000) {
         Transaccion.rango = 4;
-    } else if (monto >= 1500000 || monto < 3000000 ) {
+    } else if (monto >= 1500000 || monto < 3000000) {
         Transaccion.rango = 3;
-    } else if (monto >= 3000000 || monto < 10000000 ) {
+    } else if (monto >= 3000000 || monto < 10000000) {
         Transaccion.rango = 2;
     } else if (monto >= 10000000) {
         Transaccion.rango = 1;

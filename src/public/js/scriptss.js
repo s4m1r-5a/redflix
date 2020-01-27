@@ -4,6 +4,32 @@ function Moneda(valor) {
     valor = valor.split('').reverse().join('').replace(/^[\.]/, '');
     return valor;
 }
+//lenguaje
+let languag = {
+    "lengthMenu": "Ver 10 filas",
+    "sProcessing": "Procesando...",
+    "sLengthMenu": "Ver _MENU_ filas",
+    "sZeroRecords": "No se encontraron resultados",
+    "sEmptyTable": "Ningún dato disponible",
+    "sInfo": "Mostrando del _START_ al _END_ | Total _TOTAL_ registros",
+    "sInfoEmpty": "Reg. del 0 al 0 | Total 0 registros",
+    "sInfoFiltered": "(filtro de _MAX_ registros)",
+    "sInfoPostFix": "",
+    "sSearch": "Buscar : ",
+    "sUrl": "",
+    "sInfoThousands": ",",
+    "sLoadingRecords": "Cargando...",
+    "oPaginate": {
+        "sFirst": "Primero",
+        "sLast": "Último",
+        "sNext": "Siguiente",
+        "sPrevious": "Anterior"
+    },
+    "oAria": {
+        "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+        "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+    }
+};
 //mensajes
 function SMSj(tipo, mensaje) {
     var message = mensaje;
@@ -644,7 +670,7 @@ if (window.location.pathname == `/links/reportes`) {
         RecogerDatos()
         $.ajax({
             type: 'PUT',
-            url: '/links/ventas',
+            url: '/links/reportes',
             data: dts,
             success: function (data) {
                 tableOrden.ajax.reload(function (json) {
@@ -654,14 +680,7 @@ if (window.location.pathname == `/links/reportes`) {
             }
         })
     });
-
-    // Ver Orden de servicio
-    $('#mostrarOrden').on('click', function () {
-        var data = $('#datatable2').DataTable().row('.selected').data();
-        var url = `/links/orden?id=${data.id}&f=${data.start}`;
-        $(location).attr('href', url);
-    });
-
+    //////////////////////* Table2 */////////////////////// 
     var tableOrden = $('#datatable2').DataTable({
         dom: 'Bfrtip',
         buttons: ['pageLength',
@@ -693,34 +712,10 @@ if (window.location.pathname == `/links/reportes`) {
             targets: 0
         }],
         order: [[0, "desc"]],
-        language: {
-            "lengthMenu": "Mostrar 10 filas",
-            "sProcessing": "Procesando...",
-            "sLengthMenu": "Mostrar _MENU_ registros",
-            "sZeroRecords": "No se encontraron resultados",
-            "sEmptyTable": "Ningún dato disponible en esta tabla",
-            "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
-            "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
-            "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
-            "sInfoPostFix": "",
-            "sSearch": "Buscar : ",
-            "sUrl": "",
-            "sInfoThousands": ",",
-            "sLoadingRecords": "Cargando...",
-            "oPaginate": {
-                "sFirst": "Primero",
-                "sLast": "Último",
-                "sNext": "Siguiente",
-                "sPrevious": "Anterior"
-            },
-            "oAria": {
-                "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
-                "sSortDescending": ": Activar para ordenar la columna de manera descendente"
-            }
-        },
+        language: languag,
         ajax: {
             method: "POST",
-            url: "/links/reportes",
+            url: "/links/reportes/table2",
             dataSrc: "data"
         },
         columns: [
@@ -792,6 +787,158 @@ if (window.location.pathname == `/links/reportes`) {
             }
         ]
     });
+    //////////////////////* Table3 *///////////////////////    
+    var table3 = $('#datatable3').DataTable({
+        deferRender: true,
+        paging: true,
+        search: {
+            regex: true,
+            caseInsensitive: false,
+        },
+        responsive: {
+            details: {
+                type: 'column'
+            }
+        },
+        columnDefs: [{
+            className: 'control',
+            orderable: true,
+            targets: 0
+        }],
+        order: [[0, "desc"]],
+        language: languag,
+        ajax: {
+            method: "POST",
+            url: "/links/reportes/table3",
+            dataSrc: "data"
+        },
+        columns: [
+            { data: "id" },
+            {
+                data: "fecha",
+                render: function (data, method, row) {
+                    return moment.utc(data).format('YYYY-MM-DD HH:mm A') //pone la fecha en un formato entendible
+                }
+            },
+            { data: "fullname" },
+            { data: "venefactor" },
+            {
+                data: "monto",
+                render: function (data, method, row) {
+                    return '$' + Moneda(parseFloat(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
+                }
+            },
+            { data: "metodo" },
+            { data: "idrecarga" },
+            {
+                data: "fechtrans",
+                render: function (data, method, row) {
+                    return moment(data).format('YYYY-MM-DD HH:mm A') //pone la fecha en un formato entendible
+                }
+            },
+            {
+                data: "saldoanterior",
+                render: function (data, method, row) {
+                    return '$' + Moneda(parseFloat(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
+                }
+            },
+            { data: "numeroventas" },
+            {
+                data: "estado",
+                render: function (data, method, row) {
+                    switch (data) {
+                        case 'Aprobada':
+                            return `<span class="badge badge-pill badge-success">${data}</span>`
+                            break;
+                        case 'Declinada':
+                            return `<span class="badge badge-pill badge-danger">${data}</span>`
+                            break;
+                        case 'Procesando':
+                            return `<span class="badge badge-pill badge-info">${data}</span>`
+                            break;
+                        case 'Pendiente':
+                            return `<span class="badge badge-pill badge-warning">${data}</span>`
+                            break;
+                        default:
+                            return `<span class="badge badge-pill badge-secondary">${data}</span>`
+                    }
+                }
+            },
+            { data: "recibo" },
+        ]
+    });
+    //////////////////////* Table4 *///////////////////////    
+    var table4 = $('#datatable4').DataTable({
+        deferRender: true,
+        paging: true,
+        search: {
+            regex: true,
+            caseInsensitive: false,
+        },
+        responsive: {
+            details: {
+                type: 'column'
+            }
+        },
+        columnDefs: [{
+            className: 'control',
+            orderable: true,
+            targets: 0
+        }],
+        order: [[0, "desc"]],
+        language: languag,
+        ajax: {
+            method: "POST",
+            url: "/links/reportes/table4",
+            dataSrc: "data"
+        },
+        columns: [  
+            { data: "id" },
+            {
+                data: "fechsolicitud",
+                render: function (data, method, row) {
+                    return moment(data).format('YYYY-MM-DD hh:mm A') //pone la fecha en un formato entendible
+                }
+            },
+            { data: "fullname" },
+            {
+                data: "monto",
+                render: function (data, method, row) {
+                    return '$' + Moneda(parseFloat(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
+                }
+            },
+            { data: "transaccion" },
+            { data: "metodo" },
+            { data: "producto" },
+            {
+                data: "fechadecompra",
+                render: function (data, method, row) {
+                    return moment(data).format('YYYY-MM-DD') || '' //pone la fecha en un formato entendible
+                }
+            },
+            {
+                data: "estado",
+                render: function (data, method, row) {
+                    switch (data) {
+                        case 4:
+                            return `<span class="badge badge-pill badge-success">Aprobada</span>`
+                            break;
+                        case 6:
+                            return `<span class="badge badge-pill badge-danger">Declinada</span>`
+                            break;
+                        case 1:
+                            return `<span class="badge badge-pill badge-info">Procesando</span>`
+                            break;
+                        case 3:
+                            return `<span class="badge badge-pill badge-warning">Pendiente</span>`
+                            break;
+                        default:
+                            return `<span class="badge badge-pill badge-secondary">Indefinida</span>`
+                    }
+                }
+            }
+        ]
+    });
     // Daterangepicker  
     var start = moment().subtract(29, "days").startOf("hour");
     var end = moment().startOf("hour").add(32, "hour");
@@ -829,6 +976,8 @@ if (window.location.pathname == `/links/reportes`) {
         maxDateFilter = end;
         minDateFilter = start;
         tableOrden.draw();
+        table3.draw();
+        table4.draw();
     });
 }
 //////////////////////////////////* PRODUCTOS */////////////////////////////////////////////////////////////
@@ -1109,8 +1258,9 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             }
         ],
         deferRender: true,
-        autoWidth: true,
         paging: true,
+        autoWidth: true,
+        //paging: true,
         search: {
             regex: true,
             caseInsensitive: false,
@@ -1191,10 +1341,11 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                 }
             },
             {
-                defaultContent: `<button type="button" class="btn btn-secondary dropdown-toggle btnaprobar" data-toggle="dropdown" 
-                              aria-haspopup="true" aria-expanded="false">Acción</button>
-							<div class="dropdown-menu">								                                
-                            </div>`
+                defaultContent: `<div class="btn-group btn-group-sm">
+                                    <button type="button" class="btn btn-secondary dropdown-toggle btnaprobar" data-toggle="dropdown" 
+                                     aria-haspopup="true" aria-expanded="false">Acción</button>
+                                        <div class="dropdown-menu"></div>
+                                </div>`
             }
         ]
     }); //table.buttons().container().appendTo("#datatable_wrapper .col-sm-12 .col-md-6");    
