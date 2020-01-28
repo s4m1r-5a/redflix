@@ -52,7 +52,6 @@ router.post('/add', async (req, res) => {
 router.post('/movil', async (req, res) => {
     const { movil } = req.body;
     const cliente = await pool.query('SELECT * FROM clientes WHERE movil = ?', movil);
-    //console.log(req.body);
     res.send(cliente);
 });
 //////////////* REPORTES *//////////////////////////////////

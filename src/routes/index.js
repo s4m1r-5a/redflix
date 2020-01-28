@@ -186,18 +186,40 @@ router.get(`/planes`, async (req, res) => {
 });
 router.post(`/venta`, async (req, res) => {
     const { telephone, buyerFullName, buyerEmail, pin } = req.body;
-    
+
     const cliente = await pool.query('SELECT * FROM clientes WHERE email = ? AND movil = ?', [buyerEmail, telephone]);
     if (cliente.length > 0) {
-        console.log(cliente)
         let clave = `jodete cabron este codigo no esta completo aun-${cliente[0].nombre}-${cliente[0].movil}-${cliente[0].email}-${pin}`,
             key = crypto.createHash('md5').update(clave).digest("hex");
         url = `https://iux.com.co/x/venta.php?name=${cliente[0].nombre}&movil=${cliente[0].movil}&email=${cliente[0].email}&ref=${pin}&key=${key}`;
-        await pool.query('UPDATE ventas set ? WHERE pin = ?', [{client : cliente[0].id}, pin]);
+        let pi = pin.slice(0, 3), fh = new Date();
+        
+        switch (pi) {
+            case 'S1M':
+                fh.setDate(fh.getDate() + 30)
+                break;
+            case 'S2M':
+                fh.setDate(fh.getDate() + 60)
+                break;
+            case 'S6M':
+                fh.setDate(fh.getDate() + 180)
+                break;
+        }
+        await pool.query('UPDATE ventas set ? WHERE pin = ?',
+            [
+                {
+                    client: cliente[0].id,
+                    correo: cliente[0].email,
+                    fechadeactivacion: new Date(),
+                    fechadevencimiento: fh
+                }, pin
+            ]
+        );
+
         await transpoter.sendMail({
             from: "'Suport' <suport@tqtravel.co>",
-            to: 's4m1r.5a@gmail.com',
-            subject: 'confirmacion de que si sirbe',
+            to: 'redflix.red@hotmail.com',
+            subject: 'confirmacion de registro',
             text: `${telephone}-${buyerFullName}-${buyerEmail}-${pin}-${key}
             -VENTA`
         });
@@ -209,11 +231,11 @@ router.post(`/venta`, async (req, res) => {
                 console.error(error)
                 return
             }
-            sms('573007753983', `${body} ${res.statusCode} ACTUALIZADO`);
-        }) 
-        res.redirect('https://iux.com.co/app/login');     
+            //sms('573007753983', `${body} ${res.statusCode} ACTUALIZADO`);
+        })
+        res.redirect('https://iux.com.co/app/login');
     } else {
-        
+
     }
 });
 module.exports = router;
