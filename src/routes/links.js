@@ -128,7 +128,12 @@ router.post('/ventas', isLoggedIn, async (req, res) => {
     const { prod, product, nombre, user, movil, nompro } = req.body;
     const result = await rango(req.user.id);
     const usua = await usuario(req.user.id);
-    const sald = await saldo(27, result, req.user.id);
+    if (split(" ")[1] === undefined) {
+        const sald = await saldo(product, result, req.user.id);
+    } else {
+        const sald = await saldo(split(" ")[1], result, req.user.id);
+    }
+
     let cel = movil.replace(/-/g, "")
 
     if (cel.length !== 10) {
@@ -191,7 +196,7 @@ router.post('/ventas', isLoggedIn, async (req, res) => {
 router.post('/patro', isLoggedIn, async (req, res) => {
     const { quien } = req.body;
     if (quien == "Patrocinador") {
-        const fila = await pool.query('SELECT * FROM pines WHERE id = ?', req.user.pin);
+        const fila = await pool.query('SELECT pi.id, p.usuario FROM pines p INNER JOIN pines pi ON p.usuario = pi.acreedor WHERE p.id = ?', req.user.pin);
         res.send(fila);
     }
 });
@@ -237,33 +242,40 @@ router.post('/recarga', isLoggedIn, async (req, res) => {
 });
 /////////////////////////* AFILIACION *////////////////////////////////////////
 router.post('/afiliado', async (req, res) => {
-    const result = await rango(req.user.id);
-    const usua = await usuario(req.user.id);
-    const { movil, cajero } = req.body, pin = ID(13);
-    const nuevoPin = {
-        id: pin,
-        categoria: 1,
-        usuario: req.user.id
-    }
-    if (cajero !== undefined) {
-        nuevoPin.categoria = 2
+    const sald = await saldo(26, result, req.user.id);
+    if (sald === 'NO') {
+        req.flash('error', 'Afiliacion no realizada, saldo insuficiente');
+        res.redirect('/links/recarga');
     } else {
-        const venta = {
-            fechadecompra: new Date(),
-            pin,
-            vendedor: usua,
-            cajero: req.user.fullname,
-            idcajero: req.user.id,
-            product: 26,
-            rango: result,
-            movildecompra: movil
+        const result = await rango(req.user.id);
+        const usua = await usuario(req.user.id);
+        const { movil, cajero } = req.body, pin = ID(13);
+        const nuevoPin = {
+            id: pin,
+            categoria: 1,
+            usuario: req.user.id
         }
-        await pool.query('INSERT INTO ventas SET ? ', venta);
+        var cel = movil.replace(/-/g, "");
+        if (cajero !== undefined) {
+            nuevoPin.categoria = 2
+        } else {
+            const venta = {
+                fechadecompra: new Date(),
+                pin,
+                vendedor: usua,
+                cajero: req.user.fullname,
+                idcajero: req.user.id,
+                product: 26,
+                rango: result,
+                movildecompra: cel
+            }
+            await pool.query('INSERT INTO ventas SET ? ', venta);
+        }
+        await pool.query('INSERT INTO pines SET ? ', nuevoPin);
+        sms('57' + movil, 'Bienvenido a ser parte de nuestro equipo RedFlix tu ID sera ' + pin);
+        req.flash('success', 'Pin enviado satisfactoriamente, comuniquese con el afiliado para que se registre');
+        res.redirect('/tablero');
     }
-    await pool.query('INSERT INTO pines SET ? ', nuevoPin);
-    sms('57' + movil, 'Bienvenido a ser parte de nuestro equipo RedFlix tu ID sera ' + pin);
-    req.flash('success', 'Pin enviado satisfactoriamente, comuniquese con el afiliado para que se registre');
-    res.redirect('/tablero');
 });
 router.post('/id', async (req, res) => {
     const { pin } = req.body;

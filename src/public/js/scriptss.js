@@ -917,7 +917,7 @@ if (window.location.pathname == `/links/reportes`) {
             url: "/links/reportes/table4",
             dataSrc: "data"
         },
-        columns: [  
+        columns: [
             { data: "id" },
             {
                 data: "fechsolicitud",
