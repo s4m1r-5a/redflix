@@ -242,12 +242,16 @@ router.post('/recarga', isLoggedIn, async (req, res) => {
 });
 /////////////////////////* AFILIACION *////////////////////////////////////////
 router.post('/afiliado', async (req, res) => {
+    const result = await rango(req.user.id);
     const sald = await saldo(26, result, req.user.id);
+
     if (sald === 'NO') {
+
         req.flash('error', 'Afiliacion no realizada, saldo insuficiente');
         res.redirect('/links/recarga');
+
     } else {
-        const result = await rango(req.user.id);
+        
         const usua = await usuario(req.user.id);
         const { movil, cajero } = req.body, pin = ID(13);
         const nuevoPin = {
