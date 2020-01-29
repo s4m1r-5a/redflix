@@ -7,16 +7,20 @@
                         <div class="media">
                             <div class="d-inline-block mt-2 mr-3">
                                 <i class="feather-lg text-primary" data-feather="shopping-cart"></i>
-                            </div>                          
+                            </div>
                             {{#each links}}
-                            <input type="hidden" class="datos tres" value="{{utilidad}}"/>
-                            <input type="hidden" class="datos uno" id="{{Mes}}" value="{{venta}}"/>
-                            <input type="hidden" class="datos dos" value="{{CantMes}}"/>   
+                            <input type="hidden" class="datos meses" value="{{Mes}}" />
+                            <input type="hidden" class="datos v{{Mes}}" value="{{venta}}" />
+                            <input type="hidden" class="datos u{{Mes}}" value="{{utilidad}}" />
+                            <input type="hidden" class="datos c{{Mes}}" value="{{Comision}}" />
+                            <input type="hidden" class="datos m{{Mes}}" value="{{CantMes}}" />
+                            <input type="hidden" class="datos p{{Mes}}" value="{{Porcentag}}" />
+                            <input type="hidden" class="datos d{{Mes}}" value="{{promediov}}" />
                             {{/each}}
-                            {{#each links.desendente}}                            
-                            <input type="hidden" class="dato" id="m{{Mes}}" value="{{venta}}"/>                                                        
+                            {{#each links.desendente}}
+                            <input type="hidden" class="dato" id="m{{Mes}}" value="{{venta}}" />
                             {{/each}}
-                            <div id"datoslineadesendente"></div> 
+                            <div id"datoslineadesendente"></div>
                             <div class="media-body">
                                 <h3 class="mb-2" id="ventames">0</h3>
                                 <div class="mb-0">Ventas Del Mes</div>
@@ -60,11 +64,11 @@
                     <div class="card-body py-4">
                         <div class="media">
                             <div class="d-inline-block mt-2 mr-3">
-                                <i class="feather-lg text-danger" data-feather="shopping-bag"></i>
+                                <i class="feather-lg text-primary" data-feather="dollar-sign"></i>
                             </div>
                             <div class="media-body">
-                                <h3 class="mb-2">{{resul.venta_mes}}</h3>
-                                <div class="mb-0">Recargas Pendientes</div>
+                                <h3 class="mb-2" id="utilidadneta"></h3>
+                                <div class="mb-0">Utilidad Neta</div>
                             </div>
                         </div>
                     </div>
@@ -313,83 +317,24 @@
                                 </div>
                             </div>
                         </div>
-                        <h5 class="card-title mb-0">Latest Projects</h5>
+                        <h5 class="card-title mb-0">Balance Total</h5>
                     </div>
-                    <table id="datatables-dashboard-projects" class="table table-striped my-0">
+                    <table id="datatables5" class="table table-striped table-hover display nowrap"
+                        style="width:100%">
                         <thead>
                             <tr>
-                                <th>Name</th>
-                                <th class="d-none d-xl-table-cell">Start Date</th>
-                                <th class="d-none d-xl-table-cell">End Date</th>
-                                <th>Status</th>
-                                <th class="d-none d-md-table-cell">Assignee</th>
+                                <th style="width:1%;">A</th>
+                                <th style="width:1%;" data-priority="2">Año</th>
+                                <th style="width:1%;">Mes</th>
+                                <th style="width:1%;">ventas</th>
+                                <th style="width:1%;">Promedio</th>
+                                <th style="width:1%;">Totales</th>
+                                <th style="width:1%;">Utilidad</th>
+                                <th style="width:1%;">U. Neta</th>
+                                <th style="width:1%;" data-priority="1">Nivel</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr>
-                                <td>Project Apollo</td>
-                                <td class="d-none d-xl-table-cell">01/01/2018</td>
-                                <td class="d-none d-xl-table-cell">31/06/2018</td>
-                                <td><span class="badge badge-success">Done</span></td>
-                                <td class="d-none d-md-table-cell">Carl Jenkins</td>
-                            </tr>
-                            <tr>
-                                <td>Project Fireball</td>
-                                <td class="d-none d-xl-table-cell">01/01/2018</td>
-                                <td class="d-none d-xl-table-cell">31/06/2018</td>
-                                <td><span class="badge badge-danger">Cancelled</span></td>
-                                <td class="d-none d-md-table-cell">Bertha Martin</td>
-                            </tr>
-                            <tr>
-                                <td>Project Hades</td>
-                                <td class="d-none d-xl-table-cell">01/01/2018</td>
-                                <td class="d-none d-xl-table-cell">31/06/2018</td>
-                                <td><span class="badge badge-success">Done</span></td>
-                                <td class="d-none d-md-table-cell">Stacie Hall</td>
-                            </tr>
-                            <tr>
-                                <td>Project Nitro</td>
-                                <td class="d-none d-xl-table-cell">01/01/2018</td>
-                                <td class="d-none d-xl-table-cell">31/06/2018</td>
-                                <td><span class="badge badge-warning">In progress</span></td>
-                                <td class="d-none d-md-table-cell">Carl Jenkins</td>
-                            </tr>
-                            <tr>
-                                <td>Project Phoenix</td>
-                                <td class="d-none d-xl-table-cell">01/01/2018</td>
-                                <td class="d-none d-xl-table-cell">31/06/2018</td>
-                                <td><span class="badge badge-success">Done</span></td>
-                                <td class="d-none d-md-table-cell">Bertha Martin</td>
-                            </tr>
-                            <tr>
-                                <td>Project X</td>
-                                <td class="d-none d-xl-table-cell">01/01/2018</td>
-                                <td class="d-none d-xl-table-cell">31/06/2018</td>
-                                <td><span class="badge badge-success">Done</span></td>
-                                <td class="d-none d-md-table-cell">Stacie Hall</td>
-                            </tr>
-                            <tr>
-                                <td>Project Romeo</td>
-                                <td class="d-none d-xl-table-cell">01/01/2018</td>
-                                <td class="d-none d-xl-table-cell">31/06/2018</td>
-                                <td><span class="badge badge-success">Done</span></td>
-                                <td class="d-none d-md-table-cell">Ashley Briggs</td>
-                            </tr>
-                            <tr>
-                                <td>Project Wombat</td>
-                                <td class="d-none d-xl-table-cell">01/01/2018</td>
-                                <td class="d-none d-xl-table-cell">31/06/2018</td>
-                                <td><span class="badge badge-warning">In progress</span></td>
-                                <td class="d-none d-md-table-cell">Bertha Martin</td>
-                            </tr>
-                            <tr>
-                                <td>Project Zircon</td>
-                                <td class="d-none d-xl-table-cell">01/01/2018</td>
-                                <td class="d-none d-xl-table-cell">31/06/2018</td>
-                                <td><span class="badge badge-danger">Cancelled</span></td>
-                                <td class="d-none d-md-table-cell">Stacie Hall</td>
-                            </tr>
-                        </tbody>
+                        <tbody></tbody>
                     </table>
                 </div>
             </div>

@@ -75,48 +75,119 @@ router.get('/profile', isLoggedIn, (req, res) => {
   res.render('profile');
 });
 router.get('/tablero', isLoggedIn, async (req, res) => {
-  const links = await pool.query(`SELECT MONTH(v.fechadecompra) Mes, COUNT(*) CantMes, SUM(p.precio) venta, SUM(p.utilidad) utilidad
+  const links = await pool.query(`SELECT MONTH(v.fechadecompra) Mes, COUNT(*) CantMes, SUM(p.precio) venta, SUM(p.utilidad) utilidad, 
+  ((p.utilidad*r.comision/100)*100/p.utilidad) Porcentag, SUM((p.utilidad*r.comision/100)) Comision, ROUND(COUNT(*)/30) promediov
   FROM ventas v 
-  INNER JOIN clientes c ON v.client = c.id 
   INNER JOIN users u ON v.vendedor = u.id
-  INNER JOIN products p ON v.product = p.id_producto
-  INNER JOIN pines pi ON u.pin = pi.id
-  WHERE u.id = ?
+    INNER JOIN products p ON v.product = p.id_producto
+    INNER JOIN rangos r ON v.rango = r.id    
+    WHERE v.vendedor = ?
       AND YEAR(v.fechadecompra) = YEAR(CURDATE()) 
       AND MONTH(v.fechadecompra) BETWEEN 1 and 12
   GROUP BY MONTH(v.fechadecompra)
-  ORDER BY 1 `, [req.user.id]);
-  const link = await pool.query(`SELECT MONTH(v.fechadecompra) Mes, COUNT(*) CantMes, SUM(p.precio) venta, SUM(p.utilidad) utilidad
+  ORDER BY 1`, [req.user.id]);
+  const link = await pool.query(`SELECT MONTH(v.fechadecompra) Mes, COUNT(*) CantMes, SUM(p.precio) venta, SUM(p.utilidad) utilidad, 
+  ((p.utilidad*r.comision/100)*100/p.utilidad) Porcentag, SUM((p.utilidad*r.comision/100)) Comision, ROUND(COUNT(*)/30) promediov
   FROM ventas v 
-  INNER JOIN clientes c ON v.client = c.id 
   INNER JOIN users u ON v.vendedor = u.id
-  INNER JOIN products p ON v.product = p.id_producto
-  INNER JOIN pines pi ON u.pin = pi.id
-  WHERE pi.usuario = ?
+    INNER JOIN products p ON v.product = p.id_producto
+    INNER JOIN rangos r ON v.rango = r.id    
+    WHERE v.vendedor = ?
       AND YEAR(v.fechadecompra) = YEAR(CURDATE()) 
       AND MONTH(v.fechadecompra) BETWEEN 1 and 12
   GROUP BY MONTH(v.fechadecompra)
-  ORDER BY 1 `, [req.user.id]);
+  ORDER BY 1`, [req.user.id]);
   links.desendente = link;
   console.log(links);
   //console.log(ambos);
   res.render('tablero', { links });
 });
-router.post('/tablero2', isLoggedIn, async (req, res) => {
-  //SELECT MONTH(v.fechadecompra) Mes, COUNT(*) CantMes, FORMAT(SUM(p.precio),2) venta d
-  const links = await pool.query(`SELECT MONTH(v.fechadecompra) Mes, COUNT(*) CantMes, SUM(p.precio) venta, SUM(p.utilidad) utilidad, c.nombre usari
-  FROM ventas v 
-  INNER JOIN clientes c ON v.client = c.id 
-  INNER JOIN users u ON v.vendedor = u.id
-  INNER JOIN products p ON v.product = p.id_producto
-  INNER JOIN pines pi ON u.pin = pi.id
-  WHERE pi.usuario = ?
-      AND YEAR(v.fechadecompra) = YEAR(CURDATE()) 
-      AND MONTH(v.fechadecompra) BETWEEN 1 and 12
-  GROUP BY MONTH(v.fechadecompra)
-  ORDER BY 1`, [req.user.id]);
-  res.send(links);
-  console.log(links);
+router.post('/tablero/:a', isLoggedIn, async (req, res) => {
+  const { a } = req.params;
+
+  if (a == 'table5') {
+
+    const links = await pool.query(`SELECT YEAR(v.fechadecompra) Año, COUNT(*) CantMes, SUM(p.precio) venta, SUM(p.utilidad) utilidad, 
+    ELT(MONTH(v.fechadecompra), "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre") Mes,
+    ((p.utilidad*r.comision/100)*100/p.utilidad) Porcentag, SUM((p.utilidad*r.comision/100)) Comision, ROUND(COUNT(*)/30) promediov
+    FROM ventas v 
+    INNER JOIN users u ON v.vendedor = u.id
+    INNER JOIN products p ON v.product = p.id_producto
+    INNER JOIN rangos r ON v.rango = r.id    
+    WHERE v.vendedor = ?
+    AND MONTH(v.fechadecompra) BETWEEN 1 and 12
+    GROUP BY YEAR(v.fechadecompra), MONTH(v.fechadecompra) ASC
+    ORDER BY 1`, [req.user.id]);
+    respuesta = { "data": links };
+    res.send(respuesta);
+
+  } else if (a == '1') {
+
+    let reportes = new Array(4)
+    let linea = '', lDesc = '';
+    const lineaUno = await pool.query(`SELECT acreedor FROM pines WHERE pines.usuario = ?`, req.user.id);
+    await lineaUno.map((primera) => { lDesc += ` OR pi.acreedor = ${primera.acreedor}`; linea += ` OR pines.usuario = ${primera.acreedor}` });
+    const reporte = await pool.query(`SELECT YEAR(v.fechadecompra) Año, MONTH(v.fechadecompra) Mes, COUNT(*) CantMes, 
+    ((p.utilidad*r.comision/100)*100/p.utilidad) Porcentag, SUM((p.utilidad*r.comision/100)) Comision, SUM(p.precio) venta, 
+    SUM(p.utilidad) utilidad FROM ventas v     
+    INNER JOIN users u ON v.vendedor = u.id
+    INNER JOIN products p ON v.product = p.id_producto
+    INNER JOIN rangos r ON v.rango = r.id
+    INNER JOIN pines pi ON u.pin = pi.id
+    WHERE pi.acreedor = 1${lDesc}
+    AND MONTH(v.fechadecompra) BETWEEN 1 and 12
+    GROUP BY YEAR(v.fechadecompra), MONTH(v.fechadecompra) ASC
+    ORDER BY 1`);
+    res.send(reporte);
+
+  } else if (a == '2') {
+
+    let reportes = new Array(4)
+    let linea = '', lDesc = '';
+    const lineaUno = await pool.query(`SELECT acreedor FROM pines WHERE pines.usuario = ?`, req.user.id);
+    await lineaUno.map((primera) => { linea += ` OR pines.usuario = ${primera.acreedor}` });
+
+    const lineaDos = await pool.query(`SELECT acreedor FROM pines WHERE pines.usuario = 1${linea}`);
+    await lineaDos.map((primera) => { lDesc += ` OR pi.acreedor = ${primera.acreedor}`});
+    const reporte2 = await pool.query(`SELECT YEAR(v.fechadecompra) Año, MONTH(v.fechadecompra) Mes, COUNT(*) CantMes, 
+    ((p.utilidad*r.comision/100)*100/p.utilidad) Porcentag, SUM((p.utilidad*r.comision/100)) Comision, SUM(p.precio) venta, 
+    SUM(p.utilidad) utilidad FROM ventas v
+    INNER JOIN users u ON v.vendedor = u.id
+    INNER JOIN products p ON v.product = p.id_producto
+    INNER JOIN rangos r ON v.rango = r.id
+    INNER JOIN pines pi ON u.pin = pi.id
+    WHERE pi.acreedor = 1${lDesc}
+    AND MONTH(v.fechadecompra) BETWEEN 1 and 12
+    GROUP BY YEAR(v.fechadecompra), MONTH(v.fechadecompra) ASC
+    ORDER BY 1`);
+    res.send(reporte2);
+
+  } else if (a == '3') {
+
+    let reportes = new Array(4)
+    let linea = '', lDesc = '';
+    const lineaUno = await pool.query(`SELECT acreedor FROM pines WHERE pines.usuario = ?`, req.user.id);
+    await lineaUno.map((primera) => { linea += ` OR pines.usuario = ${primera.acreedor}` });
+
+    const lineaDos = await pool.query(`SELECT acreedor FROM pines WHERE pines.usuario = 1${linea}`);
+    linea = '';
+    await lineaDos.map((primera) => { linea += ` OR pines.usuario = ${primera.acreedor}` });
+    const lineaTres = await pool.query(`SELECT acreedor FROM pines WHERE pines.usuario =  1${linea}`);
+    await lineaTres.map((primera) => { lDesc += ` OR pi.acreedor = ${primera.acreedor}` });
+    const reporte3 = await pool.query(`SELECT YEAR(v.fechadecompra) Año, MONTH(v.fechadecompra) Mes, COUNT(*) CantMes, 
+    SUM(((p.utilidad*90/100)-(p.utilidad*r.comision/100))) Rango, SUM((p.utilidad*r.comision/100)) Comision, SUM(p.precio) venta, 
+    SUM(p.utilidad) utilidad FROM ventas v 
+    INNER JOIN users u ON v.vendedor = u.id
+    INNER JOIN products p ON v.product = p.id_producto
+    INNER JOIN rangos r ON v.rango = r.id
+    INNER JOIN pines pi ON u.pin = pi.id
+    WHERE pi.acreedor = 1${lDesc}
+    AND MONTH(v.fechadecompra) BETWEEN 1 and 12
+    GROUP BY YEAR(v.fechadecompra), MONTH(v.fechadecompra) ASC
+    ORDER BY 1`);
+    res.send(reporte3);
+    //AND YEAR(v.fechadecompra) = YEAR(CURDATE())
+  }
 });
 
 module.exports = router;

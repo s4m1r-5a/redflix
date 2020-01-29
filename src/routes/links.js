@@ -25,17 +25,11 @@ router.post('/productos', Admins, async (req, res) => {
 });
 
 /////////////////////////////////////////////////////
-router.get('/calendar', isLoggedIn, (req, res) => {
-    console.log('si llega');
-    res.render('links/calendar');
-});
 
 router.get('/social', isLoggedIn, (req, res) => {
     res.render('links/social');
 });
-router.get('/recarga', isLoggedIn, (req, res) => {
-    res.render('links/recarga');
-});
+
 
 router.post('/add', async (req, res) => {
     const { title, url, description } = req.body;
@@ -55,7 +49,7 @@ router.post('/movil', async (req, res) => {
     res.send(cliente);
 });
 //////////////* REPORTES *//////////////////////////////////
-router.get('/reportes', Admins, (req, res) => {
+router.get('/reportes', isLoggedIn, (req, res) => {
     //Desendentes(15)
     res.render('links/reportes');
 });
@@ -114,24 +108,34 @@ router.post('/solicitudes', isLoggedIn, async (req, res) => {
     res.send(respuesta);
 });
 router.put('/solicitudes', isLoggedIn, async (req, res) => {
-    const { id, estado, mg } = req.body
-    const d = { estado }
-    console.log(req.body)
-    await pool.query('UPDATE transacciones set ? WHERE id = ?', [d, id]);
-    res.send(mg);
+    const { id, estado, mg, monto } = req.body
+    const result = await rango(req.user.id);
+    const sald = await saldo('', result, req.user.id, monto);
+
+    if (sald === 'NO') {
+        res.send(false);
+    } else {
+        const d = { estado }
+        await pool.query('UPDATE transacciones set ? WHERE id = ?', [d, id]);
+        res.send(true);
+    }
 });
 /////////////* VENTAS */////////////////////////////////////
-router.get('/ventas', isLoggedIn, (req, res) => {
+router.get('/ventas', isLoggedIn, async (req, res) => {
+    const result = await rango(req.user.id);
+    console.log(result)
     res.render('links/ventas');
 });
 router.post('/ventas', isLoggedIn, async (req, res) => {
     const { prod, product, nombre, user, movil, nompro } = req.body;
     const result = await rango(req.user.id);
     const usua = await usuario(req.user.id);
-    if (split(" ")[1] === undefined) {
-        const sald = await saldo(product, result, req.user.id);
+    var sald;
+    console.log(product.charAt(2))
+    if (product.charAt(2) !== "") {
+        sald = await saldo(product.split(" ")[1], result, req.user.id);
     } else {
-        const sald = await saldo(split(" ")[1], result, req.user.id);
+        sald = await saldo(product, result, req.user.id);
     }
 
     let cel = movil.replace(/-/g, "")
@@ -200,6 +204,9 @@ router.post('/patro', isLoggedIn, async (req, res) => {
         res.send(fila);
     }
 });
+router.get('/recarga', isLoggedIn, (req, res) => {
+    res.render('links/recarga');
+});
 router.post('/recarga', isLoggedIn, async (req, res) => {
     console.log(req.body)
     console.log()
@@ -251,7 +258,7 @@ router.post('/afiliado', async (req, res) => {
         res.redirect('/links/recarga');
 
     } else {
-        
+
         const usua = await usuario(req.user.id);
         const { movil, cajero } = req.body, pin = ID(13);
         const nuevoPin = {
@@ -418,14 +425,22 @@ async function usuario(id) {
         return id
     }
 };
-async function saldo(producto, rango, id) {
-    const produ = await pool.query(`SELECT precio, utilidad, stock FROM products WHERE id_producto = ?`, producto);
-    const rang = await pool.query(`SELECT comision FROM rangos WHERE id = ?`, rango);
-    const operacion = produ[0].precio - (produ[0].utilidad * rang[0].comision / 100);
+async function saldo(producto, rango, id, monto) {
+    var operacion;
+    if (!producto && monto) {
+        operacion = monto;
+    } else if (!producto && !monto) {
+        return 'NO'
+    } else {
+        const produ = await pool.query(`SELECT precio, utilidad, stock FROM products WHERE id_producto = ?`, producto);
+        const rang = await pool.query(`SELECT comision FROM rangos WHERE id = ?`, rango);
+        operacion = produ[0].precio - (produ[0].utilidad * rang[0].comision / 100);
+    }
     const saldo = await pool.query(`SELECT IF(saldoactual < ${operacion} OR saldoactual IS NULL,'NO','SI') Respuesta FROM users WHERE id = ? `, id);
     return saldo[0].Respuesta
 };
 async function rango(id) {
+    if (id == 15) { return 1 }
     let m = new Date(),
         month = m.getMonth() - 2,
         d, meses = 0,

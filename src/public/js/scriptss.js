@@ -381,43 +381,100 @@ $('.plancit').click(function () {
     $('.x').hide("slow");
     $('.z').show("slow");
 });
+//////////////////////////* TABLERO *///////////////////////////////////////
 if (window.location == "http://localhost:3000/tablero" || window.location == "https://redflixx.herokuapp.com/tablero") {
-    var date = new Date()
-    $("#fullcalendar").fullCalendar({
-        locale: 'es',
-        header: {
-            left: "prev,next today, Miboton, Reporte",
-            center: "title",
-            right: "month,agendaWeek,agendaDay,listMonth"
-        },
-        buttonText: {
-            today: 'Hoy',
-            month: 'mes',
-            week: 'semana',
-            day: 'dia',
-            listMonth: 'lista'
-        },
-        customButtons: {
-            Miboton: {
-                text: "Reservar",
-                click: function () {
-                    $('#fechas').show();
-                    $("#ModalEventos").modal();
-                }
-            }
-        },
-        dayClick: function (date, jsEvent, view) {
-            alert(date.format() + " " + view.name);
-        },
-        weekNumbers: true,
-        eventLimit: true,
-        editable: true,
-        events: "https://fullcalendar.io/demo-events.json",
-        eventClick: function (calEvent) {
-            alert(calEvent.title);
-        },
-        eventDrop: function () { }
+    var reportes = new Array()
+    var f = new Date();
+    var m = f.getMonth() + 1;
+    var fe = f.getMonth();
+
+    reportes = [
+        { cuentas: 0, comision: 0, venta: 0, utilidad: 0, total: 0, linea: { l1: 1, l2: 1, l3: 1 }, porcentage: 0 },
+        { cuentas: 0, comision: 0, venta: 0, utilidad: 0, total: 0, linea: { l1: 0, l2: 0, l3: 0 }, porcentage: 0 },
+        { cuentas: 0, comision: 0, venta: 0, utilidad: 0, total: 0, linea: { l1: 0, l2: 0, l3: 0 }, porcentage: 0 },
+        { cuentas: 0, comision: 0, venta: 0, utilidad: 0, total: 0, linea: { l1: 0, l2: 0, l3: 0 }, porcentage: 0 },
+        { cuentas: 0, comision: 0, venta: 0, utilidad: 0, total: 0, linea: { l1: 0, l2: 0, l3: 0 }, porcentage: 0 },
+        { cuentas: 0, comision: 0, venta: 0, utilidad: 0, total: 0, linea: { l1: 0, l2: 0, l3: 0 }, porcentage: 0 },
+        { cuentas: 0, comision: 0, venta: 0, utilidad: 0, total: 0, linea: { l1: 0, l2: 0, l3: 0 }, porcentage: 0 },
+        { cuentas: 0, comision: 0, venta: 0, utilidad: 0, total: 0, linea: { l1: 0, l2: 0, l3: 0 }, porcentage: 0 },
+        { cuentas: 0, comision: 0, venta: 0, utilidad: 0, total: 0, linea: { l1: 0, l2: 0, l3: 0 }, porcentage: 0 },
+        { cuentas: 0, comision: 0, venta: 0, utilidad: 0, total: 0, linea: { l1: 0, l2: 0, l3: 0 }, porcentage: 0 },
+        { cuentas: 0, comision: 0, venta: 0, utilidad: 0, total: 0, linea: { l1: 0, l2: 0, l3: 0 }, porcentage: 0 },
+        { cuentas: 0, comision: 0, venta: 0, utilidad: 0, total: 0, linea: { l1: 0, l2: 0, l3: 0 }, porcentage: 0 },
+        { cuentas: 0, comision: 0, venta: 0, utilidad: 0, total: 0, linea: { l1: 0, l2: 0, l3: 0 }, porcentage: 0 },
+    ]
+    function Desendente() {
+        datos.data.datasets.splice(0);
+        var newData = {
+            data: [$('.u' + m).val(), reportes[fe].utilidad, $('.c' + m).val(), reportes[fe].total],
+            backgroundColor: [
+                window.theme.primary,
+                window.theme.warning,
+                window.theme.danger,
+                "#E8EAED"
+            ],
+            borderColor: "transparent"
+        };
+        datos.data.datasets.push(newData);
+        window.pie.update();
+    };
+
+    function Calcula() {
+        reportes.map((repor) => {
+            df = Object.values(repor.linea)
+            repor.porcentage = Math.max(...df);
+            num = (((repor.utilidad * parseFloat($('.p' + m).val())) / 100) - ((repor.utilidad * repor.porcentage) / 100));
+            repor.total = Math.sign(num) > 0 ? num : 0;
+        });
+    };
+
+    $.ajax({
+        url: '/tablero/1',
+        type: 'POST',
+        //async: false,
+        success: function (data) {
+            data.map((repor) => {
+                reportes[repor.Mes - 1].cuentas += repor.CantMes
+                reportes[repor.Mes - 1].comision += repor.Comision
+                reportes[repor.Mes - 1].venta += repor.venta
+                reportes[repor.Mes - 1].utilidad += repor.utilidad
+                reportes[repor.Mes - 1].linea.l1 = repor.Porcentag
+            });
+        }
     });
+    $.ajax({
+        url: '/tablero/2',
+        type: 'POST',
+        //async: false,
+        success: function (data) {
+            data.map((repor) => {
+                reportes[repor.Mes - 1].cuentas += repor.CantMes
+                reportes[repor.Mes - 1].comision += repor.Comision
+                reportes[repor.Mes - 1].venta += repor.venta
+                reportes[repor.Mes - 1].utilidad += repor.utilidad
+                reportes[repor.Mes - 1].linea.l2 = repor.Porcentag
+            });
+        }
+    });
+    $.ajax({
+        url: '/tablero/3',
+        type: 'POST',
+        //async: false,
+        success: function (data) {
+            data.map((repor) => {
+                reportes[repor.Mes - 1].cuentas += repor.CantMes
+                reportes[repor.Mes - 1].comision += repor.Comision
+                reportes[repor.Mes - 1].venta += repor.venta
+                reportes[repor.Mes - 1].utilidad += repor.utilidad
+                reportes[repor.Mes - 1].linea.l3 = repor.Porcentag
+            });
+            Calcula()
+            Desendente()
+        }
+    });
+
+
+    var date = new Date()
     // Bar chart
     new Chart(document.getElementById("chartjs-dashboard-bar"), {
         type: "bar",
@@ -472,31 +529,13 @@ if (window.location == "http://localhost:3000/tablero" || window.location == "ht
         format: "L"
     });
 
-    var ld = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-    // Line chart
-    var f = new Date(),
-        pro = 0,
-        prom = 0,
-        promedio = 0;
-    $(".datos").each(function () {
-        if ($(this).attr('id') == undefined) {
-            if ($(this).attr('class') == 'datos dos') {
-                $('#ventames').html($(this).val());
-            } else {
-                $('#utilidad').html($(this).val());
-            }
-        } else {
-            $('#ventaprecio').html($(this).val());
-            if ($(this).attr('id') <= f.getMonth()) {
-                pro += 1;
-                prom += parseFloat($(this).val());
-                prom /= pro;
-                promedio = Math.round(prom);
-            }
-            $('#promedio').html(promedio);
-        }
-    });
-    $('#promedio').mask('000,000,000', { reverse: true });
+    $('#promedio').html($('.d' + m).val());
+    $('#ventaprecio').html($('.v' + m).val());
+    $('#utilidad').html($('.u' + m).val());
+    $('#utilidadneta').html($('.c' + m).val());
+    $('#ventames').html($('.m' + m).val());
+
+    $('#utilidadneta').mask('000,000,000', { reverse: true });
     $('#utilidad').mask('000,000,000', { reverse: true });
     $('#ventaprecio').mask('000,000,000', { reverse: true });
     new Chart(document.getElementById("chartjs-line"), {
@@ -522,7 +561,48 @@ if (window.location == "http://localhost:3000/tablero" || window.location == "ht
                     $('#11').val(),
                     $('#12').val()
                 ]
-            }, {
+            },
+            {
+                label: "Ventas ($)",
+                fill: true,
+                backgroundColor: "transparent",
+                borderColor: window.theme.primary,
+                data: [
+                    $('.u1').val(),
+                    $('.u2').val(),
+                    $('.u3').val(),
+                    $('.u4').val(),
+                    $('.u5').val(),
+                    $('.u6').val(),
+                    $('.u7').val(),
+                    $('.u8').val(),
+                    $('.u9').val(),
+                    $('.u10').val(),
+                    $('.u11').val(),
+                    $('.u12').val()
+                ]
+            },
+            {
+                label: "Ventas ($)",
+                fill: true,
+                backgroundColor: "transparent",
+                borderColor: window.theme.primary,
+                data: [
+                    $('.c1').val(),
+                    $('.c2').val(),
+                    $('.c3').val(),
+                    $('.c4').val(),
+                    $('.c5').val(),
+                    $('.c6').val(),
+                    $('.c7').val(),
+                    $('.c8').val(),
+                    $('.c9').val(),
+                    $('.c10').val(),
+                    $('.c11').val(),
+                    $('.c12').val()
+                ]
+            },
+            {
                 label: "Ventas indirectas ($)",
                 fill: true,
                 backgroundColor: "transparent",
@@ -583,12 +663,14 @@ if (window.location == "http://localhost:3000/tablero" || window.location == "ht
     });
 
     // Pie chart
-    new Chart(document.getElementById("chartjs-dashboard-pie"), {
+
+    //new Chart(document.getElementById("chartjs-dashboard-pie"), {})
+    var datos = {
         type: "pie",
         data: {
-            labels: ["Direct", "Affiliate", "E-mail", "Other"],
+            labels: ["Utilidad Directa", "Utilidad Indirecta", "Comision Directa", "Comision Indirecta"],
             datasets: [{
-                data: [2602, 1253, 541, 1465],
+                data: [$('.u' + m).val(), reportes[fe].utilidad, $('.c' + m).val(), reportes[fe].comision],
                 backgroundColor: [
                     window.theme.primary,
                     window.theme.warning,
@@ -605,13 +687,92 @@ if (window.location == "http://localhost:3000/tablero" || window.location == "ht
                 display: false
             }
         }
-    });
+    };
+    var canvas = document.getElementById("chartjs-dashboard-pie").getContext('2d');
+    window.pie = new Chart(canvas, datos);
 
-    $("#datatables-dashboard-projects").DataTable({
+
+
+
+
+
+
+
+    var table5 = $('#datatables5').DataTable({
         pageLength: 6,
         lengthChange: false,
         bFilter: false,
-        autoWidth: false
+        //autoWidth: false,
+        deferRender: true,
+        paging: true,
+        responsive: {
+            details: {
+                type: 'column'
+            }
+        },
+        columnDefs: [{
+            className: 'control',
+            orderable: true,
+            targets: 0
+        }],
+        order: [[1, "desc"], [2, "desc"]],
+        language: languag,
+        ajax: {
+            method: "POST",
+            url: "/tablero/table5",
+            dataSrc: "data"
+        },
+        columns: [
+            {
+                defaultContent: `a`
+            },
+            { data: "Año" },
+            { data: "Mes" },
+            { data: "CantMes" },
+            { data: "promediov" },
+            {
+                data: "venta",
+                render: function (data, method, row) {
+                    return '$' + Moneda(parseFloat(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
+                }
+            },
+            {
+                data: "utilidad",
+                render: function (data, method, row) {
+                    return '$' + Moneda(parseFloat(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
+                }
+            },
+            {
+                data: "Comision",
+                render: function (data, method, row) {
+                    return '$' + Moneda(parseFloat(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
+                }
+            },
+            {
+                data: "Porcentag",
+                render: function (data, method, row) {
+                    switch (data) {
+                        case 40:
+                            return `<span class="badge badge-pill badge-warning">Vendedor 40%</span>`
+                            break;
+                        case 60:
+                            return `<span class="badge badge-pill badge-success">Contratista 60%</span>`
+                            break;
+                        case 70:
+                            return `<span class="badge badge-pill badge-info">Distribuidor 70%</span>`
+                            break;
+                        case 90:
+                            return `<span class="badge badge-pill badge-secondary">Mayorista 90%</span>`
+                            break;
+                        case 95:
+                            return `<span class="badge badge-pill badge-primary">Master 95%</span>`
+                            break;
+                        default:
+                            return `<span class="badge badge-pill badge-danger">Indefinido</span>`
+                    }
+                }
+            }
+        ]
     });
 };
 //////////////////////////////////* REPORTES */////////////////////////////////////////////////////////////
@@ -1247,12 +1408,6 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
         });
 
     });
-    /*cont = parseFloat($('.cont').html())
-    $('.edi').keyup(function () {
-        cont--
-        console.log(cont)
-        $('.cont').html(cont)
-    });*/
     var Color = (val) => {
         var elemen = $(`#t-${val}`);
         if (elemen.hasClass('i')) {
@@ -1285,7 +1440,6 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
         deferRender: true,
         paging: true,
         autoWidth: true,
-        //paging: true,
         search: {
             regex: true,
             caseInsensitive: false,
@@ -1408,7 +1562,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
     table.on('click', '.dropdown-item', function () {
         var fila = $(this).parents('tr');
         var data = table.row(fila).data();
-        var dts = { id: data.id, mg: data.estado }
+        var dts = { id: data.id, mg: data.estado, monto: data.monto }
         switch ($(this).text()) {
             case 'Aprobar':
                 dts.estado = 4;
@@ -1426,7 +1580,11 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             data: dts,
             success: function (data) {
                 table.ajax.reload(function (json) {
-                    SMSj('success', `Solicitud procesada correctamente`)
+                    if (data) {
+                        SMSj('success', `Solicitud procesada correctamente`);
+                    } else {
+                        SMSj('error', `Solicitud no pudo ser procesada correctamente, por fondos insuficientes`)
+                    }
                 });
             }
         })
