@@ -161,8 +161,8 @@
         </div>
 
         <div class="row">
-            <div class="col-12 col-lg-6 col-xl-4 d-flex">
-                <div class="card flex-fill">
+            <div class="col-12 col-xl-4 d-none d-xl-flex">
+                <div class="card flex-fill w-100">
                     <div class="card-header">
                         <div class="card-actions float-right">
                             <div class="dropdown show">
@@ -188,8 +188,8 @@
                     </div>
                 </div>
             </div>
-            <div class="col-12 col-xl-4 d-none d-xl-flex">
-                <div class="card flex-fill w-100">
+            <div class="col-12 col-lg-6 col-xl-4 d-flex">
+                <div class="card flex-fill">
                     <div class="card-header">
                         <div class="card-actions float-right">
                             <div class="dropdown show">
@@ -222,27 +222,7 @@
                                         <th class="text-right">Value</th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                    <tr>
-                                        <td><i class="fas fa-square-full text-primary"></i> Direct</td>
-                                        <td class="text-right">$ 2602</td>
-                                        <td class="text-right text-success">+43%</td>
-                                    </tr>
-                                    <tr>
-                                        <td><i class="fas fa-square-full text-warning"></i> Affiliate</td>
-                                        <td class="text-right">$ 1253</td>
-                                        <td class="text-right text-success">+13%</td>
-                                    </tr>
-                                    <tr>
-                                        <td><i class="fas fa-square-full text-danger"></i> E-mail</td>
-                                        <td class="text-right">$ 541</td>
-                                        <td class="text-right text-success">+24%</td>
-                                    </tr>
-                                    <tr>
-                                        <td><i class="fas fa-square-full text-dark"></i> Other</td>
-                                        <td class="text-right">$ 1465</td>
-                                        <td class="text-right text-success">+11%</td>
-                                    </tr>
+                                <tbody id="cuerpo">                                  
                                 </tbody>
                             </table>
                         </div>
@@ -361,6 +341,31 @@
                             <canvas id="chartjs-dashboard-bar"></canvas>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12 col-lg-12 col-xl-12 d-flex">
+                <div class="card flex-fill">
+                    <div class="card-header">
+                        <div class="card-actions float-right">
+                            <div class="dropdown show">
+                                <a href="#" data-toggle="dropdown" data-display="static">
+                                    <i class="align-middle" data-feather="more-horizontal"></i>
+                                </a>
+
+                                <div class="dropdown-menu dropdown-menu-right">
+                                    <a class="dropdown-item" href="#">Action</a>
+                                    <a class="dropdown-item" href="#">Another action</a>
+                                    <a class="dropdown-item" href="#">Something else here</a>
+                                </div>
+                            </div>
+                        </div>
+                        <h5 class="card-title mb-0">Balance Total</h5>
+                    </div>
+                    <table id="datatables6" class="table table-sm table-striped table-hover display nowrap"
+                        style="width:100%">                        
+                    </table>
                 </div>
             </div>
         </div>

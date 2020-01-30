@@ -383,49 +383,163 @@ $('.plancit').click(function () {
 });
 //////////////////////////* TABLERO *///////////////////////////////////////
 if (window.location == "http://localhost:3000/tablero" || window.location == "https://redflixx.herokuapp.com/tablero") {
+    new Chart(document.getElementById("chartjs-dashboard-pie"), {})
+    //new Chart(document.getElementById("chartjs-line"), {})
+
+    var canvas2 = document.getElementById("chartjs-line").getContext('2d');
+    var canvas = document.getElementById("chartjs-dashboard-pie").getContext('2d');
     var reportes = new Array()
     var f = new Date();
     var m = f.getMonth() + 1;
     var fe = f.getMonth();
+    var d = 90//parseFloat($('.p' + m).val())
+    var datosTabla6
 
-    reportes = [
-        { cuentas: 0, comision: 0, venta: 0, utilidad: 0, total: 0, linea: { l1: 1, l2: 1, l3: 1 }, porcentage: 0 },
-        { cuentas: 0, comision: 0, venta: 0, utilidad: 0, total: 0, linea: { l1: 0, l2: 0, l3: 0 }, porcentage: 0 },
-        { cuentas: 0, comision: 0, venta: 0, utilidad: 0, total: 0, linea: { l1: 0, l2: 0, l3: 0 }, porcentage: 0 },
-        { cuentas: 0, comision: 0, venta: 0, utilidad: 0, total: 0, linea: { l1: 0, l2: 0, l3: 0 }, porcentage: 0 },
-        { cuentas: 0, comision: 0, venta: 0, utilidad: 0, total: 0, linea: { l1: 0, l2: 0, l3: 0 }, porcentage: 0 },
-        { cuentas: 0, comision: 0, venta: 0, utilidad: 0, total: 0, linea: { l1: 0, l2: 0, l3: 0 }, porcentage: 0 },
-        { cuentas: 0, comision: 0, venta: 0, utilidad: 0, total: 0, linea: { l1: 0, l2: 0, l3: 0 }, porcentage: 0 },
-        { cuentas: 0, comision: 0, venta: 0, utilidad: 0, total: 0, linea: { l1: 0, l2: 0, l3: 0 }, porcentage: 0 },
-        { cuentas: 0, comision: 0, venta: 0, utilidad: 0, total: 0, linea: { l1: 0, l2: 0, l3: 0 }, porcentage: 0 },
-        { cuentas: 0, comision: 0, venta: 0, utilidad: 0, total: 0, linea: { l1: 0, l2: 0, l3: 0 }, porcentage: 0 },
-        { cuentas: 0, comision: 0, venta: 0, utilidad: 0, total: 0, linea: { l1: 0, l2: 0, l3: 0 }, porcentage: 0 },
-        { cuentas: 0, comision: 0, venta: 0, utilidad: 0, total: 0, linea: { l1: 0, l2: 0, l3: 0 }, porcentage: 0 },
-        { cuentas: 0, comision: 0, venta: 0, utilidad: 0, total: 0, linea: { l1: 0, l2: 0, l3: 0 }, porcentage: 0 },
+    $('#promedio').html($('.d' + m).val());
+    $('#ventaprecio').html($('.v' + m).val());
+    $('#utilidad').html($('.u' + m).val());
+    $('#utilidadneta').html($('.c' + m).val());
+    $('#ventames').html($('.m' + m).val());
+
+    $('#utilidadneta').mask('000,000,000', { reverse: true });
+    $('#utilidad').mask('000,000,000', { reverse: true });
+    $('#ventaprecio').mask('000,000,000', { reverse: true });
+
+    var reportes = [
+        { año: 0, mes: 0, cuentas: 0, venta: 0, utilidad: 0, l1: 0, l2: 0, l3: 0, u1: 0, u2: 0, u3: 0, t1: 0, t2: 0, t3: 0, comision: 0, total: 0 },
+        { año: 0, mes: 0, cuentas: 0, venta: 0, utilidad: 0, l1: 0, l2: 0, l3: 0, u1: 0, u2: 0, u3: 0, t1: 0, t2: 0, t3: 0, comision: 0, total: 0 },
+        { año: 0, mes: 0, cuentas: 0, venta: 0, utilidad: 0, l1: 0, l2: 0, l3: 0, u1: 0, u2: 0, u3: 0, t1: 0, t2: 0, t3: 0, comision: 0, total: 0 },
+        { año: 0, mes: 0, cuentas: 0, venta: 0, utilidad: 0, l1: 0, l2: 0, l3: 0, u1: 0, u2: 0, u3: 0, t1: 0, t2: 0, t3: 0, comision: 0, total: 0 },
+        { año: 0, mes: 0, cuentas: 0, venta: 0, utilidad: 0, l1: 0, l2: 0, l3: 0, u1: 0, u2: 0, u3: 0, t1: 0, t2: 0, t3: 0, comision: 0, total: 0 },
+        { año: 0, mes: 0, cuentas: 0, venta: 0, utilidad: 0, l1: 0, l2: 0, l3: 0, u1: 0, u2: 0, u3: 0, t1: 0, t2: 0, t3: 0, comision: 0, total: 0 },
+        { año: 0, mes: 0, cuentas: 0, venta: 0, utilidad: 0, l1: 0, l2: 0, l3: 0, u1: 0, u2: 0, u3: 0, t1: 0, t2: 0, t3: 0, comision: 0, total: 0 },
+        { año: 0, mes: 0, cuentas: 0, venta: 0, utilidad: 0, l1: 0, l2: 0, l3: 0, u1: 0, u2: 0, u3: 0, t1: 0, t2: 0, t3: 0, comision: 0, total: 0 },
+        { año: 0, mes: 0, cuentas: 0, venta: 0, utilidad: 0, l1: 0, l2: 0, l3: 0, u1: 0, u2: 0, u3: 0, t1: 0, t2: 0, t3: 0, comision: 0, total: 0 },
+        { año: 0, mes: 0, cuentas: 0, venta: 0, utilidad: 0, l1: 0, l2: 0, l3: 0, u1: 0, u2: 0, u3: 0, t1: 0, t2: 0, t3: 0, comision: 0, total: 0 },
+        { año: 0, mes: 0, cuentas: 0, venta: 0, utilidad: 0, l1: 0, l2: 0, l3: 0, u1: 0, u2: 0, u3: 0, t1: 0, t2: 0, t3: 0, comision: 0, total: 0 },
+        { año: 0, mes: 0, cuentas: 0, venta: 0, utilidad: 0, l1: 0, l2: 0, l3: 0, u1: 0, u2: 0, u3: 0, t1: 0, t2: 0, t3: 0, comision: 0, total: 0 },
+        { año: 0, mes: 0, cuentas: 0, venta: 0, utilidad: 0, l1: 0, l2: 0, l3: 0, u1: 0, u2: 0, u3: 0, t1: 0, t2: 0, t3: 0, comision: 0, total: 0 },
+
     ]
+    var datos = {
+        type: "pie",
+        data: { labels: ["Utilidad Directa", "Utilidad Indirecta", "Comision Directa", "Comision Indirecta"] },
+        options: {
+            responsive: !window.MSInputMethodContext,
+            maintainAspectRatio: false,
+            legend: { display: false }
+        }
+    };
+    var datos2 = {
+        type: "line",
+        data: {
+            labels: ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"],
+            datasets: [{
+                label: "Ventas ($)",
+                fill: true,
+                backgroundColor: "transparent",
+                borderColor: window.theme.success,
+                data: [$('.v1').val(), $('.v2').val(), $('.v3').val(), $('.v4').val(), $('.v5').val(), $('.v6').val(),
+                $('.v7').val(), $('.v8').val(), $('.v9').val(), $('.v10').val(), $('.v11').val(), $('.v12').val()]
+            },
+            {
+                label: "Ventas ($)",
+                fill: true,
+                backgroundColor: "transparent",
+                borderColor: window.theme.primary,
+                data: [$('.u1').val(), $('.u2').val(), $('.u3').val(), $('.u4').val(), $('.u5').val(), $('.u6').val(),
+                $('.u7').val(), $('.u8').val(), $('.u9').val(), $('.u10').val(), $('.u11').val(), $('.u12').val()]
+            },
+            {
+                label: "Ventas ($)",
+                fill: true,
+                backgroundColor: "transparent",
+                borderColor: window.theme.secondary,
+                data: [$('.c1').val(), $('.c2').val(), $('.c3').val(), $('.c4').val(), $('.c5').val(), $('.c6').val(),
+                $('.c7').val(), $('.c8').val(), $('.c9').val(), $('.c10').val(), $('.c11').val(), $('.c12').val()]
+            }]
+        },
+        options: {
+            responsive: !window.MSInputMethodContext,
+            maintainAspectRatio: false,
+            legend: { display: false },
+            tooltips: { intersect: false },
+            hover: { intersect: true },
+            plugins: { filler: { propagate: false } },
+            scales: {
+                xAxes: [{ reverse: true, gridLines: { color: "rgba(0,0,0,0.05)" } }],
+                yAxes: [{ display: true, borderDash: [1, 1], gridLines: { color: "rgba(0,0,0,0)", fontColor: "#fff" } }]
+            }
+        }
+    };
+
+    window.pie = new Chart(canvas, datos);
+    window.pie2 = new Chart(canvas2, datos2);
+
+    function Calcula() {
+        reportes.map((repor) => {
+            if (repor.l1 < d) {
+                repor.t1 = (repor.u1 * d / 100) - (repor.u1 * repor.l1 / 100)
+                repor.total += repor.t1
+                if (repor.l2 < d && repor.l2 <= repor.l1) {
+                    repor.t2 = (repor.u2 * d / 100) - (repor.u2 * repor.l1 / 100)
+                    repor.total += repor.t2
+                } else if (repor.l2 < d && repor.l2 > repor.l1) {
+                    repor.t2 = (repor.u2 * d / 100) - (repor.u2 * repor.l2 / 100)
+                    repor.total += repor.t2
+                };
+                if (repor.l3 < d && repor.l3 <= repor.l2) {
+                    repor.t3 = (repor.u3 * d / 100) - (repor.u3 * repor.l2 / 100)
+                    repor.total += repor.t3
+                } else if (repor.l3 < d && repor.l3 > repor.l2 && repor.l3 <= repor.l1) {
+                    repor.t3 = (repor.u3 * d / 100) - (repor.u3 * repor.l1 / 100)
+                    repor.total += repor.t3
+                } else if (repor.l3 < d && repor.l3 > repor.l1) {
+                    repor.t3 = (repor.u3 * d / 100) - (repor.u3 * repor.l3 / 100)
+                    repor.total += repor.t3
+                };
+            };
+            //df = Object.values(repor.linea)
+            //repor.porcentage = Math.max(...df);
+            //num = (((repor.utilidad * parseFloat(d)) / 100) - ((repor.utilidad * repor.porcentage) / 100));
+            //repor.total = Math.sign(num) > 0 ? num : 0;
+        });
+    };
+
     function Desendente() {
         datos.data.datasets.splice(0);
         var newData = {
-            data: [$('.u' + m).val(), reportes[fe].utilidad, $('.c' + m).val(), reportes[fe].total],
-            backgroundColor: [
-                window.theme.primary,
-                window.theme.warning,
-                window.theme.danger,
-                "#E8EAED"
-            ],
+            data: [Moneda($('.u' + m).val()), Moneda(reportes[fe].utilidad), Moneda($('.c' + m).val()), Moneda(reportes[fe].total)],
+            backgroundColor: [window.theme.primary, window.theme.error, window.theme.info, window.theme.success],
             borderColor: "transparent"
         };
         datos.data.datasets.push(newData);
         window.pie.update();
     };
-
-    function Calcula() {
-        reportes.map((repor) => {
-            df = Object.values(repor.linea)
-            repor.porcentage = Math.max(...df);
-            num = (((repor.utilidad * parseFloat($('.p' + m).val())) / 100) - ((repor.utilidad * repor.porcentage) / 100));
-            repor.total = Math.sign(num) > 0 ? num : 0;
-        });
+    function Grafica() {
+        var data2 = new Array();
+        var data = reportes.filter((r) => {
+            return r.año === f.getFullYear()
+        }).map((r) => {
+            data2.push(r.total)
+            return r.utilidad
+        })
+        var g = {
+            label: "nuevo ($)",
+            fill: true,
+            backgroundColor: "transparent",
+            borderColor: window.theme.danger,
+            data: data
+        }
+        var i = {
+            label: "nuevo2 ($)",
+            fill: true,
+            backgroundColor: "transparent",
+            borderColor: window.theme.info,
+            data: data2
+        }
+        datos2.data.datasets.push(g, i);
+        window.pie2.update();
     };
 
     $.ajax({
@@ -438,7 +552,10 @@ if (window.location == "http://localhost:3000/tablero" || window.location == "ht
                 reportes[repor.Mes - 1].comision += repor.Comision
                 reportes[repor.Mes - 1].venta += repor.venta
                 reportes[repor.Mes - 1].utilidad += repor.utilidad
-                reportes[repor.Mes - 1].linea.l1 = repor.Porcentag
+                reportes[repor.Mes - 1].l1 = repor.Porcentag
+                reportes[repor.Mes - 1].u1 = repor.utilidad
+                reportes[repor.Mes - 1].año = repor.Año
+                reportes[repor.Mes - 1].mes = repor.Mes
             });
         }
     });
@@ -452,7 +569,10 @@ if (window.location == "http://localhost:3000/tablero" || window.location == "ht
                 reportes[repor.Mes - 1].comision += repor.Comision
                 reportes[repor.Mes - 1].venta += repor.venta
                 reportes[repor.Mes - 1].utilidad += repor.utilidad
-                reportes[repor.Mes - 1].linea.l2 = repor.Porcentag
+                reportes[repor.Mes - 1].l2 = repor.Porcentag
+                reportes[repor.Mes - 1].u2 = repor.utilidad
+                reportes[repor.Mes - 1].año = repor.Año
+                reportes[repor.Mes - 1].mes = repor.Mes
             });
         }
     });
@@ -466,13 +586,71 @@ if (window.location == "http://localhost:3000/tablero" || window.location == "ht
                 reportes[repor.Mes - 1].comision += repor.Comision
                 reportes[repor.Mes - 1].venta += repor.venta
                 reportes[repor.Mes - 1].utilidad += repor.utilidad
-                reportes[repor.Mes - 1].linea.l3 = repor.Porcentag
+                reportes[repor.Mes - 1].l3 = repor.Porcentag
+                reportes[repor.Mes - 1].u3 = repor.utilidad
+                reportes[repor.Mes - 1].año = repor.Año
+                reportes[repor.Mes - 1].mes = repor.Mes
             });
             Calcula()
             Desendente()
+            $('#cuerpo').append(`
+            <tr>
+                <td><i class="fas fa-square-full text-primary"></i> Tu</td>
+                <td class="text-right">$ ${Moneda($('.c' + m).val())}</td>
+                <td class="text-right text-success">${$('.p' + m).val()}%</td>
+            </tr>
+            <tr>
+                <td><i class="fas fa-square-full text-warning"></i> Nivel 1</td>
+                <td class="text-right">$ ${Moneda(reportes[fe].t1)}</td>
+                <td class="text-right text-success">${reportes[fe].l1}%</td>
+            </tr>
+            <tr>
+                <td><i class="fas fa-square-full text-danger"></i> Nivel 2</td>
+                <td class="text-right">$ ${Moneda(reportes[fe].t2)}</td>
+                <td class="text-right text-success">${reportes[fe].l2}%</td>
+            </tr>
+            <tr>
+                <td><i class="fas fa-square-full text-dark"></i> Nivel 3</td>
+                <td class="text-right">$ ${Moneda(reportes[fe].t3)}</td>
+                <td class="text-right text-success">${reportes[fe].l3}%</td>
+            </tr>`);
+            Grafica()
+            var datosTabla6 = reportes.map((p) => {
+                return Object.values(p)
+            })
+            //table6.draw();
+            var table6 = $('#datatables6').DataTable({
+                pageLength: 6,
+                lengthChange: false,
+                bFilter: false,
+                deferRender: true,
+                paging: true,
+                responsive: { details: { type: 'column' } },
+                //columnDefs: [{ className: 'control', orderable: true, targets: 0 }],
+                order: [[0, "desc"], [1, "asc"]],
+                language: languag,
+                data: datosTabla6,
+                columns: [
+                    { title: "Año" },
+                    { title: "Mes" },
+                    { title: "Cuentas" },
+                    { title: "Total Ventas", render: function (data, method, row) { return '$' + Moneda(parseFloat(data)) } },
+                    { title: "Utilida", render: function (data, method, row) { return '$' + Moneda(parseFloat(data)) } },
+                    { title: "Nivel-1 %", render: function (data, method, row) { return data + '%' } },
+                    { title: "Nivel-2 %", render: function (data, method, row) { return data + '%' } },
+                    { title: "Nivel-3 %", render: function (data, method, row) { return data + '%' } },
+                    { title: "Nivel-1 Utilida", render: function (data, method, row) { return '$' + Moneda(parseFloat(data)) } },
+                    { title: "Nivel-2 Utilida", render: function (data, method, row) { return '$' + Moneda(parseFloat(data)) } },,
+                    { title: "Nivel-3 Utilida", render: function (data, method, row) { return '$' + Moneda(parseFloat(data)) } },
+                    { title: "Nivel-1 Ganado", render: function (data, method, row) { return '$' + Moneda(parseFloat(data)) } },
+                    { title: "Nivel-2 Ganado", render: function (data, method, row) { return '$' + Moneda(parseFloat(data)) } },
+                    { title: "Nivel-3 Ganado", render: function (data, method, row) { return '$' + Moneda(parseFloat(data)) } },
+                    { title: "Comision Niveles", render: function (data, method, row) { return '$' + Moneda(parseFloat(data)) } },
+                    { title: "Total Ganado", render: function (data, method, row) { return '$' + Moneda(parseFloat(data)) } },
+                ]
+            });
         }
     });
-
 
     var date = new Date()
     // Bar chart
@@ -529,193 +707,15 @@ if (window.location == "http://localhost:3000/tablero" || window.location == "ht
         format: "L"
     });
 
-    $('#promedio').html($('.d' + m).val());
-    $('#ventaprecio').html($('.v' + m).val());
-    $('#utilidad').html($('.u' + m).val());
-    $('#utilidadneta').html($('.c' + m).val());
-    $('#ventames').html($('.m' + m).val());
-
-    $('#utilidadneta').mask('000,000,000', { reverse: true });
-    $('#utilidad').mask('000,000,000', { reverse: true });
-    $('#ventaprecio').mask('000,000,000', { reverse: true });
-    new Chart(document.getElementById("chartjs-line"), {
-        type: "line",
-        data: {
-            labels: ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"],
-            datasets: [{
-                label: "Ventas ($)",
-                fill: true,
-                backgroundColor: "transparent",
-                borderColor: window.theme.primary,
-                data: [
-                    $('#1').val(),
-                    $('#2').val(),
-                    $('#3').val(),
-                    $('#4').val(),
-                    $('#5').val(),
-                    $('#6').val(),
-                    $('#7').val(),
-                    $('#8').val(),
-                    $('#9').val(),
-                    $('#10').val(),
-                    $('#11').val(),
-                    $('#12').val()
-                ]
-            },
-            {
-                label: "Ventas ($)",
-                fill: true,
-                backgroundColor: "transparent",
-                borderColor: window.theme.primary,
-                data: [
-                    $('.u1').val(),
-                    $('.u2').val(),
-                    $('.u3').val(),
-                    $('.u4').val(),
-                    $('.u5').val(),
-                    $('.u6').val(),
-                    $('.u7').val(),
-                    $('.u8').val(),
-                    $('.u9').val(),
-                    $('.u10').val(),
-                    $('.u11').val(),
-                    $('.u12').val()
-                ]
-            },
-            {
-                label: "Ventas ($)",
-                fill: true,
-                backgroundColor: "transparent",
-                borderColor: window.theme.primary,
-                data: [
-                    $('.c1').val(),
-                    $('.c2').val(),
-                    $('.c3').val(),
-                    $('.c4').val(),
-                    $('.c5').val(),
-                    $('.c6').val(),
-                    $('.c7').val(),
-                    $('.c8').val(),
-                    $('.c9').val(),
-                    $('.c10').val(),
-                    $('.c11').val(),
-                    $('.c12').val()
-                ]
-            },
-            {
-                label: "Ventas indirectas ($)",
-                fill: true,
-                backgroundColor: "transparent",
-                borderColor: window.theme.tertiary,
-                borderDash: [4, 4],
-                data: [
-                    $('#m1').val(),
-                    $('#m2').val(),
-                    $('#m3').val(),
-                    $('#m4').val(),
-                    $('#m5').val(),
-                    $('#m6').val(),
-                    $('#m7').val(),
-                    $('#m8').val(),
-                    $('#m9').val(),
-                    $('#m10').val(),
-                    $('#m11').val(),
-                    $('#m12').val()
-                ]
-            }]
-        },
-        options: {
-            maintainAspectRatio: false,
-            legend: {
-                display: false
-            },
-            tooltips: {
-                intersect: false
-            },
-            hover: {
-                intersect: true
-            },
-            plugins: {
-                filler: {
-                    propagate: false
-                }
-            },
-            scales: {
-                xAxes: [{
-                    reverse: true,
-                    gridLines: {
-                        color: "rgba(0,0,0,0.05)"
-                    }
-                }],
-                yAxes: [{
-                    ticks: {
-                        stepSize: 1000000
-                    },
-                    display: true,
-                    borderDash: [5, 5],
-                    gridLines: {
-                        color: "rgba(0,0,0,0)",
-                        fontColor: "#fff"
-                    }
-                }]
-            }
-        }
-    });
-
-    // Pie chart
-
-    //new Chart(document.getElementById("chartjs-dashboard-pie"), {})
-    var datos = {
-        type: "pie",
-        data: {
-            labels: ["Utilidad Directa", "Utilidad Indirecta", "Comision Directa", "Comision Indirecta"],
-            datasets: [{
-                data: [$('.u' + m).val(), reportes[fe].utilidad, $('.c' + m).val(), reportes[fe].comision],
-                backgroundColor: [
-                    window.theme.primary,
-                    window.theme.warning,
-                    window.theme.danger,
-                    "#E8EAED"
-                ],
-                borderColor: "transparent"
-            }]
-        },
-        options: {
-            responsive: !window.MSInputMethodContext,
-            maintainAspectRatio: false,
-            legend: {
-                display: false
-            }
-        }
-    };
-    var canvas = document.getElementById("chartjs-dashboard-pie").getContext('2d');
-    window.pie = new Chart(canvas, datos);
-
-
-
-
-
-
-
-
     var table5 = $('#datatables5').DataTable({
         pageLength: 6,
         lengthChange: false,
         bFilter: false,
-        //autoWidth: false,
         deferRender: true,
         paging: true,
-        responsive: {
-            details: {
-                type: 'column'
-            }
-        },
-        columnDefs: [{
-            className: 'control',
-            orderable: true,
-            targets: 0
-        }],
-        order: [[1, "desc"], [2, "desc"]],
+        responsive: { details: { type: 'column' } },
+        columnDefs: [{ className: 'control', orderable: true, targets: 0 }],
+        order: [[1, "desc"]/*, [2, "desc"]*/],
         language: languag,
         ajax: {
             method: "POST",
@@ -724,7 +724,7 @@ if (window.location == "http://localhost:3000/tablero" || window.location == "ht
         },
         columns: [
             {
-                defaultContent: `a`
+                defaultContent: `.`
             },
             { data: "Año" },
             { data: "Mes" },
@@ -751,30 +751,33 @@ if (window.location == "http://localhost:3000/tablero" || window.location == "ht
             {
                 data: "Porcentag",
                 render: function (data, method, row) {
-                    switch (data) {
+                    var m
+                    data > 39 && data < 61 ? m = 40 : data > 59 && data < 71 ? m = 60 : data > 69 && data < 71 ? m = 70 : data > 89 && data < 96 ? m = 90 : data > 95 ? m = 95 : 0;
+                    switch (m) {
                         case 40:
-                            return `<span class="badge badge-pill badge-warning">Vendedor 40%</span>`
+                            return `<span class="badge badge-pill badge-warning">Vendedor ${data}%</span>`
                             break;
                         case 60:
-                            return `<span class="badge badge-pill badge-success">Contratista 60%</span>`
+                            return `<span class="badge badge-pill badge-success">Contratista ${data}%</span>`
                             break;
                         case 70:
-                            return `<span class="badge badge-pill badge-info">Distribuidor 70%</span>`
+                            return `<span class="badge badge-pill badge-info">Distribuidor ${data}%</span>`
                             break;
                         case 90:
-                            return `<span class="badge badge-pill badge-secondary">Mayorista 90%</span>`
+                            return `<span class="badge badge-pill badge-secondary">Mayorista ${data}%</span>`
                             break;
                         case 95:
-                            return `<span class="badge badge-pill badge-primary">Master 95%</span>`
+                            return `<span class="badge badge-pill badge-primary">Master ${data}%</span>`
                             break;
-                        default:
-                            return `<span class="badge badge-pill badge-danger">Indefinido</span>`
                     }
                 }
             }
         ]
     });
 };
+
+
+
 //////////////////////////////////* REPORTES */////////////////////////////////////////////////////////////
 if (window.location.pathname == `/links/reportes`) {
     let p = '', fecha = new Date(), fechs = new Date();
@@ -907,7 +910,7 @@ if (window.location.pathname == `/links/reportes`) {
         columns: [
             { data: "id" },
             {
-                data: "fechadecompra",
+                data: "feclassNachadecompra",
                 className: 'te',
                 render: function (data, method, row) {
                     return moment(data).format('YYYY-MM-DD hh:mm A') //pone la fecha en un formato entendible
