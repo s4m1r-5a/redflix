@@ -66,30 +66,43 @@ router.put('/reportes', isLoggedIn, async (req, res) => {
 router.post('/reportes/:id', isLoggedIn, async (req, res) => {
     const { id } = req.params;
     if (id == 'table2') {
+        
+        d = req.user.admin > 0 ? '' : 'v.vendedor = ? AND';
 
-        const ventas = await pool.query(`SELECT * FROM ventas v INNER JOIN products p ON v.product = p.id_producto 
-        WHERE v.vendedor = ? AND v.product != 25 AND YEAR(v.fechadecompra) = YEAR(CURDATE()) AND MONTH(v.fechadecompra) BETWEEN 1 and 12`, req.user.id);
+        sql = `SELECT * FROM ventas v INNER JOIN products p ON v.product = p.id_producto WHERE ${d} 
+        v.product != 25 AND YEAR(v.fechadecompra) = YEAR(CURDATE()) AND MONTH(v.fechadecompra) BETWEEN 1 and 12`
+
+        const ventas = await pool.query(sql, req.user.id);
         respuesta = { "data": ventas };
         res.send(respuesta);
 
     } else if (id == 'table3') {
 
-        const solicitudes = await pool.query(`SELECT t.id, u.fullname, us.id tu, us.fullname venefactor, 
+        d = req.user.id == 15 ? '' : 't.acreedor = ?  AND';
+        
+        sql = `SELECT t.id, u.fullname, us.id tu, us.fullname venefactor, 
         t.fecha, t.monto, m.metodo, t.creador, t.estado idestado, e.estado, t.recibo, r.id idrecarga, 
         r.transaccion, r.fecha fechtrans, r.saldoanterior, r.numeroventas FROM transacciones t 
         INNER JOIN users u ON t.remitente = u.id INNER JOIN users us ON t.acreedor = us.id 
         INNER JOIN recargas r ON r.transaccion = t.id INNER JOIN metodos m ON t.metodo = m.id 
-        INNER JOIN estados e ON t.estado = e.id WHERE t.acreedor = ? AND  YEAR(t.fecha) = YEAR(CURDATE()) 
-        AND MONTH(t.fecha) BETWEEN 1 and 12`, req.user.id);
+        INNER JOIN estados e ON t.estado = e.id WHERE ${d} YEAR(t.fecha) = YEAR(CURDATE()) 
+        AND MONTH(t.fecha) BETWEEN 1 and 12`
+
+        const solicitudes = await pool.query(sql, req.user.id);
         respuesta = { "data": solicitudes };
         res.send(respuesta);
 
     } else if (id == 'table4') {
 
-        const ventas = await pool.query(`SELECT v.id, v.fechadecompra, p.producto, v.transaccion, u.fullname, t.fecha fechsolicitud, 
+        d = req.user.id == 15 ? '' : 'v.vendedor = ? AND';
+
+        sql = `SELECT v.id, v.fechadecompra, p.producto, v.transaccion, u.fullname, t.fecha fechsolicitud, 
         t.monto, m.metodo, t.estado FROM ventas v INNER JOIN products p ON v.product = p.id_producto 
         INNER JOIN transacciones t ON v.transaccion = t.id INNER JOIN users u ON t.acreedor = u.id INNER JOIN metodos m ON t.metodo = m.id
-        WHERE v.vendedor = ? AND v.product = 25 AND YEAR(v.fechadecompra) = YEAR(CURDATE()) AND MONTH(v.fechadecompra) BETWEEN 1 and 12`, req.user.id);
+        WHERE ${d} v.product = 25 AND YEAR(v.fechadecompra) = YEAR(CURDATE()) 
+        AND MONTH(v.fechadecompra) BETWEEN 1 and 12`
+
+        const ventas = await pool.query(sql, req.user.id);
         respuesta = { "data": ventas };
         res.send(respuesta);
     }

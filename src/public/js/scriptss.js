@@ -640,7 +640,7 @@ if (window.location == "http://localhost:3000/tablero" || window.location == "ht
                     { title: "Nivel-2 %", render: function (data, method, row) { return data + '%' } },
                     { title: "Nivel-3 %", render: function (data, method, row) { return data + '%' } },
                     { title: "Nivel-1 Utilida", render: function (data, method, row) { return '$' + Moneda(parseFloat(data)) } },
-                    { title: "Nivel-2 Utilida", render: function (data, method, row) { return '$' + Moneda(parseFloat(data)) } },,
+                    { title: "Nivel-2 Utilida", render: function (data, method, row) { return '$' + Moneda(parseFloat(data)) } }, ,
                     { title: "Nivel-3 Utilida", render: function (data, method, row) { return '$' + Moneda(parseFloat(data)) } },
                     { title: "Nivel-1 Ganado", render: function (data, method, row) { return '$' + Moneda(parseFloat(data)) } },
                     { title: "Nivel-2 Ganado", render: function (data, method, row) { return '$' + Moneda(parseFloat(data)) } },
@@ -832,20 +832,22 @@ if (window.location.pathname == `/links/reportes`) {
         }
     );
     $('#datatable2').on('click', '.te', function () {
-        var fila = $(this).parents('tr');
-        if ($(fila).hasClass('selected')) {
-            $(fila).removeClass('selected');
-        } else {
-            $('#datatable2').DataTable().$('tr.selected').removeClass('selected');
-            $(fila).addClass('selected');
+        if ($('#usuarioadmin').val() == 1) {
+            var fila = $(this).parents('tr');
+            if ($(fila).hasClass('selected')) {
+                $(fila).removeClass('selected');
+            } else {
+                $('#datatable2').DataTable().$('tr.selected').removeClass('selected');
+                $(fila).addClass('selected');
+            }
+            var data = $('#datatable2').DataTable().row(fila).data();
+            $("#idsms").val(data.id);
+            $("#car").attr("src", data.imagenes);
+            $("#cliente").val(data.client);
+            $("#correo").val(data.correo);
+            $("#cels").val(data.movildecompra);
+            $('#ModalOrden').modal('toggle');
         }
-        var data = $('#datatable2').DataTable().row(fila).data();
-        $("#idsms").val(data.id);
-        $("#car").attr("src", data.imagenes);
-        $("#cliente").val(data.client);
-        $("#correo").val(data.correo);
-        $("#cels").val(data.movildecompra);
-        $('#ModalOrden').modal('toggle');
     });
 
     $('#ModalOrden').on('hidden.bs.modal', function () {
