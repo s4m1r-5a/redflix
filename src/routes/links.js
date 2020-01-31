@@ -134,9 +134,10 @@ router.put('/solicitudes', isLoggedIn, async (req, res) => {
     }
 });
 /////////////* VENTAS */////////////////////////////////////
+router.get('/ventas2', isLoggedIn, async (req, res) => {
+    res.render('links/ventas2');
+});
 router.get('/ventas', isLoggedIn, async (req, res) => {
-    const result = await rango(req.user.id);
-    console.log(result)
     res.render('links/ventas');
 });
 router.post('/ventas', isLoggedIn, async (req, res) => {
@@ -296,7 +297,7 @@ router.post('/afiliado', async (req, res) => {
             await pool.query('INSERT INTO ventas SET ? ', venta);
         }
         await pool.query('INSERT INTO pines SET ? ', nuevoPin);
-        sms('57' + movil, 'Bienvenido a ser parte de nuestro equipo RedFlix tu ID sera ' + pin);
+        sms('57' + movil, 'Bienvenido a ser parte de nuestro equipo RedFlix ingresa a https://redflixx.herokuapp.com/signup y registrarte canjeando este ID ' + pin);
         req.flash('success', 'Pin enviado satisfactoriamente, comuniquese con el afiliado para que se registre');
         res.redirect('/tablero');
     }
