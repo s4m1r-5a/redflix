@@ -382,7 +382,7 @@ $('.plancit').click(function () {
     $('.z').show("slow");
 });
 //////////////////////////* TABLERO *///////////////////////////////////////
-if (window.location == "http://localhost:3000/tablero" || window.location == "https://redflixx.herokuapp.com/tablero") {
+if (window.location.pathname == `/tablero`) {
     new Chart(document.getElementById("chartjs-dashboard-pie"), {})
     //new Chart(document.getElementById("chartjs-line"), {})
 
