@@ -75,7 +75,7 @@ router.get('/profile', isLoggedIn, (req, res) => {
   res.render('profile');
 });
 router.get('/tablero', isLoggedIn, async (req, res) => {
-  const links = await pool.query(`SELECT MONTH(v.fechadecompra) Mes, COUNT(*) CantMes, SUM(p.precio) venta, SUM(p.utilidad) utilidad, 
+  /*const links = await pool.query(`SELECT MONTH(v.fechadecompra) Mes, COUNT(*) CantMes, SUM(p.precio) venta, SUM(p.utilidad) utilidad, 
   ((p.utilidad*r.comision/100)*100/p.utilidad) Porcentag, SUM((p.utilidad*r.comision/100)) Comision, ROUND(COUNT(*)/30) promediov
   FROM ventas v 
   INNER JOIN users u ON v.vendedor = u.id
@@ -100,7 +100,8 @@ router.get('/tablero', isLoggedIn, async (req, res) => {
   links.desendente = link;
   console.log(links);
   //console.log(ambos);
-  res.render('tablero', { links });
+  res.render('tablero', { links });*/
+  res.render('tablero')
 });
 router.post('/tablero/:a', isLoggedIn, async (req, res) => {
   const { a } = req.params;

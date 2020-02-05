@@ -6,7 +6,8 @@ const pool = require('../database');
 const { isLoggedIn, isLogged, Admins } = require('../lib/auth');
 const sms = require('../sms.js');
 const { registro } = require('../keys');
-const request = require('request')
+const request = require('request');
+const axios = require('axios');
 const moment = require('moment');
 
 router.get('/add', isLoggedIn, (req, res) => {
@@ -19,8 +20,7 @@ router.get('/productos', Admins, (req, res) => {
 });
 router.post('/productos', Admins, async (req, res) => {
     const fila = await pool.query('SELECT * FROM products WHERE usuario = ?', req.user.id);
-    respuesta = { "data": fila };
-    console.log(respuesta)
+    respuesta = { "data": fila };    
     res.send(respuesta);
 });
 
@@ -66,7 +66,7 @@ router.put('/reportes', isLoggedIn, async (req, res) => {
 router.post('/reportes/:id', isLoggedIn, async (req, res) => {
     const { id } = req.params;
     if (id == 'table2') {
-        
+
         d = req.user.admin > 0 ? '' : 'v.vendedor = ? AND';
 
         sql = `SELECT * FROM ventas v INNER JOIN products p ON v.product = p.id_producto WHERE ${d} 
@@ -79,7 +79,7 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
     } else if (id == 'table3') {
 
         d = req.user.id == 15 ? '' : 't.acreedor = ?  AND';
-        
+
         sql = `SELECT t.id, u.fullname, us.id tu, us.fullname venefactor, 
         t.fecha, t.monto, m.metodo, t.creador, t.estado idestado, e.estado, t.recibo, r.id idrecarga, 
         r.transaccion, r.fecha fechtrans, r.saldoanterior, r.numeroventas FROM transacciones t 
@@ -108,7 +108,7 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
     }
 
 });
-//////////////* SOLICITUDES *//////////////////////////////////
+//////////////* SOLICITUDES || CONSULTAS *//////////////////////////////////
 router.get('/solicitudes', isLoggedIn, (req, res) => {
     res.render('links/solicitudes');
 });
@@ -121,7 +121,7 @@ router.post('/solicitudes', isLoggedIn, async (req, res) => {
     res.send(respuesta);
 });
 router.put('/solicitudes', isLoggedIn, async (req, res) => {
-    const { id, estado, mg, monto } = req.body
+    const { id, estado, mg, monto } = req.body;
     const result = await rango(req.user.id);
     const sald = await saldo('', result, req.user.id, monto);
 
@@ -132,6 +132,39 @@ router.put('/solicitudes', isLoggedIn, async (req, res) => {
         await pool.query('UPDATE transacciones set ? WHERE id = ?', [d, id]);
         res.send(true);
     }
+});
+router.post('/cedulav', isLoggedIn, async (req, res) => {
+    const { cedula } = req.body;
+    const APPID_CEDULA = '408';
+    const TOKEN_CEDULA = '3cd80102dd1dbb7ba19c58a34eb1b05c';
+
+    //const r = await axios.get(url);
+    function En(datos) {
+        res.send(datos);
+    };
+
+    var getCI = (cedula) => {
+        request({
+            url: 'https://cuado.co:444/api/v1?app_id=' + APPID_CEDULA + '&token=' + TOKEN_CEDULA + '&cedula=' + cedula,
+            json: true,
+            rejectUnauthorized: false
+        }, function (error, response, body) {
+            var datos;
+            if (!error && response.statusCode === 200) {
+                if (body.data)
+                    datos = body.data;
+                else
+                    datos = body.error_str;
+            } else {
+                datos = 'fkflfdld';
+            }
+            En(datos)
+            return datos
+        });
+    }
+
+    getCI(cedula)
+
 });
 /////////////* VENTAS */////////////////////////////////////
 router.get('/ventas2', isLoggedIn, async (req, res) => {
@@ -145,7 +178,6 @@ router.post('/ventas', isLoggedIn, async (req, res) => {
     const result = await rango(req.user.id);
     const usua = await usuario(req.user.id);
     var sald;
-    console.log(product.charAt(2))
     if (product.charAt(2) !== "") {
         sald = await saldo(product.split(" ")[1], result, req.user.id);
     } else {
@@ -196,6 +228,11 @@ router.post('/ventas', isLoggedIn, async (req, res) => {
                 rango: result,
                 movildecompra: cel
             }
+            if (!user) {
+                const persona = { nombre, movil: cel, email1: correo };
+                const clien = await pool.query('INSERT INTO clientes SET ? ', persona);
+                venta2.client = clien.insertId;
+            }
             const cliente = await pool.query('SELECT * FROM ventas WHERE client = ? AND fechadevencimiento >= ?', [user, new Date()]);
             if (cliente.length) {
                 fech = moment(cliente[0].fechadevencimiento).format('YYYY-MM-DD');
@@ -221,9 +258,7 @@ router.post('/patro', isLoggedIn, async (req, res) => {
 router.get('/recarga', isLoggedIn, (req, res) => {
     res.render('links/recarga');
 });
-router.post('/recarga', isLoggedIn, async (req, res) => {
-    console.log(req.body)
-    console.log()
+router.post('/recarga', isLoggedIn, async (req, res) => {    
     const { monto, metodo, id, quien, pin } = req.body;
     const Transaccion = {
         acreedor: req.user.id,
@@ -345,7 +380,7 @@ router.post('/cliente', async (req, res) => {
             console.error(error);
             return;
         }
-        //console.log(Array.isArray(body))
+        
         if (body.length > 0) {
             dat = await body.map((re) => {
                 if (re.id === telephone && re.email === buyerEmail) {
@@ -403,8 +438,7 @@ router.get('/delete/:id', async (req, res) => {
 
 router.get('/edit/:id', async (req, res) => {
     const links = await pool.query('SELECT * FROM links WHERE id = ?', [id]);
-    const { id } = req.params;
-    console.log(links);
+    const { id } = req.params;    
     res.render('/links/edit', { link: links[0] });
 });
 
@@ -600,8 +634,7 @@ async function Desendentes(id) {
     AND MONTH(v.fechadecompra) BETWEEN 1 and 12
     GROUP BY YEAR(v.fechadecompra), MONTH(v.fechadecompra) ASC
     ORDER BY 1`);
-    //console.log(reporte)
-
+    
     const lineaDos = await pool.query(`SELECT acreedor FROM pines WHERE pines.usuario = 1${linea}`);
     lDesc = '', linea = '';
     await lineaDos.map((primera) => { lDesc += ` OR pi.acreedor = ${primera.acreedor}`; linea += ` OR pines.usuario = ${primera.acreedor}` });
@@ -616,8 +649,7 @@ async function Desendentes(id) {
     AND MONTH(v.fechadecompra) BETWEEN 1 and 12
     GROUP BY YEAR(v.fechadecompra), MONTH(v.fechadecompra) ASC
     ORDER BY 1`);
-    //console.log(reporte2)
-
+    
     const lineaTres = await pool.query(`SELECT acreedor FROM pines WHERE pines.usuario =  1${linea}`);
     lDesc = '', linea = '';
     await lineaTres.map((primera) => { lDesc += ` OR pi.acreedor = ${primera.acreedor}` });
@@ -632,9 +664,7 @@ async function Desendentes(id) {
     AND MONTH(v.fechadecompra) BETWEEN 1 and 12
     GROUP BY YEAR(v.fechadecompra), MONTH(v.fechadecompra) ASC
     ORDER BY 1`);
-    //console.log(reporte3)
-    mapa = [reporte, reporte2, reporte3]
-    //console.log(mapa) 
+    mapa = [reporte, reporte2, reporte3]    
     if (reporte.length > 0) {
         await mapa.map((r) => {
             console.log(r)

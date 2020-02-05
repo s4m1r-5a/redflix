@@ -7,20 +7,20 @@ module.exports = {
         password: 'colomb1@',
         database: 'redflix'
     },*/
-    /*database: {
-        connectionLimit: 10,
+    database: {
+        connectionLimit: 1000,
         host: '213.190.6.64',
         user: 'u152781536_s',
         password: 'cinetflix',
         database: 'u152781536_redf'
-    },*/
-    database: {
+    },
+    /*database: {
         connectionLimit: 1000,
         host: 'localhost',
         user: 'redflixx',
         password: 'colomb1@',
         database: 'redflix'
-    },
+    },*/
     registro: {
         pin: 'hola'
     },
