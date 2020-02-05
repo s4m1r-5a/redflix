@@ -413,7 +413,7 @@ $(document).ready(function () {
     });
 });
 //////////////////////////* INDEX */////////////////////////////////////////
-if (window.location.pathname == `/`) {
+/*if (window.location.pathname == `/`) {
     var scaling = 1;
     //count
     var currentSliderCount = 0;
@@ -513,7 +513,7 @@ if (window.location.pathname == `/`) {
             });
         }
     });
-}
+}*/
 //////////////////////////* TABLERO *///////////////////////////////////////
 if (window.location.pathname == `/tablero`) {
     new Chart(document.getElementById("chartjs-dashboard-pie"), {})
