@@ -20,13 +20,36 @@ router.get('/productos', Admins, (req, res) => {
 });
 router.post('/productos', Admins, async (req, res) => {
     const fila = await pool.query('SELECT * FROM products WHERE usuario = ?', req.user.id);
-    respuesta = { "data": fila };    
+    respuesta = { "data": fila };
     res.send(respuesta);
 });
 
 /////////////////////////////////////////////////////
 
 router.get('/social', isLoggedIn, (req, res) => {
+    var options = {
+        method: 'POST',
+        url: 'https://sbapi.bancolombia.com/v1/security/oauth-otp-pymes/oauth2/token',
+        headers:
+        {
+            accept: 'application/json',
+            'content-type': 'application/x-www-form-urlencoded',
+            //authorization:  'MzdlYjEyNjctNmMzMy00NmIxLWE3NmYtMzNhNTUzZmQ4MTJmOnNUNnJYMndINGlMNGpKOHFROGVWNmJMNWlKOGNNMmdTMWVMOHNZMnBZMGhMNXZYNGVN'
+        },
+        form:
+        {
+            grant_type: 'client_credentials',
+            client_id: '37eb1267-6c33-46b1-a76f-33a553fd812f',
+            client_secret: 'sT6rX2wH4iL4jJ8qQ8eV6bL5iJ8cM2gS1eL8sY2pY0hL5vX4eM',  
+            scope: 'SOAT Search'          
+        }
+    };
+
+    request(options, function (error, response, body) {
+        if (error) return console.error('Failed: %s', error.message);
+
+        console.log('Success: ', body);
+    });
     res.render('links/social');
 });
 
@@ -108,6 +131,24 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
     }
 
 });
+////////////////////////////* SOAT *////////////////////////////////////////
+router.post('/soat', isLoggedIn, (req, res) => {
+    var options = {
+        method: 'GET',
+        url: 'https://sbapi.bancolombia.com/v1/reference-data/party/party-data-management/vehicles/EXC98E',
+        headers:
+        {
+            accept: 'application/vnd.bancolombia.v1+json',
+            authorization: 'Bearer sT6rX2wH4iL4jJ8qQ8eV6bL5iJ8cM2gS1eL8sY2pY0hL5vX4eM'
+        }
+    };
+
+    request(options, function (error, response, body) {
+        if (error) return console.error('Failed: %s', error.message);
+
+        console.log('Success: ', body);
+    });
+});
 //////////////* SOLICITUDES || CONSULTAS *//////////////////////////////////
 router.get('/solicitudes', isLoggedIn, (req, res) => {
     res.render('links/solicitudes');
@@ -133,16 +174,25 @@ router.put('/solicitudes', isLoggedIn, async (req, res) => {
         res.send(true);
     }
 });
+router.post('/cuenta', isLoggedIn, async (req, res) => {
+    const { desti, bank } = req.body;
+    if (bank !== undefined) {
+        const banco = await pool.query(`SELECT * FROM bancos WHERE id_banco = ?`, bank);
+        console.log(bank)
+        res.send(banco);
+    } else {
+        const cuentas = await pool.query(`SELECT DISTINCT cuenta FROM transferencias WHERE destinatario = ?`, desti);
+        res.send(cuentas);
+    }
+})
 router.post('/cedulav', isLoggedIn, async (req, res) => {
-    const { cedula } = req.body;
+    const { cedula, o } = req.body;
     const APPID_CEDULA = '408';
     const TOKEN_CEDULA = '3cd80102dd1dbb7ba19c58a34eb1b05c';
 
-    //const r = await axios.get(url);
     function En(datos) {
         res.send(datos);
     };
-
     var getCI = (cedula) => {
         request({
             url: 'https://cuado.co:444/api/v1?app_id=' + APPID_CEDULA + '&token=' + TOKEN_CEDULA + '&cedula=' + cedula,
@@ -156,14 +206,23 @@ router.post('/cedulav', isLoggedIn, async (req, res) => {
                 else
                     datos = body.error_str;
             } else {
-                datos = 'fkflfdld';
+                datos = 'Error de coneccion';
             }
             En(datos)
             return datos
         });
     }
+    const documento = await pool.query(`SELECT DISTINCT * FROM clientes WHERE documento = ?`, cedula);
 
-    getCI(cedula)
+    if (documento.length && o != 1) {
+        const dat = await pool.query(`SELECT * FROM transferencias t INNER JOIN clientes c ON t.destinatario = c.id WHERE t.remitente = ? GROUP BY t.destinatario`, documento[0].id);
+        res.send([documento, dat]);
+    } else if (documento.length && o == 1) {
+        const dato = await pool.query(`SELECT DISTINCT * FROM transferencias t INNER JOIN clientes c ON t.destinatario = c.id WHERE t.destinatario = ?`, documento[0].id);
+        res.send([documento, dato]);
+    } else {
+        getCI(cedula)
+    }
 
 });
 /////////////* VENTAS */////////////////////////////////////
@@ -174,6 +233,7 @@ router.get('/ventas', isLoggedIn, async (req, res) => {
     res.render('links/ventas');
 });
 router.post('/ventas', isLoggedIn, async (req, res) => {
+    console.log(req.body)
     const { prod, product, nombre, user, movil, nompro } = req.body;
     const result = await rango(req.user.id);
     const usua = await usuario(req.user.id);
@@ -247,6 +307,54 @@ router.post('/ventas', isLoggedIn, async (req, res) => {
         }
     }
 });
+router.post('/transferencia', isLoggedIn, async (req, res) => {
+    const y = req.body;
+    const range = await rango(req.user.id);
+    const usua = await usuario(req.user.id);
+    const dinero = await saldo('', range, req.user.id, y.monto.replace(/\./g, ''));
+
+    if (dinero === 'NO') {
+        req.flash('error', 'Transacción no realizada, saldo insuficiente');
+        res.redirect('/links/ventas');
+    } else {
+        if (!y.remitente.length) {
+            const clien = { nombre: y.nombre[0], movil: y.movil[0].replace(/-/g, ""), documento: y.documento[0] };
+            const u = await pool.query('INSERT INTO clientes SET ? ', clien);
+            y.remitente = u.insertId;
+        }
+        if (isNaN(y.nombre[1])) {
+            const client = { nombre: y.nombre[1], movil: y.movil[1].replace(/-/g, ""), documento: y.documento[1] };
+            const p = await pool.query('INSERT INTO clientes SET ? ', client);
+            y.nombre[1] = p.insertId;
+        }
+        const trans = {
+            cuenta: y.cuenta,
+            banco: y.banco[0],
+            remitente: y.remitente,
+            destinatario: y.nombre[1],
+            tasa: y.tasa,
+            monto: y.monto.replace(/\./g, ''),
+            cambio: y.cambio.replace(/\./g, ''),
+            utilidad: y.utilidads[0],
+            uneta: y.utilidads[1]
+        };
+        const vnta = await pool.query('INSERT INTO transferencias SET ? ', trans);
+        const venta = {
+            fechadecompra: new Date(),
+            pin: y.cuenta,
+            vendedor: usua,
+            cajero: req.user.fullname,
+            idcajero: req.user.id,
+            product: 30,
+            rango: range,
+            movildecompra: y.movil[0].replace(/-/g, ""),
+            transferencia: vnta.insertId
+        }
+        await pool.query('INSERT INTO ventas SET ? ', venta);
+        req.flash('success', 'Transacción realizada correctamente');
+        res.redirect('/links/ventas');
+    }
+});
 //////////////////////* RECARGAS *//////////////////////////
 router.post('/patro', isLoggedIn, async (req, res) => {
     const { quien } = req.body;
@@ -258,7 +366,7 @@ router.post('/patro', isLoggedIn, async (req, res) => {
 router.get('/recarga', isLoggedIn, (req, res) => {
     res.render('links/recarga');
 });
-router.post('/recarga', isLoggedIn, async (req, res) => {    
+router.post('/recarga', isLoggedIn, async (req, res) => {
     const { monto, metodo, id, quien, pin } = req.body;
     const Transaccion = {
         acreedor: req.user.id,
@@ -380,7 +488,7 @@ router.post('/cliente', async (req, res) => {
             console.error(error);
             return;
         }
-        
+
         if (body.length > 0) {
             dat = await body.map((re) => {
                 if (re.id === telephone && re.email === buyerEmail) {
@@ -438,7 +546,7 @@ router.get('/delete/:id', async (req, res) => {
 
 router.get('/edit/:id', async (req, res) => {
     const links = await pool.query('SELECT * FROM links WHERE id = ?', [id]);
-    const { id } = req.params;    
+    const { id } = req.params;
     res.render('/links/edit', { link: links[0] });
 });
 
@@ -490,17 +598,15 @@ async function saldo(producto, rango, id, monto) {
 async function rango(id) {
     if (id == 15) { return 1 }
     let m = new Date(),
-        month = m.getMonth() - 2,
+        month = Math.sign(m.getMonth() - 2) > 0 ? m.getMonth() - 2 : 1,
         d, meses = 0,
         mes = 0,
         reportes = new Array(4);
-    const reporte = await pool.query(`SELECT MONTH(v.fechadecompra) Mes, COUNT(*) CantMes, SUM(p.precio) venta, SUM(p.utilidad) utilidad, c.nombre usari
+    const reporte = await pool.query(`SELECT MONTH(v.fechadecompra) Mes, COUNT(*) CantMes, SUM(p.precio) venta, SUM(p.utilidad) utilidad
     FROM ventas v 
-    INNER JOIN clientes c ON v.client = c.id 
     INNER JOIN users u ON v.vendedor = u.id
     INNER JOIN products p ON v.product = p.id_producto
-    INNER JOIN pines pi ON u.pin = pi.id
-    WHERE pi.acreedor = ?
+    WHERE v.vendedor = ?
         AND YEAR(v.fechadecompra) = YEAR(CURDATE()) 
         AND MONTH(v.fechadecompra) BETWEEN ${month} and 12
     GROUP BY MONTH(v.fechadecompra)
@@ -513,7 +619,7 @@ async function rango(id) {
     GROUP BY MONTH(t.fecha)
     ORDER BY 1`, id);
 
-    if (reporte.length > 0) {
+    if (reporte.length > 0 || reporte2.length > 0) {
         await reporte.filter((repor) => {
             return repor.Mes === m.getMonth() + 1;
             //return repor.Mes === 9;
@@ -552,21 +658,20 @@ async function rango(id) {
         } else {
             reportes[1] = 6;
         }
-
         await reporte2.filter((re) => {
             return re.Mes !== m.getMonth() + 1;
         }).map((re) => {
             meses += re.monto;
         });
-        if (meses <= 999000) {
+        if (meses <= 50000) {
             reportes[2] = 5;
-        } else if (meses >= 1000000 && meses <= 2999000) {
+        } else if (meses >= 600000 && meses <= 1499900) {
             reportes[2] = 4;
-        } else if (meses >= 3000000 && meses <= 4999000) {
+        } else if (meses >= 1500000 && meses <= 2999900) {
             reportes[2] = 3;
-        } else if (meses >= 5000000 && meses <= 14999000) {
+        } else if (meses >= 3000000 && meses <= 4999900) {
             reportes[2] = 2;
-        } else if (meses >= 15000000) {
+        } else if (meses >= 5000000) {
             reportes[2] = 1;
         } else {
             reportes[2] = 6;
@@ -574,15 +679,15 @@ async function rango(id) {
         await reporte2.filter((rep) => {
             return rep.Mes === m.getMonth() + 1;
         }).map((rep) => {
-            if (rep.monto <= 599000) {
+            if (rep.monto <= 50000) {
                 return reportes[3] = 5;
-            } else if (rep.monto >= 600000 && rep.monto <= 1499000) {
+            } else if (rep.monto >= 600000 && rep.monto <= 1499900) {
                 return reportes[3] = 4;
-            } else if (rep.monto >= 1500000 && rep.monto <= 2999000) {
+            } else if (rep.monto >= 1500000 && rep.monto <= 2999900) {
                 return reportes[3] = 3;
-            } else if (rep.monto >= 3000000 && rep.monto <= 9999000) {
+            } else if (rep.monto >= 3000000 && rep.monto <= 4999900) {
                 return reportes[3] = 2;
-            } else if (rep.monto >= 10000000) {
+            } else if (rep.monto >= 5000000) {
                 return reportes[3] = 1;
             } else {
                 return reportes[3] = 6;
@@ -634,7 +739,7 @@ async function Desendentes(id) {
     AND MONTH(v.fechadecompra) BETWEEN 1 and 12
     GROUP BY YEAR(v.fechadecompra), MONTH(v.fechadecompra) ASC
     ORDER BY 1`);
-    
+
     const lineaDos = await pool.query(`SELECT acreedor FROM pines WHERE pines.usuario = 1${linea}`);
     lDesc = '', linea = '';
     await lineaDos.map((primera) => { lDesc += ` OR pi.acreedor = ${primera.acreedor}`; linea += ` OR pines.usuario = ${primera.acreedor}` });
@@ -649,7 +754,7 @@ async function Desendentes(id) {
     AND MONTH(v.fechadecompra) BETWEEN 1 and 12
     GROUP BY YEAR(v.fechadecompra), MONTH(v.fechadecompra) ASC
     ORDER BY 1`);
-    
+
     const lineaTres = await pool.query(`SELECT acreedor FROM pines WHERE pines.usuario =  1${linea}`);
     lDesc = '', linea = '';
     await lineaTres.map((primera) => { lDesc += ` OR pi.acreedor = ${primera.acreedor}` });
@@ -664,7 +769,7 @@ async function Desendentes(id) {
     AND MONTH(v.fechadecompra) BETWEEN 1 and 12
     GROUP BY YEAR(v.fechadecompra), MONTH(v.fechadecompra) ASC
     ORDER BY 1`);
-    mapa = [reporte, reporte2, reporte3]    
+    mapa = [reporte, reporte2, reporte3]
     if (reporte.length > 0) {
         await mapa.map((r) => {
             console.log(r)

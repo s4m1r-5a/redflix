@@ -154,7 +154,7 @@ router.get(`/planes`, async (req, res) => {
                 vendedor: 15,
                 client: links[0].id,
                 cajero: 'PAYU',
-                product: 2
+                product: 27
             }
             let clave = 'jodete cabron este codigo no esta completo aun-' + r.nombre + '-' + r.movil + '-' + r.buyerEmail + '-' + r.referenceCode,
                 yave = crypto.createHash('md5').update(clave).digest("hex");
@@ -177,7 +177,7 @@ router.get(`/planes`, async (req, res) => {
         } else if (r.transactionState == 7) {
             r.msg = "pendiente";
             r.estado = 'warning';
-            await pool.query('INSERT INTO clientes SET ? ', venta);
+            await pool.query('INSERT INTO ventas SET ? ', venta);
             res.render('respuesta', r);
         } else {
             res.render('planes');

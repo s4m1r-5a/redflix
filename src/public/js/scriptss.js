@@ -80,11 +80,27 @@ $(document).ready(function () {
     $("a.r").hover(function () {
         $(this).next('div.reditarh').show();
         $(this).css("color", "#000000");
-    },
-        function () {
+    }, function () {
+        $('.reditarh').hide("slow");
+        $(this).css("color", "#bfbfbf");
+    });
+    $(".edi").on({
+        focus: function () {
+            $(this).css("background-color", "#FFFFCC");
+            $(this).next('div.reditarh').show("slow");
+            this.select();
+        },
+        blur: function () {
+            $(this).css({
+                "background-color": "transparent"
+            });
             $('.reditarh').hide("slow");
-            $(this).css("color", "#bfbfbf");
-        });
+            $('.item').hide("slow");
+        },
+        change: function () {
+            //$(this).val($(this).val().toLowerCase().trim().split(' ').map(v => v[0].toUpperCase() + v.substr(1)).join(' '))
+        }
+    });
 
 });
 //Leva a mayúsculas la primera letra de cada palabra
@@ -307,28 +323,16 @@ $('#quien').change(function () {
         $('#id').focus();
     }
 });
-var formu
-$('form').click(function () {
-    formu = $(this).attr('id')
-})
-$(`.movil`).change(function () {
-    $('form input[name="nombre"]').val("");
-    $('form input[name="user"]').val("");
-    var fd = { movil: $(this).val().replace(/-/g, "") };
-    $.ajax({
-        url: '/links/movil',
-        data: fd,
-        type: 'POST',
-        success: function (data) {
-            $(`#${formu} input[name="nombre"]`).val(data[0].nombre);
-            $(`#${formu} input[name="user"]`).val(data[0].id);
-        }
-    });
-    $(`form input[name="nombre"]`).attr("disabled", true);
-    $(`form .ntfx`).attr("disabled", true);
-    $(`#${formu} input[name="nombre"]`).attr("disabled", false);
-    $(`#${formu} .ntfx`).attr("disabled", false);
-});
+
+
+
+
+
+
+
+
+
+
 $('#ventaiux').click(function () {
     var fd = $('#formulario').serialize();
     //alert($('input[name="movil"]').val());
@@ -382,25 +386,93 @@ $('.plancit').click(function () {
     $('.z').show("slow");
 });
 //////////////////////////* VENTAS */////////////////////////////////////////
+/* Ventas Contenido Digital */
+/*var formu
+$('form').click(function () {
+    formu = $(this).attr('id')
+})*/
+$(`.movil`).change(function () {
+    $('#Modalventa input[name="nombre"]').val("");
+    $('#Modalventainput[name="user"]').val("");
+    if ($(`#Modalventa .nom`).is(':visible')) {
+        var fd = { movil: $(this).cleanVal() };
+        $.ajax({
+            url: '/links/movil',
+            data: fd,
+            type: 'POST',
+            success: function (data) {
+                $(`#Modalventa input[name="nombre"]`).val(data[0].nombre);
+                $(`#Modalventa .user`).val(data[0].id);
+            }
+        });
+        $(`#Modalventa input[name="nombre"]`).attr("disabled", true);
+        //$(`form .ntfx`).attr("disabled", true);
+        $(`#Modalventa input[name="nombre"]`).attr("disabled", false);
+        //$(`#Modalventa .ntfx`).attr("disabled", false);
+    }
+});
+
+////////////////
 $(document).ready(function () {
-    $(".select2").each(function () {
-        $(this)
-            .wrap("<div class=\"position-relative\"></div>")
-            .select2({
-                tags: true,
-                placeholder: "Seleccione nombre",
-                dropdownParent: $(this).parent()
-            });
+    var docu = 0
+    $('#cambio').attr("disabled", true);
+    $('#banco').attr("disabled", true);
+    $(".media-body").on("click", ".btn", function () {
+        var papa = $(this).attr('id')
+        var product = $(`.${papa} .product`).val();
+        var prod = $(`.${papa} .prod`).val();
+        var nompro = $(`.${papa} .nompro`).val();
+        var img = $(`.${papa} .img`).attr('src');
+        prod === 'IUX' ? $(`#Modalventa .nom`).hide() : 0;
+        $("#Modalventa .product").val(product);
+        $("#Modalventa .prod").val(prod);
+        $("#Modalventa .nompro").val(nompro);
+        $("#Modalventa .img").attr('src', img);
+        $('#Modalventa').modal({
+            backdrop: 'static',
+            keyboard: true,
+            toggle: true
+        });
     })
-    $(`.cedulav`).change(function () {
+    $('#Modalventa').one('hidden.bs.modal', function () {
+        $("#Modalventa input").val('');
+    })
+
+    $('#monto').change(function () {
+        let re = Math.round($(this).cleanVal() / ($('#tasa').text() / 10));
+        let utilidad = Math.round($(this).cleanVal() * 0.06);
+        let neta = Math.round($(this).cleanVal() * 0.08);
+        $('#cambio').val(Moneda(re));
+        $('#utild1').val(utilidad);
+        $('#utild2').val(neta);
+    });
+    $(`#docuremi`).change(function () {
         var fd = { cedula: $(this).val() };
         $.ajax({
             url: '/links/cedulav',
             data: fd,
             type: 'POST',
             success: function (data) {
-                $(`.nombrev`).val('');
-                if (data.primer_nombre === undefined) {
+                var dta = '', dto = '';
+                $("input").not("#docuremi, #monto, #cambio, #tasa, #utild1, #utild2").val('');
+                $('#nomdest').val('').trigger('change');
+                if (Array.isArray(data)) {
+                    $(`.nombrev`).val(data[0][0].nombre);
+                    $('#movilremit').val(data[0][0].movil).mask('000-000-0000', { reverse: true });
+                    $('#remitente').val(data[0][0].id)
+                    data[1].map((r) => {
+                        dta += `<option value="${r.destinatario}">${r.nombre}</option>`;
+                        dto += `<input type="hidden" id="d${r.destinatario}" value="${r.documento}">
+                                <input type="hidden" id="m${r.destinatario}" value="${r.movil}">`;
+                    });
+                    $('#nomdest').html(dta).trigger('change');
+                    $('#datosocultos').html(dto);
+                    var t = $('#nomdest').val();
+                    var h = $('#d' + t).val();
+                    var p = parseFloat($('#m' + t).val());
+                    $('#docudest').val(h);
+                    $('#movildest').val(p).mask('000-000-0000', { reverse: true });
+                } else if (data.primer_nombre === undefined) {
                     alert('Persona no encontrada, digite su nombre manualmente...');
                     $(`.nombrev`).attr('disabled', false);
                     $(`.nombrev`).focus();
@@ -410,6 +482,99 @@ $(document).ready(function () {
                 }
             }
         });
+    });
+    $(`#docudest`).change(function () {
+        var fd = { cedula: $(this).val(), o: 1 };
+        $.ajax({
+            url: '/links/cedulav?o=1',
+            data: fd,
+            type: 'POST',
+            success: function (data) {
+                var dta = '';
+                $(`#movildest`).val('');
+                if (Array.isArray(data)) {
+                    docu = 1
+                    dta = `<option value="${data[1][0].destinatario}">${data[1][0].nombre}</option>`;
+                    $('#nomdest').html(dta).trigger('change');
+                    $('#movildest').val(data[1][0].movil).mask('000-000-0000', { reverse: true });
+                    console.log(data)
+                } else if (data.primer_nombre === undefined) {
+                    alert('Persona no encontrada, digite su nombre manualmente...');
+                    $(`#nomdest`).focus();
+                } else {
+                    var u = data.primer_nombre + ' ' + data.segundo_nombre + ' ' + data.primer_apellido + ' ' + data.segundo_apellido;
+                    dta = `<option value="${u}">${u}</option>`;
+                    $("input").filter("#banco, #cuenta").val('');
+                    $('#nomdest').html(dta).trigger('change');
+                }
+            }
+        });
+    });
+    $('#cuenta').on('change', function () {
+        Banco($(this).val());
+    })
+
+    function Banco(dato) {
+        d = { bank: dato.slice(0, 4) };
+        $.ajax({
+            url: '/links/cuenta',
+            data: d,
+            type: 'POST',
+            success: function (data) {
+                $('#idbanco').val(data[0].id_banco);
+                $('#banco').val(data[0].banco);
+                $('#tiempotranf').html(data[0].tiempodeposito);
+                docu = 0;
+            }
+        });
+    }
+
+    $("#nomdest").on('change', function () {
+        var t = $(this).val();
+        if (!isNaN(t)) {
+            var h = $('#d' + t).val();
+            var p = parseFloat($('#m' + t).val());
+            docu == 0 ? $('#docudest').val(h) : 0;
+            $('#movildest').val(p).mask('000-000-0000', { reverse: true });
+            var fd = { desti: t };
+            $.ajax({
+                url: '/links/cuenta',
+                data: fd,
+                type: 'POST',
+                success: function (data) {
+                    if (data.length <= 1) {
+                        $('#cuenta').val(data[0].cuenta);
+                        Banco(data[0].cuenta)
+                    } else {
+                        alert('hay que crear un select2')
+                    }
+                }
+            });
+        }
+    })
+    $(".select2").each(function () {
+        $(this)
+            .wrap("<div class=\"position-relative\"></div>")
+            .select2({
+                tags: true,
+                placeholder: "Seleccione o Digite Nombre Completo",
+                dropdownParent: $(this).parent()
+            }).val(null);
+    })
+    $('#tranfer').submit(function () {
+        $("input").prop('disabled', false);
+    })
+    //////* Evitar que se envie formulario con la tecla enter *//////
+    $("input").keydown(function (e) {
+        // Capturamos qué telca ha sido
+        var keyCode = e.which;
+        // Si la tecla es el Intro/Enter
+        if (keyCode == 13) {
+            // Evitamos que se ejecute eventos
+            event.preventDefault();
+            // Devolvemos falso
+            return false;
+        }
     });
 });
 //////////////////////////* INDEX */////////////////////////////////////////
@@ -927,23 +1092,6 @@ if (window.location.pathname == `/links/reportes`) {
             fechadevencimiento: moment.utc(fecha).format('YYYY-MM-DD')
         };
     };
-    $(".edi").on({
-        focus: function () {
-            $(this).css("background-color", "#FFFFCC");
-            $(this).next('div.reditarh').show("slow");
-            this.select();
-        },
-        blur: function () {
-            $(this).css({
-                "background-color": "transparent"
-            });
-            $('.reditarh').hide("slow");
-            $('.item').hide("slow");
-        },
-        change: function () {
-            //$(this).val($(this).val().toLowerCase().trim().split(' ').map(v => v[0].toUpperCase() + v.substr(1)).join(' '))
-        }
-    });
     minDateFilter = "";
     maxDateFilter = "";
     $.fn.dataTableExt.afnFiltering.push(
