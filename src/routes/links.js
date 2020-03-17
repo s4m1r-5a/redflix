@@ -5,10 +5,47 @@ const crypto = require('crypto');
 const pool = require('../database');
 const { isLoggedIn, isLogged, Admins } = require('../lib/auth');
 const sms = require('../sms.js');
-const { registro } = require('../keys');
+const { registro, Contactos } = require('../keys');
 const request = require('request');
 const axios = require('axios');
 const moment = require('moment');
+const fs = require('fs');
+const readline = require('readline');
+const { google } = require('googleapis');
+const Nexmo = require('nexmo');
+const nexmo = new Nexmo({
+    apiKey: '432c3426',
+    apiSecret: 'ywz5GyqKEfC2XsBH',
+});
+
+const message = {
+    content: {
+        type: 'text',
+        text: 'Hello from Nexmo',
+    },
+};;
+
+router.get('/prueba', (req, res) => {
+
+    var options = {
+        method: 'POST',
+        url: 'https://api.chat-api.com/instance107218/sendMessage?token=5jn3c5dxvcj27fm0',
+        form: {
+            "phone": 573012673944,
+            "body": "me ecuentro haciendo una prueba"
+        }
+    };
+    var datos;
+    request(options, function (error, response, body) {
+        if (error) return console.error('Failed: %s', error.message);
+
+        console.log('Success: ', body);
+        datos = response
+        //console.log('bien: ', response)
+    });
+
+    res.send(datos);
+});
 
 router.get('/add', isLoggedIn, (req, res) => {
     res.render('links/add');
@@ -40,8 +77,8 @@ router.get('/social', isLoggedIn, (req, res) => {
         {
             grant_type: 'client_credentials',
             client_id: '37eb1267-6c33-46b1-a76f-33a553fd812f',
-            client_secret: 'sT6rX2wH4iL4jJ8qQ8eV6bL5iJ8cM2gS1eL8sY2pY0hL5vX4eM',  
-            scope: 'SOAT Search'          
+            client_secret: 'sT6rX2wH4iL4jJ8qQ8eV6bL5iJ8cM2gS1eL8sY2pY0hL5vX4eM',
+            scope: 'SOAT Search'
         }
     };
 
@@ -75,15 +112,31 @@ router.post('/movil', async (req, res) => {
 router.get('/reportes', isLoggedIn, (req, res) => {
     //Desendentes(15)
     res.render('links/reportes');
-});
+}); 
 router.put('/reportes', isLoggedIn, async (req, res) => {
     const { id_venta, correo, clave, client, smss, movil, fechadevencimiento, fechadeactivacion } = req.body
-    const venta = { correo, fechadeactivacion, fechadevencimiento }
+    const venta = { correo, fechadeactivacion, fechadevencimiento, descripcion: ID(3) + clave }
     const cliente = await pool.query('SELECT * FROM clientes WHERE id = ?', client);
     const nombre = cliente[0].nombre.split(" ")
     const msg = `${nombre[0]} tu usuario sera ${correo} clave ${clave}, ${smss}`
+    const msg2 = `Hola de nuevo *${nombre[0]}* tu usuario es: *${correo}* y tu contraseña: *${clave}*, recuerda seguir nuestras indicaciones. Estaremos atentos a cualquier solicitud
+    *RedFlix..*`
+    var options = {
+        method: 'POST',
+        url: 'https://api.chat-api.com/instance107939/sendMessage?token=c7l8hpeiuo2wagno',
+        form: {
+            "phone": '57' + movil,
+            "body": msg2
+        }
+    };
     sms('57' + movil, msg);
     await pool.query('UPDATE ventas set ? WHERE id = ?', [venta, id_venta]);
+    request(options, function (error, response, body) {
+        if (error) return console.error('Failed: %s', error.message);
+
+        console.log('Success: ', body);
+        datos = response
+    });
     res.send(true);
 });
 router.post('/reportes/:id', isLoggedIn, async (req, res) => {
@@ -92,9 +145,9 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
 
         d = req.user.admin > 0 ? '' : 'v.vendedor = ? AND';
 
-        sql = `SELECT * FROM ventas v INNER JOIN products p ON v.product = p.id_producto WHERE ${d} 
+        sql = `SELECT v.id, v.fechadecompra, c.id cliente, v.pin, c.nombre, v.cajero, p.producto, v.correo, v.fechadeactivacion, v.fechadevencimiento, v.movildecompra, 
+        v.anular, v.descripcion FROM ventas v INNER JOIN products p ON v.product = p.id_producto INNER JOIN clientes c ON v.client = c.id WHERE ${d} 
         v.product != 25 AND YEAR(v.fechadecompra) = YEAR(CURDATE()) AND MONTH(v.fechadecompra) BETWEEN 1 and 12`
-
         const ventas = await pool.query(sql, req.user.id);
         respuesta = { "data": ventas };
         res.send(respuesta);
@@ -233,26 +286,38 @@ router.get('/ventas', isLoggedIn, async (req, res) => {
     res.render('links/ventas');
 });
 router.post('/ventas', isLoggedIn, async (req, res) => {
-    console.log(req.body)
-    const { prod, product, nombre, user, movil, nompro } = req.body;
+    const SCOPES = [
+        'https://www.googleapis.com/auth/contacts'
+    ];
+    const TOKEN_PATH = 'token.json';
+    const { prod, product, nombre, user, movil, nompro, contacto } = req.body;
     const result = await rango(req.user.id);
     const usua = await usuario(req.user.id);
     var sald;
+
     if (product.charAt(2) !== "") {
+
         sald = await saldo(product.split(" ")[1], result, req.user.id);
+
     } else {
+
         sald = await saldo(product, result, req.user.id);
     }
 
     let cel = movil.replace(/-/g, "")
 
     if (cel.length !== 10) {
+
         req.flash('error', 'Numero movil invalido');
         res.redirect('/links/ventas');
+
     } else if (sald === 'NO') {
+
         req.flash('error', 'Transacción no realizada, saldo insuficiente');
         res.redirect('/links/ventas');
+
     } else {
+
         if (prod == 'IUX') {
             let producto = product.split(" "),
                 pin = producto[0] + ID(8)
@@ -270,10 +335,15 @@ router.post('/ventas', isLoggedIn, async (req, res) => {
             sms('57' + cel, 'Bienvenido a IUX, ingrese a https://iux.com.co/app/login y canjea este Pin ' + pin);
             req.flash('success', 'Pin generado exitosamente');
             res.redirect('/links/ventas');
+
         } else if (product == '' || nombre == '' || movil == '') {
+
             req.flash('error', 'Existe un un error en la solicitud');
             res.redirect('/links/ventas');
+
         } else if (prod == 'NTFX') {
+
+            var idcontacto = '';
             let nombr = nombre.split(" ");
             var correo = nombre.replace(/ /g, "").slice(0, 9) + ID(3) + '@yopmail.com';
             correo = correo.toLowerCase();
@@ -288,22 +358,117 @@ router.post('/ventas', isLoggedIn, async (req, res) => {
                 rango: result,
                 movildecompra: cel
             }
-            if (!user) {
-                const persona = { nombre, movil: cel, email1: correo };
-                const clien = await pool.query('INSERT INTO clientes SET ? ', persona);
-                venta2.client = clien.insertId;
+            var persona = {};
+            var person = {
+                "resource": {
+                    "names": [{ "familyName": nombre }],
+                    "emailAddresses": [{ "value": correo }],
+                    "phoneNumbers": [{ "value": cel, "type": "Personal" }],
+                    "organizations": [{ "name": "RedFlix", "title": "Cliente" }]
+                }
+            };
+            const uy = async function () {
+                var options = {
+                    method: 'POST',
+                    url: 'https://api.chat-api.com/instance107939/sendMessage?token=c7l8hpeiuo2wagno',
+                    form: {
+                        "phone": '57' + cel,
+                        "body": ''
+                    }
+                };
+                const cliente = await pool.query('SELECT * FROM ventas WHERE client = ? AND fechadevencimiento >= ?', [user, new Date()]);
+                if (cliente.length) {
+                    fech = moment(cliente[0].fechadevencimiento).format('YYYY-MM-DD');
+                    venta2.fechadevencimiento = fech;
+                    sms('57' + cel, `${nombr[0].toUpperCase()} tu actual membresia aun no vence, el dia ${fech} activaremos esta recarga que estas realizando, para mas info escribenos al 3012673944. RedFlix`);
+                    options.form.body = `${nombr[0].toUpperCase()} tu actual membresia aun no vence, el dia ${fech} activaremos esta recarga que estas realizando el dia de hoy RedFlix`
+                } else {
+                    sms('57' + cel, `${nombr[0].toUpperCase()} adquiriste ${prod} ${nompro} en el lapso del día recibirás  tus datos. Si tenes alguna duda escríbenos al 3012673944 Whatsapp. RedFlix`);
+                    options.form.body = `Felicidades *${nombr[0].toUpperCase()}* tu pago fue exitoso, en el lapso del diá te enviaremos los datos de tu cuenta, recuerda nuestras recomendaciones para que no presentes problemas con la cuenta *° No cambies el correo ni la contraseña ° Usted tiene derecho a ${venta2.nompro}, no intentar conectar mas de los adquiridos ° Netflix en muchos casos le restablecera la contraseña cuando detecta un ingreso sospechoso (no necesariamente es malo). Esto sucede cuando se abre en una IP diferente a la que se abrio inicialmente ° Si usted no respeta nuestras recomendaciones puede verse perjudicado*                    
+                    *_RedFlix..._*`
+                }
+                await pool.query('INSERT INTO ventas SET ? ', venta2);
+
+                request(options, function (error, response, body) {
+                    if (error) return console.error('Failed: %s', error.message);
+
+                    console.log('Success: ', body);
+                    datos = response
+                });
+                req.flash('success', 'Transacción realizada correctamente');
+                res.redirect('/links/ventas');
             }
-            const cliente = await pool.query('SELECT * FROM ventas WHERE client = ? AND fechadevencimiento >= ?', [user, new Date()]);
-            if (cliente.length) {
-                fech = moment(cliente[0].fechadevencimiento).format('YYYY-MM-DD');
-                venta2.fechadevencimiento = fech;
-                sms('57' + cel, `${nombr[0].toUpperCase()} tu actual membresia aun no vence, el dia ${fech} activaremos esta recarga que estas realizando, para mas info escribenos al 3012673944. RedFlix`);
+            if (!user || !contacto) {
+                await fs.readFile('credentials.json', (err, content) => {
+                    if (err) return console.log('Error loading client secret file:', err);
+                    authorize(JSON.parse(content), crearcontacto);
+                });
+                var contact = async function () {
+                    if (idcontacto) {
+                        clearInterval(time);
+                        if (!user) {
+                            persona = { nombre, movil: cel, email1: correo, email3: idcontacto };
+                            const clien = await pool.query('INSERT INTO clientes SET ? ', persona);
+                            venta2.client = clien.insertId;
+                        } else if (!contacto) {
+                            const persona = { email3: idcontacto };
+                            const clien = await pool.query('UPDATE clientes set ? WHERE id = ?', [persona, user]);
+                        }
+                        uy();
+                    };
+                }
+                let time = await setInterval(contact, 10);
             } else {
-                sms('57' + cel, `${nombr[0].toUpperCase()} adquiriste ${prod} ${nompro} en el lapso del día recibirás  tus datos. Si tenes alguna duda escríbenos al 3012673944 Whatsapp. RedFlix`);
+                uy();
             }
-            await pool.query('INSERT INTO ventas SET ? ', venta2);
-            req.flash('success', 'Transacción realizada correctamente');
-            res.redirect('/links/ventas');
+
+
+
+
+            function authorize(credentials, callback) {
+                const { client_secret, client_id, redirect_uris } = Contactos;
+                const oAuth2Client = new google.auth.OAuth2(
+                    client_id, client_secret, redirect_uris);
+
+                // Comprueba si previamente hemos almacenado un token.
+                fs.readFile(TOKEN_PATH, (err, token) => {
+                    if (err) return getNewToken(oAuth2Client, callback);
+                    oAuth2Client.setCredentials(JSON.parse(token));
+                    callback(oAuth2Client);
+                });
+            }
+            function getNewToken(oAuth2Client, callback) {
+                const authUrl = oAuth2Client.generateAuthUrl({
+                    access_type: 'offline',
+                    scope: SCOPES,
+                });
+                console.log('Autorice esta aplicación visitando esta url: ', authUrl);
+                const rl = readline.createInterface({
+                    input: process.stdin,
+                    output: process.stdout,
+                });
+                rl.question('Ingrese el código de esa página aquí: ', (code) => {
+                    rl.close();
+                    oAuth2Client.getToken(code, (err, token) => {
+                        if (err) return console.error('Error retrieving access token', err);
+                        oAuth2Client.setCredentials(token);
+                        // Almacenar el token en el disco para posteriores ejecuciones del programa
+                        fs.writeFile(TOKEN_PATH, JSON.stringify(token), (err) => {
+                            if (err) return console.error(err);
+                            console.log('Token almacenado en', TOKEN_PATH);
+                        });
+                        callback(oAuth2Client);
+                    });
+                });
+            }
+            function crearcontacto(auth) {
+                const service = google.people({ version: 'v1', auth });
+                service.people.createContact(person, (err, res) => {
+                    if (err) return console.error('La API devolvió un ' + err);
+                    idcontacto = res.data.resourceName;
+                    console.log("Response", res.data.resourceName);
+                });
+            }
         }
     }
 });

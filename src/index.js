@@ -8,24 +8,23 @@ const passport = require('passport');
 const flash = require('connect-flash');
 const MySQLStore = require('express-mysql-session')(session);
 const bodyParser = require('body-parser');
-//const {Builder, By, Key, until} = require('selenium-webdriver');
 const val = require('../navegacion.js');
 const sms = require('./sms.js');
-const { database } = require('./keys');
+const { database, Contactos } = require('./keys');
 const crypto = require('crypto')
 const nodemailer = require('nodemailer')
 
 const transpoter = nodemailer.createTransport({
-    host: 'smtp.hostinger.co',
-    port: 587,
-    secure: false,
-    auth: {
-        user: 'suport@tqtravel.co',
-        pass: '123456789'
-    },
-    tls: {
-        rejectUnauthorized: false
-    }
+  host: 'smtp.hostinger.co',
+  port: 587,
+  secure: false,
+  auth: {
+    user: 'suport@tqtravel.co',
+    pass: '123456789'
+  },
+  tls: {
+    rejectUnauthorized: false
+  }
 })
 
 // Intializations
@@ -46,7 +45,7 @@ app.set('view engine', '.hbs');
 
 // Middlewares : significa cada ves que el usuario envia una peticion
 app.use(morgan('dev'));
-app.use(bodyParser.urlencoded({extended: false}));
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 app.use(session({
@@ -84,5 +83,71 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Starting
 app.listen(app.get('port'), () => {
   console.log('Server is in port', app.get('port'));
-  
+
 });
+/*
+function listConnectionNames(auth) {
+  const service = google.people({ version: 'v1', auth });
+  service.people.connections.list({
+    resourceName: 'people/me',
+    pageSize: 10,
+    personFields: 'names,emailAddresses,events,addresses,residences,phoneNumbers,organizations,ageRanges',
+  }, (err, res) => {
+    if (err) return console.error('The API returned an error: ' + err);
+    const connections = res.data.connections;
+    if (connections) {
+      connections.forEach((person) => {
+        //console.log(person);
+        if (person.names && person.organizations && person.organizations[0].name === 'RedFlix' && person.phoneNumbers && person.phoneNumbers.length > 0) {
+          console.log(person.names[0].displayName, person.phoneNumbers[0].canonicalForm, person.organizations[0].name);
+        } else {
+          console.log('No display name found for connection.');
+        }
+      });
+    } else {
+      console.log('No connections found.');
+    }
+  });
+}
+function crearcontacto(auth) {
+  const service = google.people({ version: 'v1', auth });
+  service.people.createContact({
+    "resource": {
+      "names": [
+        {
+          "familyName": "euliecer gaitan"
+        }
+      ],
+      "emailAddresses": [
+        {
+          "value": "euliecer@yopmail.com"
+        }
+      ],
+      "phoneNumbers": [
+        {
+          "value": "3007753982",
+          "type": "Personal"
+        }
+      ],
+      "organizations": [
+        {
+          "name": "RedFlix",
+          "title": "Cliente"
+        }
+      ]
+    }
+  }, (err, res) => {
+    if (err) return console.error('La API devolvió un ' + err);
+    console.log("Response", res);
+  });
+}
+function consultar(auth) {
+  const service = google.people({ version: 'v1', auth });
+  service.people.get({
+    resourceName: 'people/c4346095922586713777',
+    personFields: 'names,emailAddresses,events,addresses,residences,phoneNumbers,organizations,ageRanges',
+  }, (err, res) => {
+    if (err) return console.error('La API devolvió un ' + err);
+    console.log("Persona", res.data.resourceName);
+  });
+}*/

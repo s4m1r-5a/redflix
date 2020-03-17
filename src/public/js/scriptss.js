@@ -403,6 +403,7 @@ $(`.movil`).change(function () {
             success: function (data) {
                 $(`#Modalventa input[name="nombre"]`).val(data[0].nombre);
                 $(`#Modalventa .user`).val(data[0].id);
+                $(`#Modalventa .contacto`).val(data[0].email3);
             }
         });
         $(`#Modalventa input[name="nombre"]`).attr("disabled", true);
@@ -412,7 +413,7 @@ $(`.movil`).change(function () {
     }
 });
 
-////////////////
+////////////////* transferencias a venezuela */////////////////////////
 $(document).ready(function () {
     var docu = 0
     $('#cambio').attr("disabled", true);
@@ -1124,7 +1125,7 @@ if (window.location.pathname == `/links/reportes`) {
             var data = $('#datatable2').DataTable().row(fila).data();
             $("#idsms").val(data.id);
             $("#car").attr("src", data.imagenes);
-            $("#cliente").val(data.client);
+            $("#cliente").val(data.cliente);
             $("#correo").val(data.correo);
             $("#cels").val(data.movildecompra);
             $('#ModalOrden').modal('toggle');
@@ -1193,10 +1194,10 @@ if (window.location.pathname == `/links/reportes`) {
         columns: [
             { data: "id" },
             {
-                data: "feclassNachadecompra",
+                data: "fechadecompra",
                 className: 'te',
                 render: function (data, method, row) {
-                    return moment(data).format('YYYY-MM-DD hh:mm A') //pone la fecha en un formato entendible
+                    return moment.utc(data).format('llll') //pone la fecha en un formato entendible
                 }
             },
             {
@@ -1204,11 +1205,7 @@ if (window.location.pathname == `/links/reportes`) {
                 className: 'te'
             },
             {
-                data: "vendedor",
-                className: 'te'
-            },
-            {
-                data: "client",
+                data: "nombre",
                 className: 'te'
             },
             {
