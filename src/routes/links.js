@@ -370,7 +370,7 @@ router.post('/ventas', isLoggedIn, async (req, res) => {
             const uy = async function () {
                 var options = {
                     method: 'POST',
-                    url: 'https://api.chat-api.com/instance107939/sendMessage?token=c7l8hpeiuo2wagno',
+                    url: 'https://eu89.chat-api.com/instance107218/sendMessage?token=5jn3c5dxvcj27fm0',
                     form: {
                         "phone": '57' + cel,
                         "body": ''
