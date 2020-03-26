@@ -27,7 +27,7 @@ var http = require('http');
         'cmd' : 'sendsms',
         'domainId' : 'samirsaldarriaga',
         'login': 'samirsaldarriaga@hotmail.com',
-        'passwd': 'fZ7h8e9LUs2',
+        'passwd': 'salda202003gab',
         'dest' : tel,
         //No es posible utilizar el remitente en América pero sí en España y Europa
         'senderId' : '',

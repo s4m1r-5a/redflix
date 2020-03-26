@@ -13,6 +13,24 @@ const sms = require('./sms.js');
 const { database, Contactos } = require('./keys');
 const crypto = require('crypto')
 const nodemailer = require('nodemailer')
+const accountSid = 'AC0db7285fa004f3706457d39b73e8bb37';
+const authToken = 'a7a8cf8ee7b8730d6bb2766a8a2d4c19';
+const client = require('twilio')(accountSid, authToken);
+
+/*client.messages
+  .create({
+    from: 'whatsapp:+14155238886',
+    body: 'Hello there!',
+    to: 'whatsapp:+573007753983'
+  })
+  .then(message => console.log(message.sid));
+client.messages
+  .create({
+    from: '+14155238886',
+    body: 'Hello there!',
+    to: '+573007753983'
+  })
+  .then(message => console.log(message.sid));*/
 
 const transpoter = nodemailer.createTransport({
   host: 'smtp.hostinger.co',

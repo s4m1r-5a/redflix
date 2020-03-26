@@ -34,7 +34,9 @@
     "passport-local": "^1.0.0",
     "phantomjs": "^2.1.7",
     "request": "^2.88.0",
-    "timeago.js": "^4.0.0-beta.1"
+    "telegram-bot-api": "^1.3.3",
+    "timeago.js": "^4.0.0-beta.1",
+    "twilio": "^3.41.1"
   },
   "devDependencies": {
     "nodemon": "^1.18.7"
