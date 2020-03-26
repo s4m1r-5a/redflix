@@ -1086,7 +1086,7 @@ if (window.location.pathname == `/links/reportes`) {
             id_venta: $('#idsms').val(),
             correo: $('#correo').val(),
             clave: $('#contraseña').val(),
-            client: $('#cliente').val(),
+            clien: $('#cliente').val(),
             smss: $('#smsdescripcion').text(),
             movil: $("#cels").val(),
             fechadeactivacion: moment.utc(fechs).format('YYYY-MM-DD'),

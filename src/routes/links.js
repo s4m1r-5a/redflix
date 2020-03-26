@@ -12,22 +12,13 @@ const moment = require('moment');
 const fs = require('fs');
 const readline = require('readline');
 const { google } = require('googleapis');
-const Nexmo = require('nexmo');
-const nexmo = new Nexmo({
-    apiKey: '432c3426',
-    apiSecret: 'ywz5GyqKEfC2XsBH',
-});
-
-const message = {
-    content: {
-        type: 'text',
-        text: 'Hello from Nexmo',
-    },
-};;
+const accountSid = 'AC0db7285fa004f3706457d39b73e8bb37';
+const authToken = '4aab777f543accbc622614ec93e16b2c';
+const client = require('twilio')(accountSid, authToken);
 
 router.get('/prueba', (req, res) => {
 
-    var options = {
+    /*var options = {
         method: 'POST',
         url: 'https://api.chat-api.com/instance107218/sendMessage?token=5jn3c5dxvcj27fm0',
         form: {
@@ -42,9 +33,24 @@ router.get('/prueba', (req, res) => {
         console.log('Success: ', body);
         datos = response
         //console.log('bien: ', response)
-    });
+    });*/
+    var datos;
+    client.messages
+        .create({
+            from: 'whatsapp:+14155238886',
+            body: 'Hello Mary!',
+            to: 'whatsapp:+573015152306'
+        })
+        .then(message => console.log(message.sid));
+    /*client.messages
+        .create({
+            from: '+14155238886',
+            body: 'Hello there!',
+            to: '+573007753983'
+        })
+        .then(message => datos = message.sid);*/
 
-    res.send(datos);
+    res.send(true);
 });
 
 router.get('/add', isLoggedIn, (req, res) => {
@@ -112,11 +118,11 @@ router.post('/movil', async (req, res) => {
 router.get('/reportes', isLoggedIn, (req, res) => {
     //Desendentes(15)
     res.render('links/reportes');
-}); 
+});
 router.put('/reportes', isLoggedIn, async (req, res) => {
-    const { id_venta, correo, clave, client, smss, movil, fechadevencimiento, fechadeactivacion } = req.body
+    const { id_venta, correo, clave, clien, smss, movil, fechadevencimiento, fechadeactivacion } = req.body
     const venta = { correo, fechadeactivacion, fechadevencimiento, descripcion: ID(3) + clave }
-    const cliente = await pool.query('SELECT * FROM clientes WHERE id = ?', client);
+    const cliente = await pool.query('SELECT * FROM clientes WHERE id = ?', clien);
     const nombre = cliente[0].nombre.split(" ")
     const msg = `${nombre[0]} tu usuario sera ${correo} clave ${clave}, ${smss}`
     const msg2 = `Hola de nuevo *${nombre[0]}* tu usuario es: *${correo}* y tu contraseña: *${clave}*, recuerda seguir nuestras indicaciones. Estaremos atentos a cualquier solicitud
@@ -129,8 +135,16 @@ router.put('/reportes', isLoggedIn, async (req, res) => {
             "body": msg2
         }
     };
+    client.messages
+        .create({
+            from: 'whatsapp:+14155238886',
+            body: msg2,
+            to: 'whatsapp:+573007753983'
+        })
+        .then(message => console.log(message.sid));
     sms('57' + movil, msg);
     await pool.query('UPDATE ventas set ? WHERE id = ?', [venta, id_venta]);
+
     request(options, function (error, response, body) {
         if (error) return console.error('Failed: %s', error.message);
 
@@ -376,19 +390,33 @@ router.post('/ventas', isLoggedIn, async (req, res) => {
                         "body": ''
                     }
                 };
+                var dat = {
+                    from: 'whatsapp:+14155238886',
+                    body: '',
+                    to: 'whatsapp:+573007753983'
+                }
                 const cliente = await pool.query('SELECT * FROM ventas WHERE client = ? AND fechadevencimiento >= ?', [user, new Date()]);
                 if (cliente.length) {
                     fech = moment(cliente[0].fechadevencimiento).format('YYYY-MM-DD');
                     venta2.fechadevencimiento = fech;
                     sms('57' + cel, `${nombr[0].toUpperCase()} tu actual membresia aun no vence, el dia ${fech} activaremos esta recarga que estas realizando, para mas info escribenos al 3012673944. RedFlix`);
                     options.form.body = `${nombr[0].toUpperCase()} tu actual membresia aun no vence, el dia ${fech} activaremos esta recarga que estas realizando el dia de hoy RedFlix`
+                    dat.body = `${nombr[0].toUpperCase()} tu actual membresia aun no vence, el dia ${fech} activaremos esta recarga que estas realizando el dia de hoy. Pra mas informacion escribenos al 3012673944 *_RedFlix..._*`
                 } else {
                     sms('57' + cel, `${nombr[0].toUpperCase()} adquiriste ${prod} ${nompro} en el lapso del día recibirás  tus datos. Si tenes alguna duda escríbenos al 3012673944 Whatsapp. RedFlix`);
                     options.form.body = `Felicidades *${nombr[0].toUpperCase()}* tu pago fue exitoso, en el lapso del diá te enviaremos los datos de tu cuenta, recuerda nuestras recomendaciones para que no presentes problemas con la cuenta *° No cambies el correo ni la contraseña ° Usted tiene derecho a ${venta2.nompro}, no intentar conectar mas de los adquiridos ° Netflix en muchos casos le restablecera la contraseña cuando detecta un ingreso sospechoso (no necesariamente es malo). Esto sucede cuando se abre en una IP diferente a la que se abrio inicialmente ° Si usted no respeta nuestras recomendaciones puede verse perjudicado*                    
                     *_RedFlix..._*`
+                    dat.body = `Felicidades *${nombr[0].toUpperCase()}* tu pago fue exitoso, en el lapso del diá te enviaremos los datos de tu cuenta, recuerda nuestras recomendaciones para que no presentes problemas con la cuenta \n *° No cambies el correo ni la contraseña \n ° Usted tiene derecho a ${venta2.nompro}, no intentar conectar mas de los adquiridos \n ° Netflix en muchos casos le restablecera la contraseña cuando detecta un ingreso sospechoso (no necesariamente es malo). Esto sucede cuando se abre en una IP diferente a la que se abrio inicialmente \n ° Si usted no respeta nuestras recomendaciones puede verse perjudicado*.                    
+                    Pra mas informacion escribenos al 3012673944 *_RedFlix..._*`
                 }
                 await pool.query('INSERT INTO ventas SET ? ', venta2);
+                ////// mensajes Twilio ///////////
 
+                client.messages
+                    .create(dat)
+                    .then(message => console.log(message.sid));
+
+                ////////////////////////////////////////////////
                 request(options, function (error, response, body) {
                     if (error) return console.error('Failed: %s', error.message);
 
