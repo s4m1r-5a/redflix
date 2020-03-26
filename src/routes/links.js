@@ -375,7 +375,7 @@ router.post('/ventas', isLoggedIn, async (req, res) => {
             var persona = {};
             var person = {
                 "resource": {
-                    "names": [{ "familyName": nombre }],
+                    "names": [{ "familyName": nombre.toUpperCase() }],
                     "emailAddresses": [{ "value": correo }],
                     "phoneNumbers": [{ "value": cel, "type": "Personal" }],
                     "organizations": [{ "name": "RedFlix", "title": "Cliente" }]
@@ -435,12 +435,12 @@ router.post('/ventas', isLoggedIn, async (req, res) => {
                     if (idcontacto) {
                         clearInterval(time);
                         if (!user) {
-                            persona = { nombre, movil: cel, email1: correo, email3: idcontacto };
+                            persona = { nombre: nombre.toUpperCase(), movil: cel, email1: correo, email3: idcontacto };
                             const clien = await pool.query('INSERT INTO clientes SET ? ', persona);
                             venta2.client = clien.insertId;
                         } else if (!contacto) {
-                            const persona = { email3: idcontacto };
-                            const clien = await pool.query('UPDATE clientes set ? WHERE id = ?', [persona, user]);
+                            const persona = { nombre: nombre.toUpperCase(), email3: idcontacto };
+                            await pool.query('UPDATE clientes set ? WHERE id = ?', [persona, user]);
                         }
                         uy();
                     };
