@@ -13,7 +13,7 @@ const fs = require('fs');
 const readline = require('readline');
 const { google } = require('googleapis');
 const accountSid = 'AC0db7285fa004f3706457d39b73e8bb37';
-const authToken = '4aab777f543accbc622614ec93e16b2c';
+const authToken = '28e8f6c7f5108bae9c8d834620a96986';
 const client = require('twilio')(accountSid, authToken);
 
 router.get('/prueba', (req, res) => {
@@ -38,7 +38,8 @@ router.get('/prueba', (req, res) => {
     client.messages
         .create({
             from: 'whatsapp:+14155238886',
-            body: `Felicidades *SAMIR* tu pago fue exitoso, en el lapso del diá te enviaremos los datos de tu cuenta, recuerda nuestras recomendaciones para que no presentes problemas con la cuenta \n \n° *No cambies el correo ni la contraseña* \n \n° *Usted tiene derecho a 4 dispositivos, no intentar conectar mas de los adquiridos* \n \n° *Netflix en muchos casos le restablecera la contraseña cuando detecta un ingreso sospechoso (no necesariamente es malo). Esto sucede cuando se abre en una IP diferente a la que se abrio inicialmente* \n \n° *Si usted no respeta nuestras recomendaciones puede verse perjudicado.* \n \nPra mas informacion escribenos al *3012673944* *_RedFlix..._*`,
+            body: `Felicidades *SAMIR* tu pago fue exitoso, en el lapso del diá te enviaremos los datos de tu cuenta, recuerda nuestras recomendaciones para que no presentes problemas con la cuenta \n \n° *No cambies el correo ni la contraseña* \n \n° *Usted tiene derecho a 4 dispositivos, no intentar conectar mas de los adquiridos* \n \n° *Netflix en muchos casos le restablecera la contraseña cuando detecta un ingreso sospechoso (no necesariamente es malo). Esto sucede cuando se abre en una IP diferente a la que se abrio inicialmente* \n \n° *Si usted no respeta nuestras recomendaciones puede verse perjudicado.* \n \nPra mas informacion escribenos al *3012673944* *_RedFlix..._*
+            `,
             to: 'whatsapp:+573007753983'
         })
         .then(message => console.log(message.sid));
@@ -405,7 +406,7 @@ router.post('/ventas', isLoggedIn, async (req, res) => {
                 } else {
                     sms('57' + cel, `${nombr[0].toUpperCase()} adquiriste ${prod} ${nompro} en el lapso del día recibirás  tus datos. Si tenes alguna duda escríbenos al 3012673944 Whatsapp. RedFlix`);
                     options.form.body = `Felicidades *${nombr[0].toUpperCase()}* tu pago fue exitoso, en el lapso del diá te enviaremos los datos de tu cuenta, recuerda nuestras recomendaciones para que no presentes problemas con la cuenta \n \n° *No cambies el correo ni la contraseña* \n \n° *Usted tiene derecho a ${nompro}, no intentar conectar mas de los adquiridos* \n \n° *Netflix en muchos casos le restablecera la contraseña cuando detecta un ingreso sospechoso (no necesariamente es malo). Esto sucede cuando se abre en una IP diferente a la que se abrio inicialmente* \n \n° *Si usted no respeta nuestras recomendaciones puede verse perjudicado.* \n \nPra mas informacion escribenos al *3012673944* *_RedFlix..._*`
-                    dat.body = `Felicidades *${nombr[0].toUpperCase()}* tu pago fue exitoso, en el lapso del diá te enviaremos los datos de tu cuenta, recuerda nuestras recomendaciones para que no presentes problemas con la cuenta \n \n° *No cambies el correo ni la contraseña* \n \n° *Usted tiene derecho a ${nompro}, no intentar conectar mas de los adquiridos* \n \n° *Netflix en muchos casos le restablecera la contraseña cuando detecta un ingreso sospechoso (no necesariamente es malo). Esto sucede cuando se abre en una IP diferente a la que se abrio inicialmente* \n \n° *Si usted no respeta nuestras recomendaciones puede verse perjudicado.* \n \nPra mas informacion escribenos al *3012673944* *_RedFlix..._*  \n \n \n \n${nombre.toUpperCase()} \n${cel} \n${req.user.fullname}`
+                    dat.body = `Felicidades *${nombr[0].toUpperCase()}* tu pago fue exitoso, en el lapso del diá te enviaremos los datos de tu cuenta, recuerda nuestras recomendaciones para que no presentes problemas con la cuenta \n \n° *No cambies el correo ni la contraseña* \n \n° *Usted tiene derecho a ${nompro}, no intentar conectar mas de los adquiridos* \n \n° *Netflix en muchos casos le restablecera la contraseña cuando detecta un ingreso sospechoso (no necesariamente es malo). Esto sucede cuando se abre en una IP diferente a la que se abrio inicialmente* \n \n° *Si usted no respeta nuestras recomendaciones puede verse perjudicado.* \n \nPra mas informacion escribenos al *3012673944* *_RedFlix..._*  \n \n${nombre.toUpperCase()} \n${cel} \n${req.user.fullname}`
                 }
                 await pool.query('INSERT INTO ventas SET ? ', venta2);
                 ////// mensajes Twilio ///////////
