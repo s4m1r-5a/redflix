@@ -38,8 +38,8 @@ router.get('/prueba', (req, res) => {
     client.messages
         .create({
             from: 'whatsapp:+14155238886',
-            body: 'Hello Mary!',
-            to: 'whatsapp:+573015152306'
+            body: `Felicidades *SAMIR* tu pago fue exitoso, en el lapso del diá te enviaremos los datos de tu cuenta, recuerda nuestras recomendaciones para que no presentes problemas con la cuenta \n \n° *No cambies el correo ni la contraseña* \n \n° *Usted tiene derecho a 4 dispositivos, no intentar conectar mas de los adquiridos* \n \n° *Netflix en muchos casos le restablecera la contraseña cuando detecta un ingreso sospechoso (no necesariamente es malo). Esto sucede cuando se abre en una IP diferente a la que se abrio inicialmente* \n \n° *Si usted no respeta nuestras recomendaciones puede verse perjudicado.* \n \nPra mas informacion escribenos al *3012673944* *_RedFlix..._*`,
+            to: 'whatsapp:+573007753983'
         })
         .then(message => console.log(message.sid));
     /*client.messages
@@ -400,14 +400,12 @@ router.post('/ventas', isLoggedIn, async (req, res) => {
                     fech = moment(cliente[0].fechadevencimiento).format('YYYY-MM-DD');
                     venta2.fechadevencimiento = fech;
                     sms('57' + cel, `${nombr[0].toUpperCase()} tu actual membresia aun no vence, el dia ${fech} activaremos esta recarga que estas realizando, para mas info escribenos al 3012673944. RedFlix`);
-                    options.form.body = `${nombr[0].toUpperCase()} tu actual membresia aun no vence, el dia ${fech} activaremos esta recarga que estas realizando el dia de hoy RedFlix`
-                    dat.body = `${nombr[0].toUpperCase()} tu actual membresia aun no vence, el dia ${fech} activaremos esta recarga que estas realizando el dia de hoy. Pra mas informacion escribenos al 3012673944 *_RedFlix..._*`
+                    options.form.body = `*${nombr[0].toUpperCase()}* tu actual membresia aun no vence, el dia *${fech}* activaremos esta recarga que estas realizando el dia de hoy. Pra mas informacion escribenos al *3012673944* *_RedFlix..._*`
+                    dat.body = `*${nombr[0].toUpperCase()}* tu actual membresia aun no vence, el dia *${fech}* activaremos esta recarga que estas realizando el dia de hoy. Pra mas informacion escribenos al *3012673944* *_RedFlix..._*`
                 } else {
                     sms('57' + cel, `${nombr[0].toUpperCase()} adquiriste ${prod} ${nompro} en el lapso del día recibirás  tus datos. Si tenes alguna duda escríbenos al 3012673944 Whatsapp. RedFlix`);
-                    options.form.body = `Felicidades *${nombr[0].toUpperCase()}* tu pago fue exitoso, en el lapso del diá te enviaremos los datos de tu cuenta, recuerda nuestras recomendaciones para que no presentes problemas con la cuenta *° No cambies el correo ni la contraseña ° Usted tiene derecho a ${venta2.nompro}, no intentar conectar mas de los adquiridos ° Netflix en muchos casos le restablecera la contraseña cuando detecta un ingreso sospechoso (no necesariamente es malo). Esto sucede cuando se abre en una IP diferente a la que se abrio inicialmente ° Si usted no respeta nuestras recomendaciones puede verse perjudicado*                    
-                    *_RedFlix..._*`
-                    dat.body = `Felicidades *${nombr[0].toUpperCase()}* tu pago fue exitoso, en el lapso del diá te enviaremos los datos de tu cuenta, recuerda nuestras recomendaciones para que no presentes problemas con la cuenta \n *° No cambies el correo ni la contraseña \n ° Usted tiene derecho a ${venta2.nompro}, no intentar conectar mas de los adquiridos \n ° Netflix en muchos casos le restablecera la contraseña cuando detecta un ingreso sospechoso (no necesariamente es malo). Esto sucede cuando se abre en una IP diferente a la que se abrio inicialmente \n ° Si usted no respeta nuestras recomendaciones puede verse perjudicado*.                    
-                    Pra mas informacion escribenos al 3012673944 *_RedFlix..._*`
+                    options.form.body = `Felicidades *${nombr[0].toUpperCase()}* tu pago fue exitoso, en el lapso del diá te enviaremos los datos de tu cuenta, recuerda nuestras recomendaciones para que no presentes problemas con la cuenta \n \n° *No cambies el correo ni la contraseña* \n \n° *Usted tiene derecho a ${nompro}, no intentar conectar mas de los adquiridos* \n \n° *Netflix en muchos casos le restablecera la contraseña cuando detecta un ingreso sospechoso (no necesariamente es malo). Esto sucede cuando se abre en una IP diferente a la que se abrio inicialmente* \n \n° *Si usted no respeta nuestras recomendaciones puede verse perjudicado.* \n \nPra mas informacion escribenos al *3012673944* *_RedFlix..._*`
+                    dat.body = `Felicidades *${nombr[0].toUpperCase()}* tu pago fue exitoso, en el lapso del diá te enviaremos los datos de tu cuenta, recuerda nuestras recomendaciones para que no presentes problemas con la cuenta \n \n° *No cambies el correo ni la contraseña* \n \n° *Usted tiene derecho a ${nompro}, no intentar conectar mas de los adquiridos* \n \n° *Netflix en muchos casos le restablecera la contraseña cuando detecta un ingreso sospechoso (no necesariamente es malo). Esto sucede cuando se abre en una IP diferente a la que se abrio inicialmente* \n \n° *Si usted no respeta nuestras recomendaciones puede verse perjudicado.* \n \nPra mas informacion escribenos al *3012673944* *_RedFlix..._*  \n \n \n \n${nombre.toUpperCase()} \n${cel} \n${req.user.fullname}`
                 }
                 await pool.query('INSERT INTO ventas SET ? ', venta2);
                 ////// mensajes Twilio ///////////
@@ -449,9 +447,6 @@ router.post('/ventas', isLoggedIn, async (req, res) => {
             } else {
                 uy();
             }
-
-
-
 
             function authorize(credentials, callback) {
                 const { client_secret, client_id, redirect_uris } = Contactos;
