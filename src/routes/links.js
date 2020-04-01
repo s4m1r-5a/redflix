@@ -116,9 +116,30 @@ router.post('/movil', async (req, res) => {
     res.send(cliente);
 });
 //////////////* REPORTES *//////////////////////////////////
-router.get('/reportes', isLoggedIn, (req, res) => {
-    //Desendentes(15)
-    res.render('links/reportes');
+router.get('/reportes', isLoggedIn, async (req, res) => {
+    const proveedores = await pool.query('SELECT * FROM proveedores');
+    res.render('links/reportes', { proveedores });
+});
+router.post('/proveedores', isLoggedIn, async (req, res) => {
+    const { idv, mvl, plan, clave, nombre, correo } = req.body;
+    var tin = mvl.split("-");
+    console.log(req.body, tin)
+    var options = {
+        method: 'POST',
+        url: 'https://eu89.chat-api.com/instance107218/sendMessage?token=5jn3c5dxvcj27fm0',
+        form: {
+            "phone": '57' + tin[1],
+            "body": `Nombre: *${nombre}* \nEmail: *${correo}* ${clave ? '\nClave: *' + clave.slice(3) + '*' : ''}\nPantallas: *${plan.slice(5, -16)}*
+            \n*RedFlix..*`
+        }
+    };
+    await pool.query('UPDATE ventas set ? WHERE id = ?', [{ proveedor: tin[0] }, idv]);
+
+    request(options, function (error, response, body) {
+        if (error) return console.error('Failed: %s', error.message);
+        console.log('Success: ', body);
+    });
+    res.send(true);
 });
 router.put('/reportes', isLoggedIn, async (req, res) => {
     const { id_venta, correo, clave, clien, smss, movil, fechadevencimiento, fechadeactivacion } = req.body

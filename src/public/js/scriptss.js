@@ -1126,8 +1126,11 @@ if (window.location.pathname == `/links/reportes`) {
             $("#idsms").val(data.id);
             $("#car").attr("src", data.imagenes);
             $("#cliente").val(data.cliente);
+            $("#nombrec").val(data.nombre);
             $("#correo").val(data.correo);
             $("#cels").val(data.movildecompra);
+            $("#plan").val(data.producto);
+            $("#contraseña").val(data.descripcion);
             $('#ModalOrden').modal('toggle');
         }
     });
@@ -1197,7 +1200,7 @@ if (window.location.pathname == `/links/reportes`) {
                 data: "fechadecompra",
                 className: 'te',
                 render: function (data, method, row) {
-                    return moment.utc(data).format('llll') //pone la fecha en un formato entendible
+                    return moment(data).format('YYYY-MM-DD') //pone la fecha en un formato entendible
                 }
             },
             {
@@ -1256,6 +1259,30 @@ if (window.location.pathname == `/links/reportes`) {
             }
         ]
     });
+    //$(document).ready(function () {
+    $('#seleccionaproveedor').on('change', function () {
+        if ($(this).val()) {
+            $.ajax({
+                type: 'POST',
+                url: '/links/proveedores',
+                data: {
+                    idv: $("#idsms").val(),
+                    mvl: $(this).val(),
+                    plan: $("#plan").val(),
+                    clave: $("#contraseña").val(),
+                    nombre: $("#nombrec").val(),
+                    correo: $("#correo").val()
+                },
+                success: function (data) {
+                    $('#ModalOrden').modal('toggle');
+                    SMSj('info', 'Datos enviados al Proveedor')
+                }
+            })
+        } else {
+            SMSj('info', 'Seleccione un Proveedor valido')
+        }
+    })
+    //});
     //////////////////////* Table3 *///////////////////////    
     var table3 = $('#datatable3').DataTable({
         deferRender: true,

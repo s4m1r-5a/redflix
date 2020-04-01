@@ -16,7 +16,7 @@
                                 <tr>
                                     <th style="width:1%;">ID</th>
                                     <th style="width:10%;">Fecha</th>
-                                    <th style="width:10%;">Pin</th>                                    
+                                    <th style="width:10%;">Pin</th>
                                     <th style="width:5%;">Cliente</th>
                                     <th style="width:3%;">Cajero</th>
                                     <th style="width:15%;">Producto</th>
@@ -26,6 +26,7 @@
                                     <th style="width:20%;">Movil</th>
                                     <th style="width:15%;">Anulada</th>
                                     <th style="width:15%;">Descripcion</th>
+                                    <th style="width:15%;">Proveedor</th>
                                 </tr>
                             </thead>
                             <tbody></tbody>
@@ -98,6 +99,18 @@
                             <div class="col-12">
                                 <div class="mb-4">
                                     <i class="feather-md text-primary mr-0" data-feather="mail"></i>
+                                    <select class="form-control-no-border edi" id="seleccionaproveedor"
+                                        style="width: 80%; padding: 1px;">
+                                        <option value="">Seleccionar Proveedor</option>
+                                        {{#each proveedores}}
+                                        <option value="{{id}}-{{movil}}">{{nombre}}</option>
+                                        {{/each}}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="mb-4">
+                                    <i class="feather-md text-primary mr-0" data-feather="mail"></i>
                                     <input class="form-control-no-border edi" type="text" placeholder="Correo..."
                                         id="correo" autocomplete="off" style="width: 80%; padding: 1px;">
                                     <div class="progress progress-sm shadow-sm mb-0 reditarh" style="display: none;">
@@ -122,6 +135,8 @@
                     <input type="hidden" id="idsms" value="">
                     <input type="hidden" id="cliente" value="">
                     <input type="hidden" id="cels" value="">
+                    <input type="hidden" id="nombrec" value="">
+                    <input type="hidden" id="plan" value="">
                     <div class="col-md-4">
                         <div class="text-center">
                             <img alt="Chris Wood" id="car" src="/img/car.jpg" class="rounded-circle img-responsive mt-2"
