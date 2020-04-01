@@ -1098,7 +1098,7 @@ if (window.location.pathname == `/links/reportes`) {
     $.fn.dataTableExt.afnFiltering.push(
         function (oSettings, aData, iDataIndex) {
             if (typeof aData._date == 'undefined') {
-                aData._date = new Date(aData[1]).getTime();
+                aData._date = new Date(aData[2]).getTime();
             }
             if (minDateFilter && !isNaN(minDateFilter)) {
                 if (aData._date < minDateFilter) {
@@ -1130,11 +1130,44 @@ if (window.location.pathname == `/links/reportes`) {
             $("#correo").val(data.correo);
             $("#cels").val(data.movildecompra);
             $("#plan").val(data.producto);
-            $("#contraseña").val(data.descripcion);
+            $("#contraseña").val(data.descripcion.slice(3));
             $('#ModalOrden').modal('toggle');
         }
     });
-
+    $('#datatable2').on('click', '.restablecer', function () {
+        if ($('#usuarioadmin').val() == 1) {
+            var fila = $(this).parents('tr');
+            var data = $('#datatable2').DataTable().row(fila).data();
+            $.ajax({
+                type: 'POST',
+                url: '/links/proveedores',
+                data: {
+                    evento: 'Restablecer contraseña',
+                    idv: data.id,
+                    idp: data.proveedor,
+                    correo: data.correo,
+                    clave: data.descripcion,
+                    nombre: data.nombre,
+                    plan: data.producto,
+                    hora: fechs.getHours() + ":" + fechs.getMinutes() + ":" + fechs.getSeconds() + "." + fechs.getMilliseconds()
+                },
+                async: false,
+                success: function (data) {
+                    if (data.estado && data.min) {
+                        tableOrden.ajax.reload(function (json) {
+                            SMSj('success', 'Solicitud de restablecimiento de contraseña enviado exitosamente')
+                        });
+                    } else if (data.estado) {
+                        SMSj('error', ' Ya envio una solicitud antes, la cual esta en estado de restauracion debe esperar 5 minutos minimos para realizar nuevamente esta solicitud');
+                    } else {
+                        SMSj('error', 'Solicitud no enviada, aun no se le envian los datos a este cliente para que pueda hacer soilcitud de restablecimiento de contyraseña...');
+                    }
+                }
+            })
+        } else {
+            SMSj('info', 'Aun no se encuentra disponible este boton')
+        }
+    });
     $('#ModalOrden').on('hidden.bs.modal', function () {
         $('#datatable2 tr.selected').toggleClass('selected');
         $("#ModalOrden input").val('');
@@ -1182,12 +1215,18 @@ if (window.location.pathname == `/links/reportes`) {
                 type: 'column'
             }
         },
-        columnDefs: [{
-            className: 'control',
-            orderable: true,
-            targets: 0
-        }],
-        order: [[0, "desc"]],
+        columnDefs: [
+            /*{
+                className: 'control',
+                orderable: true,
+                targets: 0
+            },*/
+            { responsivePriority: 1, targets: 4 },
+            { responsivePriority: 2, targets: 2 },
+            { responsivePriority: 3, targets: 6 },
+            { responsivePriority: 3, targets: -1 }
+        ],
+        order: [[1, "desc"]],
         language: languag,
         ajax: {
             method: "POST",
@@ -1195,12 +1234,17 @@ if (window.location.pathname == `/links/reportes`) {
             dataSrc: "data"
         },
         columns: [
+            {
+                className: 'control',
+                orderable: true,
+                data: null,
+                defaultContent: ''
+            },
             { data: "id" },
             {
                 data: "fechadecompra",
-                className: 'te',
                 render: function (data, method, row) {
-                    return moment(data).format('YYYY-MM-DD') //pone la fecha en un formato entendible
+                    return moment(data).format('YYYY-MM-DD hh:mm A') //pone la fecha en un formato entendible
                 }
             },
             {
@@ -1256,26 +1300,43 @@ if (window.location.pathname == `/links/reportes`) {
             {
                 data: "descripcion",
                 className: 'te'
+            },
+            {
+                className: 'restablecer',
+                orderable: false,
+                data: null,
+                defaultContent: '<button class="btn btn-sm btn-outline-danger restablecer">Clave</button>'
             }
         ]
     });
     //$(document).ready(function () {
     $('#seleccionaproveedor').on('change', function () {
         if ($(this).val()) {
+            var clave = $("#contraseña").val();
             $.ajax({
                 type: 'POST',
                 url: '/links/proveedores',
                 data: {
+                    evento: clave ? 'Recargar cuenta' : 'Nuevo cliente',
                     idv: $("#idsms").val(),
-                    mvl: $(this).val(),
+                    idp: $(this).val(),
                     plan: $("#plan").val(),
-                    clave: $("#contraseña").val(),
+                    clave,
                     nombre: $("#nombrec").val(),
-                    correo: $("#correo").val()
+                    correo: $("#correo").val(),
+                    hora: fechs.getHours() + ":" + fechs.getMinutes() + ":" + fechs.getSeconds() + "." + fechs.getMilliseconds()
                 },
                 success: function (data) {
                     $('#ModalOrden').modal('toggle');
-                    SMSj('info', 'Datos enviados al Proveedor')
+                    if (data.estado && data.min) {
+                        tableOrden.ajax.reload(function (json) {
+                            SMSj('Datos enviados al Proveedor exitosamente');
+                        });
+                    } else if (data.estado) {
+                        SMSj('error', ' Ya envio una solicitud antes, debe esperar 5 minutos minimos para realizar nuevamente esta solicitud');
+                    } else {
+                        SMSj('error', 'Algo salio mal rectifica e intentalo nuevamente');
+                    }
                 }
             })
         } else {
@@ -1296,12 +1357,7 @@ if (window.location.pathname == `/links/reportes`) {
                 type: 'column'
             }
         },
-        columnDefs: [{
-            className: 'control',
-            orderable: true,
-            targets: 0
-        }],
-        order: [[0, "desc"]],
+        order: [[1, "desc"]],
         language: languag,
         ajax: {
             method: "POST",
@@ -1309,20 +1365,24 @@ if (window.location.pathname == `/links/reportes`) {
             dataSrc: "data"
         },
         columns: [
+            {
+                className: 'control',
+                orderable: true,
+                data: null,
+                defaultContent: ''
+            },
             { data: "id" },
             {
                 data: "fecha",
                 render: function (data, method, row) {
-                    return moment.utc(data).format('YYYY-MM-DD HH:mm A') //pone la fecha en un formato entendible
+                    return moment(data).format('YYYY-MM-DD hh:mm A') //pone la fecha en un formato entendible
                 }
             },
             { data: "fullname" },
             { data: "venefactor" },
             {
                 data: "monto",
-                render: function (data, method, row) {
-                    return '$' + Moneda(parseFloat(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
-                }
+                render: $.fn.dataTable.render.number(',', '.', 0, '$')
             },
             { data: "metodo" },
             { data: "idrecarga" },
@@ -1376,12 +1436,7 @@ if (window.location.pathname == `/links/reportes`) {
                 type: 'column'
             }
         },
-        columnDefs: [{
-            className: 'control',
-            orderable: true,
-            targets: 0
-        }],
-        order: [[0, "desc"]],
+        order: [[1, "desc"]],
         language: languag,
         ajax: {
             method: "POST",
@@ -1389,6 +1444,12 @@ if (window.location.pathname == `/links/reportes`) {
             dataSrc: "data"
         },
         columns: [
+            {
+                className: 'control',
+                orderable: true,
+                data: null,
+                defaultContent: ''
+            },
             { data: "id" },
             {
                 data: "fechsolicitud",
@@ -1399,9 +1460,7 @@ if (window.location.pathname == `/links/reportes`) {
             { data: "fullname" },
             {
                 data: "monto",
-                render: function (data, method, row) {
-                    return '$' + Moneda(parseFloat(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
-                }
+                render: $.fn.dataTable.render.number(',', '.', 0, '$')
             },
             { data: "transaccion" },
             { data: "metodo" },

@@ -121,25 +121,49 @@ router.get('/reportes', isLoggedIn, async (req, res) => {
     res.render('links/reportes', { proveedores });
 });
 router.post('/proveedores', isLoggedIn, async (req, res) => {
-    const { idv, mvl, plan, clave, nombre, correo } = req.body;
-    var tin = mvl.split("-");
-    console.log(req.body, tin)
-    var options = {
-        method: 'POST',
-        url: 'https://eu89.chat-api.com/instance107218/sendMessage?token=5jn3c5dxvcj27fm0',
-        form: {
-            "phone": '57' + tin[1],
-            "body": `Nombre: *${nombre}* \nEmail: *${correo}* ${clave ? '\nClave: *' + clave.slice(3) + '*' : ''}\nPantallas: *${plan.slice(5, -16)}*
-            \n*RedFlix..*`
+    const { evento, idv, idp, plan, clave, nombre, correo, hora } = req.body;
+    var e;
+    if (idp) {
+        const horas = await pool.query('SELECT anular FROM ventas WHERE id = ?', idv);
+        if (horas[0].anular !== null) {
+            hms = horas[0].anular.split(":");
+            hm = hora.split(":");
+            a = hms[0];
+            b = hms[1];
+            c = hm[0];
+            d = hm[1];
+            c > a ? e = 11 : e = (d - b);
+        } else {
+            e = 11;
         }
-    };
-    await pool.query('UPDATE ventas set ? WHERE id = ?', [{ proveedor: tin[0] }, idv]);
+        if (e > 9) {
+            const proveedores = await pool.query('SELECT * FROM proveedores WHERE id = ?', idp);
+            console.log(proveedores[0])
+            const { movil } = proveedores[0];
+            var options = {
+                method: 'POST',
+                url: 'https://eu89.chat-api.com/instance107218/sendMessage?token=5jn3c5dxvcj27fm0',
+                form: {
+                    "phone": '57' + movil,
+                    "body": `Evento: *${evento}* \nNombre: *${nombre}* \nEmail: *${correo}* ${clave ? '\nClave: *' + clave.slice(3) + '*' : ''}\nPantallas: *${plan.slice(5, -16)}*
+            \n*RedFlix..*`
+                }
+            };
+            var dat
+            evento === 'Restablecer contraseña' ? dat = { anular: hora } : dat = { proveedor: idp };
+            await pool.query('UPDATE ventas set ? WHERE id = ?', [dat, idv]);
 
-    request(options, function (error, response, body) {
-        if (error) return console.error('Failed: %s', error.message);
-        console.log('Success: ', body);
-    });
-    res.send(true);
+            request(options, function (error, response, body) {
+                if (error) return console.error('Failed: %s', error.message);
+                console.log('Success: ', body);
+            });
+            res.send({ estado: true, min: true });
+        } else {
+            res.send({ estado: true, min: false });
+        }
+    } else {
+        res.send({ estado: false, min: false });
+    }
 });
 router.put('/reportes', isLoggedIn, async (req, res) => {
     const { id_venta, correo, clave, clien, smss, movil, fechadevencimiento, fechadeactivacion } = req.body
@@ -182,7 +206,7 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
         d = req.user.admin > 0 ? '' : 'v.vendedor = ? AND';
 
         sql = `SELECT v.id, v.fechadecompra, c.id cliente, v.pin, c.nombre, v.cajero, p.producto, v.correo, v.fechadeactivacion, v.fechadevencimiento, v.movildecompra, 
-        v.anular, v.descripcion FROM ventas v INNER JOIN products p ON v.product = p.id_producto INNER JOIN clientes c ON v.client = c.id WHERE ${d} 
+        v.anular, v.descripcion, v.proveedor FROM ventas v INNER JOIN products p ON v.product = p.id_producto INNER JOIN clientes c ON v.client = c.id WHERE ${d} 
         v.product != 25 AND YEAR(v.fechadecompra) = YEAR(CURDATE()) AND MONTH(v.fechadecompra) BETWEEN 1 and 12`
         const ventas = await pool.query(sql, req.user.id);
         respuesta = { "data": ventas };

@@ -14,6 +14,7 @@
                             style="width:100%">
                             <thead>
                                 <tr>
+                                    <th></th>
                                     <th style="width:1%;">ID</th>
                                     <th style="width:10%;">Fecha</th>
                                     <th style="width:10%;">Pin</th>
@@ -26,7 +27,7 @@
                                     <th style="width:20%;">Movil</th>
                                     <th style="width:15%;">Anulada</th>
                                     <th style="width:15%;">Descripcion</th>
-                                    <th style="width:15%;">Proveedor</th>
+                                    <th>Rstbcr</th>
                                 </tr>
                             </thead>
                             <tbody></tbody>
@@ -37,6 +38,7 @@
                                     style="width:100%">
                                     <thead>
                                         <tr>
+                                            <th></th>
                                             <th style="width:1%;">Id</th>
                                             <th style="width:3%;">Fecha</th>
                                             <th style="width:2%;">Benefactor</th>
@@ -59,6 +61,7 @@
                                     style="width:100%">
                                     <thead>
                                         <tr>
+                                            <th></th>
                                             <th style="width:1%;">Id</th>
                                             <th style="width:3%;">F.Solicitud</th>
                                             <th style="width:3%;">Solicitante</th>
@@ -103,7 +106,7 @@
                                         style="width: 80%; padding: 1px;">
                                         <option value="">Seleccionar Proveedor</option>
                                         {{#each proveedores}}
-                                        <option value="{{id}}-{{movil}}">{{nombre}}</option>
+                                        <option value="{{id}}">{{nombre}}</option>
                                         {{/each}}
                                     </select>
                                 </div>
