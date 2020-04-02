@@ -355,7 +355,7 @@ router.post('/ventas', isLoggedIn, async (req, res) => {
         'https://www.googleapis.com/auth/contacts'
     ];
     const TOKEN_PATH = 'token.json';
-    const { prod, product, nombre, user, movil, nompro, contacto } = req.body;
+    const { prod, product, nombre, user, movil, nompro, contacto, fechadecompra } = req.body;
     const result = await rango(req.user.id);
     const usua = await usuario(req.user.id);
     var sald;
@@ -387,7 +387,7 @@ router.post('/ventas', isLoggedIn, async (req, res) => {
             let producto = product.split(" "),
                 pin = producto[0] + ID(8)
             const venta = {
-                fechadecompra: new Date(),
+                fechadecompra,
                 pin,
                 vendedor: usua,
                 cajero: req.user.fullname,
@@ -413,7 +413,7 @@ router.post('/ventas', isLoggedIn, async (req, res) => {
             var correo = nombre.replace(/ /g, "").slice(0, 9) + ID(3) + '@yopmail.com';
             correo = correo.toLowerCase();
             const venta2 = {
-                fechadecompra: new Date(),
+                fechadecompra,
                 vendedor: usua,
                 cajero: req.user.fullname,
                 idcajero: req.user.id,
@@ -422,6 +422,11 @@ router.post('/ventas', isLoggedIn, async (req, res) => {
                 correo,
                 rango: result,
                 movildecompra: cel
+            }
+            const clite = await pool.query('SELECT * FROM ventas WHERE client = ?', user);
+            if (clite.length > 0) {
+                venta2.descripcion = clite[0].descripcion
+                venta2.correo = clite[0].correo
             }
             var persona = {};
             var person = {
@@ -446,7 +451,7 @@ router.post('/ventas', isLoggedIn, async (req, res) => {
                     body: '',
                     to: 'whatsapp:+573007753983'
                 }
-                const cliente = await pool.query('SELECT * FROM ventas WHERE client = ? AND fechadevencimiento >= ?', [user, new Date()]);
+                const cliente = await pool.query('SELECT * FROM ventas WHERE client = ? AND fechadevencimiento >= ?', [user, fechadecompra]);
                 if (cliente.length) {
                     fech = moment(cliente[0].fechadevencimiento).format('YYYY-MM-DD');
                     venta2.fechadevencimiento = fech;

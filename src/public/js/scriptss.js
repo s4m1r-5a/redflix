@@ -429,15 +429,18 @@ $(document).ready(function () {
     $('#cambio').attr("disabled", true);
     $('#banco').attr("disabled", true);
     $(".media-body").on("click", ".btn", function () {
+        var fehc = new Date()
         var papa = $(this).attr('id')
         var product = $(`.${papa} .product`).val();
         var prod = $(`.${papa} .prod`).val();
         var nompro = $(`.${papa} .nompro`).val();
+        var fechadecompra = moment(fehc).format('YYYY-MM-DD HH:mm');
         var img = $(`.${papa} .img`).attr('src');
         prod === 'IUX' ? $(`#Modalventa .nom`).hide() : 0;
         $("#Modalventa .product").val(product);
         $("#Modalventa .prod").val(prod);
         $("#Modalventa .nompro").val(nompro);
+        $("#Modalventa .fechadecompra").val(fechadecompra);
         $("#Modalventa .img").attr('src', img);
         $('#Modalventa').modal({
             backdrop: 'static',
@@ -1431,7 +1434,7 @@ if (window.location.pathname == `/links/reportes`) {
             {
                 data: "fechtrans",
                 render: function (data, method, row) {
-                    return moment(data).format('YYYY-MM-DD HH:mm A') //pone la fecha en un formato entendible
+                    return moment(data).format('YYYY-MM-DD hh:mm A') //pone la fecha en un formato entendible
                 }
             },
             {
