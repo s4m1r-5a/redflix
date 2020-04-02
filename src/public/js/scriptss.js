@@ -1130,7 +1130,7 @@ if (window.location.pathname == `/links/reportes`) {
             $("#correo").val(data.correo);
             $("#cels").val(data.movildecompra);
             $("#plan").val(data.producto);
-            $("#contraseña").val(data.descripcion.slice(3));
+            $("#contraseña").val(data.descripcion ? data.descripcion.slice(3) : '');
             $('#ModalOrden').modal('toggle');
         }
     });

@@ -145,7 +145,7 @@ router.post('/proveedores', isLoggedIn, async (req, res) => {
                 url: 'https://eu89.chat-api.com/instance107218/sendMessage?token=5jn3c5dxvcj27fm0',
                 form: {
                     "phone": '57' + movil,
-                    "body": `Evento: *${evento}* \nNombre: *${nombre}* \nEmail: *${correo}* ${clave ? '\nClave: *' + clave.slice(3) + '*' : ''}\nPantallas: *${plan.slice(5, -16)}*
+                    "body": `Evento: *${evento}* \nNombre: *${nombre}* \nEmail: *${correo}* ${clave ? '\nClave: *' + clave + '*' : ''}\nPantallas: *${plan.slice(5, -16)}*
             \n*RedFlix..*`
                 }
             };
