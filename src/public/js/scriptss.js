@@ -412,7 +412,17 @@ $(`.movil`).change(function () {
         //$(`#Modalventa .ntfx`).attr("disabled", false);
     }
 });
-
+$('#modaldventa').submit(function () {
+    /*$('#ModalEventos').one('hidden.bs.modal', function () {
+                $('#actualizar').modal('show');
+    }).modal('hide');*/
+    $('#Modalventa').modal('hide');
+    $('#ModalEventos').modal({
+        toggle: true,
+        backdrop: 'static',
+        keyboard: true,
+    });
+})
 ////////////////* transferencias a venezuela */////////////////////////
 $(document).ready(function () {
     var docu = 0
@@ -1136,23 +1146,15 @@ if (window.location.pathname == `/links/reportes`) {
             $('#ModalOrden').modal('toggle');
         }
     });
-    $('#ModalEventos').modal({
-        backdrop: 'static',
-        keyboard: true,
-        toggle: true
-    });
     $('#datatable2').on('click', '.restablecer', function () {
         if ($('#usuarioadmin').val() == 1) {
-            /*$('#ModalEventos').one('shown.bs.modal', function () {
-                $('#ModalEventos').modal('hide')
-            }).modal('show');
-            $('#ModalEventos').one('hidden.bs.modal', function () {
+            /*$('#ModalEventos').one('hidden.bs.modal', function () {
                 $('#actualizar').modal('show');
             }).modal('hide');*/
             $('#ModalEventos').modal({
+                toggle: true,
                 backdrop: 'static',
                 keyboard: true,
-                toggle: true
             });
             var fila = $(this).parents('tr');
             var data = $('#datatable2').DataTable().row(fila).data();
@@ -1189,6 +1191,50 @@ if (window.location.pathname == `/links/reportes`) {
             SMSj('info', 'Aun no se encuentra disponible este boton')
         }
     });
+    $(document).ready(function () {
+        /*var column = tableOrden.column('2');
+        //column.visible();
+        column.visible(!column.visible());*/
+    });
+    $('#seleccionaproveedor').on('change', function () {
+        if ($(this).val()) {
+            $('#ModalOrden').modal('toggle');
+            $('#ModalEventos').modal({
+                toggle: true,
+                backdrop: 'static',
+                keyboard: true,
+            });
+            var clave = $("#contraseña").val();
+            $.ajax({
+                type: 'POST',
+                url: '/links/proveedores',
+                data: {
+                    evento: clave ? 'Recargar cuenta' : 'Nuevo cliente',
+                    idv: $("#idsms").val(),
+                    idp: $(this).val(),
+                    plan: $("#plan").val(),
+                    clave,
+                    nombre: $("#nombrec").val(),
+                    correo: $("#correo").val(),
+                    hora: fechs.getHours() + ":" + fechs.getMinutes() + ":" + fechs.getSeconds() + "." + fechs.getMilliseconds()
+                },
+                success: function (data) {
+                    $('#ModalEventos').modal('hide')
+                    if (data.estado && data.min) {
+                        tableOrden.ajax.reload(function (json) {
+                            SMSj('Datos enviados al Proveedor exitosamente');
+                        });
+                    } else if (data.estado) {
+                        SMSj('error', ' Ya envio una solicitud antes, debe esperar 5 minutos minimos para realizar nuevamente esta solicitud');
+                    } else {
+                        SMSj('error', 'Algo salio mal rectifica e intentalo nuevamente');
+                    }
+                }
+            })
+        } else {
+            SMSj('info', 'Seleccione un Proveedor valido')
+        }
+    })
     $('#ModalOrden').on('hidden.bs.modal', function () {
         $('#datatable2 tr.selected').toggleClass('selected');
         $("#ModalOrden input").val('');
@@ -1339,44 +1385,6 @@ if (window.location.pathname == `/links/reportes`) {
             }
         ]
     });
-    $(document).ready(function () {
-        /*var column = tableOrden.column('2');
-        //column.visible();
-        column.visible(!column.visible());*/
-    });
-    $('#seleccionaproveedor').on('change', function () {
-        if ($(this).val()) {
-            var clave = $("#contraseña").val();
-            $.ajax({
-                type: 'POST',
-                url: '/links/proveedores',
-                data: {
-                    evento: clave ? 'Recargar cuenta' : 'Nuevo cliente',
-                    idv: $("#idsms").val(),
-                    idp: $(this).val(),
-                    plan: $("#plan").val(),
-                    clave,
-                    nombre: $("#nombrec").val(),
-                    correo: $("#correo").val(),
-                    hora: fechs.getHours() + ":" + fechs.getMinutes() + ":" + fechs.getSeconds() + "." + fechs.getMilliseconds()
-                },
-                success: function (data) {
-                    $('#ModalOrden').modal('toggle');
-                    if (data.estado && data.min) {
-                        tableOrden.ajax.reload(function (json) {
-                            SMSj('Datos enviados al Proveedor exitosamente');
-                        });
-                    } else if (data.estado) {
-                        SMSj('error', ' Ya envio una solicitud antes, debe esperar 5 minutos minimos para realizar nuevamente esta solicitud');
-                    } else {
-                        SMSj('error', 'Algo salio mal rectifica e intentalo nuevamente');
-                    }
-                }
-            })
-        } else {
-            SMSj('info', 'Seleccione un Proveedor valido')
-        }
-    })
 
     //////////////////////* Table3 *///////////////////////    
     var table3 = $('#datatable3').DataTable({
