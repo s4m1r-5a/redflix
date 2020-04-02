@@ -1204,6 +1204,7 @@ if (window.location.pathname == `/links/reportes`) {
                 className: 'btn btn-secondary fech',
             }
         ],
+        autoWidth: false,
         deferRender: true,
         paging: true,
         search: {
@@ -1222,8 +1223,8 @@ if (window.location.pathname == `/links/reportes`) {
                 targets: 0
             },*/
             { responsivePriority: 1, targets: 4 },
-            { responsivePriority: 2, targets: 2 },
-            { responsivePriority: 3, targets: 6 },
+            { responsivePriority: 4, targets: 2 },
+            { responsivePriority: 4, targets: 6 },
             { responsivePriority: 3, targets: -1 }
         ],
         order: [[1, "desc"]],
