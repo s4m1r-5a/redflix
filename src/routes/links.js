@@ -167,7 +167,12 @@ router.post('/proveedores', isLoggedIn, async (req, res) => {
 });
 router.put('/reportes', isLoggedIn, async (req, res) => {
     const { id_venta, correo, clave, clien, smss, movil, fechadevencimiento, fechadeactivacion } = req.body
-    const venta = { correo, fechadeactivacion, fechadevencimiento, descripcion: ID(3) + clave }
+    console.log(req.body)
+    const venta = { correo, descripcion: ID(3) + clave }
+    if (fechadeactivacion) {
+        venta.fechadeactivacion = fechadeactivacion
+        venta.fechadevencimiento = fechadevencimiento
+    };
     const cliente = await pool.query('SELECT * FROM clientes WHERE id = ?', clien);
     const nombre = cliente[0].nombre.split(" ")
     const msg = `${nombre[0]} tu usuario sera ${correo} clave ${clave}, ${smss}`

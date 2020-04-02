@@ -1089,8 +1089,8 @@ if (window.location.pathname == `/links/reportes`) {
             clien: $('#cliente').val(),
             smss: $('#smsdescripcion').text(),
             movil: $("#cels").val(),
-            fechadeactivacion: moment.utc(fechs).format('YYYY-MM-DD'),
-            fechadevencimiento: moment.utc(fecha).format('YYYY-MM-DD')
+            fechadeactivacion: $("#fechadeactivacion").val() ? '' : moment(fechs).format('YYYY-MM-DD'),
+            fechadevencimiento: $("#fechadevencimiento").val() ? '' : moment(fecha).format('YYYY-MM-DD')
         };
     };
     minDateFilter = "";
@@ -1131,11 +1131,29 @@ if (window.location.pathname == `/links/reportes`) {
             $("#cels").val(data.movildecompra);
             $("#plan").val(data.producto);
             $("#contraseña").val(data.descripcion ? data.descripcion.slice(3) : '');
+            $("#fechadeactivacion").val(data.fechadeactivacion);
+            $("#fechadevencimiento").val(data.fechadevencimiento);
             $('#ModalOrden').modal('toggle');
         }
     });
+    $('#ModalEventos').modal({
+        backdrop: 'static',
+        keyboard: true,
+        toggle: true
+    });
     $('#datatable2').on('click', '.restablecer', function () {
         if ($('#usuarioadmin').val() == 1) {
+            /*$('#ModalEventos').one('shown.bs.modal', function () {
+                $('#ModalEventos').modal('hide')
+            }).modal('show');
+            $('#ModalEventos').one('hidden.bs.modal', function () {
+                $('#actualizar').modal('show');
+            }).modal('hide');*/
+            $('#ModalEventos').modal({
+                backdrop: 'static',
+                keyboard: true,
+                toggle: true
+            });
             var fila = $(this).parents('tr');
             var data = $('#datatable2').DataTable().row(fila).data();
             $.ajax({
@@ -1146,13 +1164,16 @@ if (window.location.pathname == `/links/reportes`) {
                     idv: data.id,
                     idp: data.proveedor,
                     correo: data.correo,
-                    clave: data.descripcion,
+                    clave: data.descripcion ? data.descripcion.slice(3) : '',
                     nombre: data.nombre,
                     plan: data.producto,
                     hora: fechs.getHours() + ":" + fechs.getMinutes() + ":" + fechs.getSeconds() + "." + fechs.getMilliseconds()
                 },
                 async: false,
                 success: function (data) {
+                    $('#ModalEventos').one('shown.bs.modal', function () {
+                        $('#ModalEventos').modal('hide')
+                    }).modal('show');
                     if (data.estado && data.min) {
                         tableOrden.ajax.reload(function (json) {
                             SMSj('success', 'Solicitud de restablecimiento de contraseña enviado exitosamente')
