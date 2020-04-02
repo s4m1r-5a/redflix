@@ -1216,11 +1216,19 @@ if (window.location.pathname == `/links/reportes`) {
                 type: 'column'
             }
         },
+        initComplete: function (settings, json) {
+            //tableOrden.column(2).visible(true);
+        },
         columnDefs: [
             /*{
                 className: 'control',
                 orderable: true,
                 targets: 0
+            },
+            {
+                targets: [2],
+                visible: false,
+                searchable: false
             },*/
             { responsivePriority: 1, targets: 4 },
             { responsivePriority: 4, targets: 2 },
@@ -1310,7 +1318,11 @@ if (window.location.pathname == `/links/reportes`) {
             }
         ]
     });
-    //$(document).ready(function () {
+    $(document).ready(function () {
+        /*var column = tableOrden.column('2');
+        //column.visible();
+        column.visible(!column.visible());*/
+    });
     $('#seleccionaproveedor').on('change', function () {
         if ($(this).val()) {
             var clave = $("#contraseña").val();
@@ -1344,7 +1356,7 @@ if (window.location.pathname == `/links/reportes`) {
             SMSj('info', 'Seleccione un Proveedor valido')
         }
     })
-    //});
+
     //////////////////////* Table3 *///////////////////////    
     var table3 = $('#datatable3').DataTable({
         deferRender: true,
