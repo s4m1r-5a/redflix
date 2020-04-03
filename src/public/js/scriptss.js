@@ -1246,6 +1246,12 @@ if (window.location.pathname == `/links/reportes`) {
 
     // Guardar o Actualizar Orden
     $('#guardarOrden').on('click', function () {
+        $('#ModalOrden').modal('toggle');
+        $('#ModalEventos').modal({
+            toggle: true,
+            backdrop: 'static',
+            keyboard: true,
+        });
         RecogerDatos()
         $.ajax({
             type: 'PUT',
@@ -1253,7 +1259,7 @@ if (window.location.pathname == `/links/reportes`) {
             data: dts,
             success: function (data) {
                 tableOrden.ajax.reload(function (json) {
-                    $('#ModalOrden').modal('toggle');
+                    $('#ModalEventos').modal('hide');
                     SMSj('success', 'Cuenta enviada exitosamente')
                 });
             }
