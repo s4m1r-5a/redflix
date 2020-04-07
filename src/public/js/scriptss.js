@@ -1488,11 +1488,11 @@ if (window.location.pathname == `/links/reportes`) {
             }
         },
         columnDefs: [
-            { responsivePriority: 1, targets: 2 },
-            { responsivePriority: 2, targets: 9 },
-            { responsivePriority: 4, targets: 7 },
-            { responsivePriority: 3, targets: -1 },
-            { responsivePriority: 5, targets: 6 }
+            { responsivePriority: 4, targets: 2 },
+            { responsivePriority: 3, targets: 9 },
+            { responsivePriority: 1, targets: 7 },
+            { responsivePriority: 2, targets: -1 },
+            { responsivePriority: 4, targets: 6 }
         ],
         order: [[1, "desc"]],
         language: languag,
