@@ -7,8 +7,7 @@ const { isLoggedIn } = require('../lib/auth');
 
 // SIGNUP
 router.get('/signup', (req, res) => {
-  const { id } = req.query
-  console.log(id)
+  const { id } = req.query;
   res.render('auth/signup', { id: id });
 });
 
