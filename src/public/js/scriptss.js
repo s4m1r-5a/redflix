@@ -1487,6 +1487,13 @@ if (window.location.pathname == `/links/reportes`) {
                 type: 'column'
             }
         },
+        columnDefs: [
+            { responsivePriority: 1, targets: 2 },
+            { responsivePriority: 2, targets: 9 },
+            { responsivePriority: 4, targets: 7 },
+            { responsivePriority: 3, targets: -1 },
+            { responsivePriority: 5, targets: 6 }
+        ],
         order: [[1, "desc"]],
         language: languag,
         ajax: {
@@ -1503,45 +1510,89 @@ if (window.location.pathname == `/links/reportes`) {
             },
             { data: "id" },
             {
-                data: "fechsolicitud",
-                render: function (data, method, row) {
-                    return moment(data).format('YYYY-MM-DD hh:mm A') //pone la fecha en un formato entendible
-                }
-            },
-            { data: "fullname" },
-            {
-                data: "monto",
-                render: $.fn.dataTable.render.number(',', '.', 0, '$')
-            },
-            { data: "transaccion" },
-            { data: "metodo" },
-            { data: "producto" },
-            {
                 data: "fechadecompra",
                 render: function (data, method, row) {
-                    return moment(data).format('YYYY-MM-DD') || '' //pone la fecha en un formato entendible
+                    return moment(data).format('YYYY-MM-DD hh:mm') //pone la fecha en un formato entendible
                 }
             },
             {
-                data: "estado",
+                data: "nombre",
+                className: 'te'
+            },
+            {
+                data: "cajero",
+                className: 'te'
+            },
+            {
+                data: "producto",
+                className: 'te'
+            },
+            {
+                data: "rango",
+                className: 'te',
                 render: function (data, method, row) {
                     switch (data) {
-                        case 4:
-                            return `<span class="badge badge-pill badge-success">Aprobada</span>`
-                            break;
                         case 6:
-                            return `<span class="badge badge-pill badge-danger">Declinada</span>`
+                            return `<span class="badge badge-pill badge-danger">Cajero</span>`
                             break;
-                        case 1:
-                            return `<span class="badge badge-pill badge-info">Procesando</span>`
+                        case 5:
+                            return `<span class="badge badge-pill badge-warning">Vendedor</span>`
+                            break;
+                        case 4:
+                            return `<span class="badge badge-pill badge-success">Contratista</span>`
                             break;
                         case 3:
-                            return `<span class="badge badge-pill badge-warning">Pendiente</span>`
+                            return `<span class="badge badge-pill badge-info">Distribuidor</span>`
                             break;
-                        default:
-                            return `<span class="badge badge-pill badge-secondary">Indefinida</span>`
+                        case 2:
+                            return `<span class="badge badge-pill badge-secondary">Mayorista</span>`
+                            break;
+                        case 1:
+                            return `<span class="badge badge-pill badge-primary">Master</span>`
+                            break;
                     }
                 }
+            },
+            {
+                data: "precio",
+                className: 'te',
+                render: $.fn.dataTable.render.number(',', '.', 0, '$')
+            },
+            {
+                data: "utilidad",
+                className: 'te',
+                render: $.fn.dataTable.render.number(',', '.', 0, '$')
+            },
+            {
+                data: "comision",
+                className: 'te',
+                render: function (data, method, row) {
+                    switch (data) {
+                        case '95':
+                            return `<span class="badge badge-pill badge-warning">${data}%</span>`
+                            break;
+                        case '90':
+                            return `<span class="badge badge-pill badge-success">${data}%</span>`
+                            break;
+                        case '70':
+                            return `<span class="badge badge-pill badge-info">${data}%</span>`
+                            break;
+                        case '60':
+                            return `<span class="badge badge-pill badge-secondary">${data}%</span>`
+                            break;
+                        case '40':
+                            return `<span class="badge badge-pill badge-primary">${data}%</span>`
+                            break;
+                        case '5':
+                            return `<span class="badge badge-pill badge-danger">${data}%</span>`
+                            break;
+                    }
+                }
+            },
+            {
+                data: "neta",
+                className: 'te',
+                render: $.fn.dataTable.render.number(',', '.', 0, '$')
             }
         ]
     });
