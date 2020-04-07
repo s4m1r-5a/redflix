@@ -695,7 +695,33 @@ router.post('/afiliado', async (req, res) => {
             await pool.query('INSERT INTO ventas SET ? ', venta);
         }
         await pool.query('INSERT INTO pines SET ? ', nuevoPin);
-        sms('57' + movil, 'Bienvenido a ser parte de nuestro equipo RedFlix ingresa a https://redflixx.herokuapp.com/signup y registrarte canjeando este ID ' + pin);
+
+        var options = {
+            method: 'POST',
+            url: 'https://eu89.chat-api.com/instance107218/sendMessage?token=5jn3c5dxvcj27fm0',
+            form: {
+                "phone": '57' + movil,
+                "body": `Felicidades ya eres parte de nuestro equipo *_RedFlix_* tu ID es *${pin}* \n\n
+                *Registrarte* en:\n\n**https://redflixx.herokuapp.com/signup?id=${pin}* \n\n_¡ Si ya te registraste ! y lo que quieres es iniciar sesion ingresa a_ \n*http://redflixx.herokuapp.com/signin* \n\nPara mas informacion puedes escribirnos al *3012673944* \n\n*Bienvenido a* *_RedFlix..._* _la mejor empresa de entretenimiento y contenido digital del país_`
+            }
+        };
+        var dat = {
+            from: 'whatsapp:+14155238886',
+            body: `_Se creo un nuevo registo con el movil_ *${pin}* \n\n*_RedFlix_*`,
+            to: 'whatsapp:+573007753983'
+        }
+        ////// mensajes Twilio ///////////
+        client.messages
+            .create(dat)
+            .then(message => console.log(message.sid));
+
+        ////////////////////* chat-api *////////////////////////////
+        request(options, function (error, response, body) {
+            if (error) return console.error('Failed: %s', error.message);
+            console.log('Success: ', body);
+        });
+
+        sms('57' + movil, `Felicidades ya eres parte de nuestro equipo RedFlix ingresa a https://redflixx.herokuapp.com/signup?id=${pin} y registrarte o canjeando este ID ${pin} de registro`);
         req.flash('success', 'Pin enviado satisfactoriamente, comuniquese con el afiliado para que se registre');
         res.redirect('/tablero');
     }
