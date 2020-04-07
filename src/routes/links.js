@@ -870,7 +870,7 @@ async function rango(id) {
     ////////////* busqueda de recargas de saldo de los ultimos 3 meses *///////////////////////////////////////////////////  
     const reporte2 = await pool.query(`SELECT MONTH(t.fecha) Mes, COUNT(*) CanTrans, SUM(t.monto) monto
     FROM transacciones t     
-    WHERE t.acreedor = ?
+    WHERE t.acreedor = ? AND t.metodo != 5
         AND YEAR(t.fecha) = YEAR(CURDATE()) 
         AND MONTH(t.fecha) BETWEEN ${month} and 12
     GROUP BY MONTH(t.fecha)

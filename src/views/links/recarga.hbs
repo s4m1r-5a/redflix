@@ -14,7 +14,8 @@
                         <nav class="nav btn-group">
                             <a href="#solicitar" class="btn btn-outline-primary active" data-toggle="tab">Solicitar
                                 saldo</a>
-                            <a href="" id="disable" class="btn btn-outline-primary" data-toggle="tab" disabled>Pasar saldo</a>                            
+                            <a href="" id="disable" class="btn btn-outline-primary" data-toggle="tab" disabled>Pasar
+                                saldo</a>
                         </nav>
                     </div>
                 </div>
@@ -31,16 +32,16 @@
                                                 <div class="form-group col-md-3">
                                                     <label for="monto">Monto</label>
                                                     <input type="text" id="monto" name="monto" class="form-control"
-                                                        placeholder="Ingrese valor a recargar"
-                                                        style="text-align:center" required />
+                                                        placeholder="Ingrese valor a recargar" style="text-align:center"
+                                                        required />
                                                 </div>
                                                 <div class="form-group col-md-3">
                                                     <label for="metodo">Forma de pago</label>
                                                     <select id="metodo" class="form-control" name="metodo" required>
-                                                        <option value="3" selected>Consignacion</option>
                                                         <option value="2">Transferencia</option>
-                                                        <option value="5">Nequi</option>
+                                                        <option value="3">Consignacion</option>
                                                         <option value="4">Efectivo</option>
+                                                        <option value="5" selected>Credito</option>
                                                     </select>
                                                 </div>
                                                 <div class="form-group col-md-2">
@@ -70,6 +71,8 @@
 
                 <div class="text-center my-4">
                     <h2>Rangos & Niveles</h2>
+                    <p class="lead text-center text-sm mb-4">Los saldos que tenga como forma de pago "Credito" no podran
+                        calificar en la tercera y cuarta forma</p>
                 </div>
                 <div class="row">
                     <div class="col-md-5 col-sm-6 ml-auto">
