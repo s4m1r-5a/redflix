@@ -663,16 +663,11 @@ router.post('/recarga', isLoggedIn, async (req, res) => {
 router.post('/afiliado', async (req, res) => {
     const result = await rango(req.user.id);
     const sald = await saldo(26, result, req.user.id);
+    const { movil, cajero } = req.body, pin = ID(13);
 
-    if (sald === 'NO') {
-
-        req.flash('error', 'Afiliacion no realizada, saldo insuficiente');
-        res.redirect('/links/recarga');
-
-    } else {
+    if (sald !== 'NO' || cajero !== undefined) {
 
         const usua = await usuario(req.user.id);
-        const { movil, cajero } = req.body, pin = ID(13);
         const nuevoPin = {
             id: pin,
             categoria: 1,
@@ -701,8 +696,8 @@ router.post('/afiliado', async (req, res) => {
             url: 'https://eu89.chat-api.com/instance107218/sendMessage?token=5jn3c5dxvcj27fm0',
             form: {
                 "phone": '57' + movil,
-                "body": `Felicidades ya eres parte de nuestro equipo *_RedFlix_* tu ID es *${pin}* \n\n
-                *Registrarte* en:\n\n**https://redflixx.herokuapp.com/signup?id=${pin}* \n\n_¡ Si ya te registraste ! y lo que quieres es iniciar sesion ingresa a_ \n*http://redflixx.herokuapp.com/signin* \n\nPara mas informacion puedes escribirnos al *3012673944* \n\n*Bienvenido a* *_RedFlix..._* _la mejor empresa de entretenimiento y contenido digital del país_`
+                "body": `*_¡ Felicidades !_* \n_ya eres parte de nuestro equipo_ *_RedFlix_* _tu_ *ID* _es_ *_${pin}_* \n
+                *_Registrarte_* _en:_\n*https://redflixx.herokuapp.com/signup?id=${pin}* \n\n_¡ Si ya te registraste ! y lo que quieres es iniciar sesion ingresa a_ \n*http://redflixx.herokuapp.com/signin* \n\nPara mas informacion puedes escribirnos al *3012673944* \n\n*Bienvenido a* *_RedFlix..._* _la mejor empresa de entretenimiento y contenido digital del país_`
             }
         };
         var dat = {
@@ -724,6 +719,11 @@ router.post('/afiliado', async (req, res) => {
         sms('57' + movil, `Felicidades ya eres parte de nuestro equipo RedFlix ingresa a https://redflixx.herokuapp.com/signup?id=${pin} y registrarte o canjeando este ID ${pin} de registro`);
         req.flash('success', 'Pin enviado satisfactoriamente, comuniquese con el afiliado para que se registre');
         res.redirect('/tablero');
+    } else if (sald === 'NO') {
+
+        req.flash('error', 'Afiliacion no realizada, saldo insuficiente');
+        res.redirect('/links/recarga');
+
     }
 });
 router.post('/id', async (req, res) => {
