@@ -1300,7 +1300,7 @@ if (window.location.pathname == `/links/reportes`) {
                 className: 'btn btn-secondary fech',
             },
             {
-                text: `<input id="min" type="text" class="edi text-center" style="width: 40px; padding: 1px;"
+                text: `<input id="min" type="text" class="edi text-center" style="width: 60px; padding: 1px;"
                 placeholder="Desde">`,
                 attr: {
                     title: 'Busqueda por ID',
@@ -1309,7 +1309,7 @@ if (window.location.pathname == `/links/reportes`) {
                 className: 'btn btn-secondary min'
             },
             {
-                text: `<input id="max" type="text" class="edi text-center" style="width: 40px; padding: 1px;"
+                text: `<input id="max" type="text" class="edi text-center" style="width: 60px; padding: 1px;"
                 placeholder="Hasta">`,
                 attr: {
                     title: 'Busqueda por ID',
