@@ -6,7 +6,7 @@ function Moneda(valor) {
 }
 //lenguaje
 let languag = {
-    "lengthMenu": "Ver 10 filas",
+    "lengthMenu": "Ver",
     "sProcessing": "Procesando...",
     "sLengthMenu": "",
     "sZeroRecords": "No se encontraron resultados",
@@ -1288,7 +1288,7 @@ if (window.location.pathname == `/links/reportes`) {
     //////////////////////* Table2 */////////////////////// 
     var tableOrden = $('#datatable2').DataTable({
         dom: 'Bfrtip',
-        buttons: ['pageLength',
+        buttons: [//'pageLength',
             {
                 text: `<div class="mb-0">
                     <i class="align-middle mr-2" data-feather="calendar"></i> <span class="align-middle">Fecha</span>
@@ -1300,7 +1300,7 @@ if (window.location.pathname == `/links/reportes`) {
                 className: 'btn btn-secondary fech',
             },
             {
-                text: `<input id="min" type="text" class="edi text-center" style="width: 60px; padding: 1px;"
+                text: `<input id="min" type="text" class="edi text-center" style="width: 40px; padding: 1px;"
                 placeholder="Desde">`,
                 attr: {
                     title: 'Busqueda por ID',
@@ -1309,7 +1309,7 @@ if (window.location.pathname == `/links/reportes`) {
                 className: 'btn btn-secondary min'
             },
             {
-                text: `<input id="max" type="text" class="edi text-center" style="width: 60px; padding: 1px;"
+                text: `<input id="max" type="text" class="edi text-center" style="width: 40px; padding: 1px;"
                 placeholder="Hasta">`,
                 attr: {
                     title: 'Busqueda por ID',
@@ -1319,7 +1319,7 @@ if (window.location.pathname == `/links/reportes`) {
             },
             {
                 text: `<div class="mb-0">
-                    <i class="align-middle mr-2" data-feather="dollar-sign"></i> <span class="align-middle">Calcular</span>
+                    <i class="align-middle mr-2" data-feather="dollar-sign"></i> <span class="align-middle">Ok</span>
                </div>`,
                 attr: {
                     title: 'calculo',
@@ -1360,7 +1360,24 @@ if (window.location.pathname == `/links/reportes`) {
             { responsivePriority: 3, targets: -1 }
         ],
         order: [[1, "desc"]],
-        language: languag,
+        language: {
+            "lengthMenu": "Ver",
+            "sProcessing": "Procesando...",
+            "sLengthMenu": "Ver",
+            "sZeroRecords": "No se encontraron resultados",
+            "sEmptyTable": "Ningún dato disponible",
+            "sLoadingRecords": "Cargando...",
+            "oPaginate": {
+                "sFirst": "Pri",
+                "sLast": "Últ",
+                "sNext": "Sig",
+                "sPrevious": "Ant"
+            },
+            "oAria": {
+                "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+            }
+        },
         ajax: {
             method: "POST",
             url: "/links/reportes/table2",
