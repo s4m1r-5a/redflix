@@ -1319,7 +1319,7 @@ if (window.location.pathname == `/links/reportes`) {
             },
             {
                 text: `<div class="mb-0">
-                    <i class="align-middle mr-2" data-feather="dollar-sign"></i> <span class="align-middle">Ok</span>
+                    <i class="align-middle mr-2" data-feather="dollar-sign"></i> <span class="align-middle">Calc</span>
                </div>`,
                 attr: {
                     title: 'calculo',
@@ -1719,6 +1719,7 @@ if (window.location.pathname == `/links/reportes`) {
         })
         $('#datatable4_length label').html(`<span id="precio" class="badge badge-pill badge-info">Total venta: $${Moneda(precio)}</span>
         <span id="neto" class="badge badge-pill badge-secondary">Total utilida: $${Moneda(neto)}</span>
+        <br>
         <span id="utilidad" class="badge badge-pill badge-danger">Utilidad no generada: $${Moneda(utilidad - neto)}</span>
         <span id="totalingreso" class="badge badge-pill badge-primary">RedFlix: $${Moneda(precio - neto)}</span>`)
         /*$('#precio').html(`Total venta: $${Moneda(precio)}`)
