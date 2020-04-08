@@ -1126,6 +1126,29 @@ if (window.location.pathname == `/links/reportes`) {
             return true;
         }
     );
+    $.fn.dataTable.ext.search.push(
+        function (settings, data, dataIndex) {
+            var min = parseInt($('#min').val(), 10);
+            var max = parseInt($('#max').val(), 10);
+            var age = parseFloat(data[1]) || 0; // use data for the age column
+
+            if ((isNaN(min) && isNaN(max)) ||
+                (isNaN(min) && age <= max) ||
+                (min <= age && isNaN(max)) ||
+                (min <= age && age <= max)) {
+                return true;
+            }
+            return false;
+        }
+    );
+
+    $(document).ready(function () {
+        //var table = $('#example').DataTable();
+        // Event listener to the two range filtering inputs to redraw on input
+        $('#min, #max').keyup(function () {
+            table4.draw();
+        });
+    });
     $('#datatable2').on('click', '.te', function () {
         if ($('#usuarioadmin').val() == 1) {
             var fila = $(this).parents('tr');
@@ -1277,6 +1300,24 @@ if (window.location.pathname == `/links/reportes`) {
                 className: 'btn btn-secondary fech',
             },
             {
+                text: `<input id="min" type="text" class="edi text-center" style="width: 60px; padding: 1px;"
+                placeholder="Desde">`,
+                attr: {
+                    title: 'Busqueda por ID',
+                    id: ''
+                },
+                className: 'btn btn-secondary min'
+            },
+            {
+                text: `<input id="max" type="text" class="edi text-center" style="width: 60px; padding: 1px;"
+                placeholder="Hasta">`,
+                attr: {
+                    title: 'Busqueda por ID',
+                    id: ''
+                },
+                className: 'btn btn-secondary max'
+            },
+            {
                 text: `<div class="mb-0">
                     <i class="align-middle mr-2" data-feather="dollar-sign"></i> <span class="align-middle">Calcular</span>
                </div>`,
@@ -1284,7 +1325,7 @@ if (window.location.pathname == `/links/reportes`) {
                     title: 'calculo',
                     id: 'calcular'
                 },
-                className: 'btn btn-secondary calcular',
+                className: 'btn btn-secondary calcular'
             }
         ],
         autoWidth: false,
@@ -1336,7 +1377,7 @@ if (window.location.pathname == `/links/reportes`) {
             {
                 data: "fechadecompra",
                 render: function (data, method, row) {
-                    return moment(new Date(data)).format('YYYY-MM-DD hh:mm A') //pone la fecha en un formato entendible
+                    return moment(data).format('YYYY-MM-DD hh:mm A') //pone la fecha en un formato entendible
                 }
             },
             {
@@ -1644,14 +1685,29 @@ if (window.location.pathname == `/links/reportes`) {
         table4.draw();
     });
     $('.calcular').on('click', function () {
-        /*$('#ModalEventos').modal({
-            toggle: true,
-            backdrop: 'static',
-            keyboard: true,
-        });*/
-        //var fila = $(this).parents('tr');
-        var data = $('#datatable2').DataTable().row().data();
-        console.log(data)
+        var precio = 0, utilidad = 0, neto = 0;
+        table4.page.len(-1).draw();
+        var data = table4.rows(':visible').data();
+        $('#datatable2_filter').hide('slow')
+        $('#datatable2').hide('slow')
+        $('#datatable2_paginate').hide('slow')
+        $('#tablaprecio').removeClass()
+        $('#tablaprecio').addClass("col-12")
+        $('#tablaprecio').next().removeClass()
+        $('#tablaprecio').next().addClass("col-12")
+        data.map((t) => {
+            precio += t.precio
+            utilidad += t.utilidad
+            neto += t.neta
+        })
+        $('#datatable4_length label').html(`<span id="precio" class="badge badge-pill badge-info">Total venta: $${Moneda(precio)}</span>
+        <span id="neto" class="badge badge-pill badge-secondary">Total utilida: $${Moneda(neto)}</span>
+        <span id="utilidad" class="badge badge-pill badge-danger">Utilidad no generada: $${Moneda(utilidad - neto)}</span>
+        <span id="totalingreso" class="badge badge-pill badge-primary">RedFlix: $${Moneda(precio - neto)}</span>`)
+        /*$('#precio').html(`Total venta: $${Moneda(precio)}`)
+        $('#neto').html(`Total utilida: $${Moneda(neto)}`)
+        $('#utilidad').html(`Utilidad no generada: $${Moneda(utilidad - neto)}`)
+        $('#totalingreso').html(`RedFlix: $${Moneda(precio - neto)}`)*/
 
     });
 }
