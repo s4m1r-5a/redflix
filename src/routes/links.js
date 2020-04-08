@@ -226,7 +226,7 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
 
     } else if (id == 'table4') {
 
-        d = req.user.id == 15 ? '' : 'v.vendedor = ? AND';
+        /*d = req.user.id == 15 ? '' : 'v.vendedor = ? AND';
 
         sql = `SELECT v.id, v.fechadecompra, p.producto, v.transaccion, u.fullname, t.fecha fechsolicitud, 
         t.monto, m.metodo, t.estado FROM ventas v INNER JOIN products p ON v.product = p.id_producto 
@@ -234,6 +234,15 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
         WHERE ${d} v.product = 25 AND YEAR(v.fechadecompra) = YEAR(CURDATE()) 
         AND MONTH(v.fechadecompra) BETWEEN 1 and 12`
 
+        const ventas = await pool.query(sql, req.user.id);
+        respuesta = { "data": ventas };
+        res.send(respuesta);*/
+
+        d = req.user.admin > 0 ? '' : 'v.vendedor = ? AND';
+
+        sql = `SELECT v.id, v.fechadecompra, c.nombre, v.cajero, p.producto, v.rango, p.precio, p.utilidad, r.comision, p.utilidad * r.comision / 100 neta
+        FROM ventas v INNER JOIN products p ON v.product = p.id_producto INNER JOIN rangos r ON v.rango = r.id
+        INNER JOIN clientes c ON v.client = c.id WHERE ${d} v.product != 25 AND YEAR(v.fechadecompra) = YEAR(CURDATE()) AND MONTH(v.fechadecompra) BETWEEN 1 and 12`
         const ventas = await pool.query(sql, req.user.id);
         respuesta = { "data": ventas };
         res.send(respuesta);
@@ -339,6 +348,8 @@ router.get('/ventas2', isLoggedIn, async (req, res) => {
     res.render('links/ventas2');
 });
 router.get('/ventas', isLoggedIn, async (req, res) => {
+    const result = await rango(req.user.id);
+    console.log(result)
     res.render('links/ventas');
 });
 router.post('/ventas', isLoggedIn, async (req, res) => {
@@ -643,16 +654,11 @@ router.post('/recarga', isLoggedIn, async (req, res) => {
 router.post('/afiliado', async (req, res) => {
     const result = await rango(req.user.id);
     const sald = await saldo(26, result, req.user.id);
+    const { movil, cajero } = req.body, pin = ID(13);
 
-    if (sald === 'NO') {
-
-        req.flash('error', 'Afiliacion no realizada, saldo insuficiente');
-        res.redirect('/links/recarga');
-
-    } else {
+    if (sald !== 'NO' || cajero !== undefined) {
 
         const usua = await usuario(req.user.id);
-        const { movil, cajero } = req.body, pin = ID(13);
         const nuevoPin = {
             id: pin,
             categoria: 1,
@@ -675,9 +681,40 @@ router.post('/afiliado', async (req, res) => {
             await pool.query('INSERT INTO ventas SET ? ', venta);
         }
         await pool.query('INSERT INTO pines SET ? ', nuevoPin);
-        sms('57' + movil, 'Bienvenido a ser parte de nuestro equipo RedFlix ingresa a https://redflixx.herokuapp.com/signup y registrarte canjeando este ID ' + pin);
+
+        var options = {
+            method: 'POST',
+            url: 'https://eu89.chat-api.com/instance107218/sendMessage?token=5jn3c5dxvcj27fm0',
+            form: {
+                "phone": '57' + movil,
+                "body": `*_¡ Felicidades !_* \n_ya eres parte de nuestro equipo_ *_RedFlix_* _tu_ *ID* _es_ *_${pin}_* \n
+                *_Registrarte_* _en:_\n*https://redflixx.herokuapp.com/signup?id=${pin}* \n\n_¡ Si ya te registraste ! y lo que quieres es iniciar sesion ingresa a_ \n*http://redflixx.herokuapp.com/signin* \n\nPara mas informacion puedes escribirnos al *3012673944* \n\n*Bienvenido a* *_RedFlix..._* _la mejor empresa de entretenimiento y contenido digital del país_`
+            }
+        };
+        var dat = {
+            from: 'whatsapp:+14155238886',
+            body: `_Se creo un nuevo registo con el movil_ *${pin}* \n\n*_RedFlix_*`,
+            to: 'whatsapp:+573007753983'
+        }
+        ////// mensajes Twilio ///////////
+        client.messages
+            .create(dat)
+            .then(message => console.log(message.sid));
+
+        ////////////////////* chat-api *////////////////////////////
+        request(options, function (error, response, body) {
+            if (error) return console.error('Failed: %s', error.message);
+            console.log('Success: ', body);
+        });
+
+        sms('57' + movil, `Felicidades ya eres parte de nuestro equipo RedFlix ingresa a https://redflixx.herokuapp.com/signup?id=${pin} y registrarte o canjeando este ID ${pin} de registro`);
         req.flash('success', 'Pin enviado satisfactoriamente, comuniquese con el afiliado para que se registre');
         res.redirect('/tablero');
+    } else if (sald === 'NO') {
+
+        req.flash('error', 'Afiliacion no realizada, saldo insuficiente');
+        res.redirect('/links/recarga');
+
     }
 });
 router.post('/id', async (req, res) => {
@@ -837,6 +874,7 @@ async function rango(id) {
         d, meses = 0,
         mes = 0,
         reportes = new Array(4);
+    ////////////* busqueda de ventatas de los ultimos 3 meses *///////////////////////////////////////////////////    
     const reporte = await pool.query(`SELECT MONTH(v.fechadecompra) Mes, COUNT(*) CantMes, SUM(p.precio) venta, SUM(p.utilidad) utilidad
     FROM ventas v 
     INNER JOIN users u ON v.vendedor = u.id
@@ -846,25 +884,25 @@ async function rango(id) {
         AND MONTH(v.fechadecompra) BETWEEN ${month} and 12
     GROUP BY MONTH(v.fechadecompra)
     ORDER BY 1`, id);
+    ////////////* busqueda de recargas de saldo de los ultimos 3 meses *///////////////////////////////////////////////////  
     const reporte2 = await pool.query(`SELECT MONTH(t.fecha) Mes, COUNT(*) CanTrans, SUM(t.monto) monto
     FROM transacciones t     
-    WHERE t.acreedor = ?
+    WHERE t.acreedor = ? AND t.metodo != 5
         AND YEAR(t.fecha) = YEAR(CURDATE()) 
         AND MONTH(t.fecha) BETWEEN ${month} and 12
     GROUP BY MONTH(t.fecha)
     ORDER BY 1`, id);
-
+    ////////////* venta del mes actual */////////////////////////////////////////////////// 
     if (reporte.length > 0 || reporte2.length > 0) {
         await reporte.filter((repor) => {
             return repor.Mes === m.getMonth() + 1;
-            //return repor.Mes === 9;
         }).map((repor) => {
-            if (repor.CantMes >= 1 && repor.CantMes <= 19) {
+            if (repor.CantMes >= 1 && repor.CantMes <= 24) {
                 d = `${repor.Mes} ${repor.CantMes} 5`
                 return reportes[0] = 5;
-            } else if (repor.CantMes >= 20 && repor.CantMes <= 49) {
+            } else if (repor.CantMes >= 25 && repor.CantMes <= 54) {
                 return reportes[0] = 4;
-            } else if (repor.CantMes >= 50 && repor.CantMes <= 99) {
+            } else if (repor.CantMes >= 55 && repor.CantMes <= 99) {
                 return reportes[0] = 3;
             } else if (repor.CantMes >= 100 && repor.CantMes <= 499) {
                 return reportes[0] = 2;
@@ -875,6 +913,7 @@ async function rango(id) {
         if (!reportes[0]) {
             reportes[0] = 6;
         };
+        ////////////*  venta de los ultimos 2 meses mas el actual  */////////////////////////////////////////////////// 
         await reporte.filter((re) => {
             return re.Mes !== m.getMonth() + 1;
         }).map((re) => {
@@ -893,6 +932,7 @@ async function rango(id) {
         } else {
             reportes[1] = 6;
         }
+        ////////////* rango por recargas de saldo del mes actual */////////////////////////////////////////////////// 
         await reporte2.filter((re) => {
             return re.Mes !== m.getMonth() + 1;
         }).map((re) => {
@@ -900,17 +940,18 @@ async function rango(id) {
         });
         if (meses <= 50000) {
             reportes[2] = 5;
-        } else if (meses >= 600000 && meses <= 1499900) {
+        } else if (meses >= 1500000 && meses <= 4999900) {
             reportes[2] = 4;
-        } else if (meses >= 1500000 && meses <= 2999900) {
+        } else if (meses >= 5000000 && meses <= 9999900) {
             reportes[2] = 3;
-        } else if (meses >= 3000000 && meses <= 4999900) {
+        } else if (meses >= 10000000 && meses <= 19999900) {
             reportes[2] = 2;
-        } else if (meses >= 5000000) {
+        } else if (meses >= 20000000) {
             reportes[2] = 1;
         } else {
             reportes[2] = 6;
         }
+        ////////////* rango por recargas de saldo de los ultimos 3 meses */////////////////////////////////////////////////// 
         await reporte2.filter((rep) => {
             return rep.Mes === m.getMonth() + 1;
         }).map((rep) => {
@@ -928,6 +969,7 @@ async function rango(id) {
                 return reportes[3] = 6;
             }
         });
+        console.log(reportes)
         if (!reportes[3]) {
             reportes[3] = 6;
         };
