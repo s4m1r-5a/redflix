@@ -1151,9 +1151,6 @@ if (window.location.pathname == `/links/reportes`) {
     });
     $('#datatable2').on('click', '.restablecer', function () {
         if ($('#usuarioadmin').val() == 1) {
-            /*$('#ModalEventos').one('hidden.bs.modal', function () {
-                $('#actualizar').modal('show');
-            }).modal('hide');*/
             $('#ModalEventos').modal({
                 toggle: true,
                 backdrop: 'static',
@@ -1278,6 +1275,16 @@ if (window.location.pathname == `/links/reportes`) {
                     id: 'Date'
                 },
                 className: 'btn btn-secondary fech',
+            },
+            {
+                text: `<div class="mb-0">
+                    <i class="align-middle mr-2" data-feather="dollar-sign"></i> <span class="align-middle">Calcular</span>
+               </div>`,
+                attr: {
+                    title: 'calculo',
+                    id: 'calcular'
+                },
+                className: 'btn btn-secondary calcular',
             }
         ],
         autoWidth: false,
@@ -1329,7 +1336,7 @@ if (window.location.pathname == `/links/reportes`) {
             {
                 data: "fechadecompra",
                 render: function (data, method, row) {
-                    return moment(data).format('YYYY-MM-DD hh:mm A') //pone la fecha en un formato entendible
+                    return moment(new Date(data)).format('YYYY-MM-DD hh:mm A') //pone la fecha en un formato entendible
                 }
             },
             {
@@ -1584,6 +1591,17 @@ if (window.location.pathname == `/links/reportes`) {
         tableOrden.draw();
         table3.draw();
         table4.draw();
+    });
+    $('.calcular').on('click', function () {
+        /*$('#ModalEventos').modal({
+            toggle: true,
+            backdrop: 'static',
+            keyboard: true,
+        });*/
+        //var fila = $(this).parents('tr');
+        var data = $('#datatable2').DataTable().row().data();
+        console.log(data)
+
     });
 }
 //////////////////////////////////* PRODUCTOS */////////////////////////////////////////////////////////////

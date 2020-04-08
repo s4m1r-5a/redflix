@@ -18,38 +18,29 @@ const client = require('twilio')(accountSid, authToken);
 
 router.get('/prueba', (req, res) => {
 
-    /*var options = {
+    var options = {
         method: 'POST',
-        url: 'https://api.chat-api.com/instance107218/sendMessage?token=5jn3c5dxvcj27fm0',
-        form: {
-            "phone": 573012673944,
-            "body": "me ecuentro haciendo una prueba"
+        url: 'https://sbapi.bancolombia.com/v1/security/oauth-otp-pymes/oauth2/token',
+        headers:
+        {
+            accept: 'application/json',
+            'content-type': 'application/x-www-form-urlencoded',
+            authorization: 'Basic base64(37eb1267-6c33-46b1-a76f-33a553fd812f:rT5yY5fH0eR1oL0oI0tV1rX2hS6hU0mH3yG3mW4jU0wD5aC2mP)'
+        },
+        form:
+        {
+            grant_type: 'client_credentials',
+            client_id: '37eb1267-6c33-46b1-a76f-33a553fd812f',
+            client_secret: 'rT5yY5fH0eR1oL0oI0tV1rX2hS6hU0mH3yG3mW4jU0wD5aC2mP',
+            scope: 'https://sbapi.bancolombia.com/v2/operations/cross-product/payments/payment-order/transfer/action/registry'
         }
     };
-    var datos;
+
     request(options, function (error, response, body) {
         if (error) return console.error('Failed: %s', error.message);
 
         console.log('Success: ', body);
-        datos = response
-        //console.log('bien: ', response)
-    });*/
-    var datos;
-    client.messages
-        .create({
-            from: 'whatsapp:+14155238886',
-            body: `Felicidades *SAMIR* tu pago fue exitoso, en el lapso del diá te enviaremos los datos de tu cuenta, recuerda nuestras recomendaciones para que no presentes problemas con la cuenta \n \n° *No cambies el correo ni la contraseña* \n \n° *Usted tiene derecho a 4 dispositivos, no intentar conectar mas de los adquiridos* \n \n° *Netflix en muchos casos le restablecera la contraseña cuando detecta un ingreso sospechoso (no necesariamente es malo). Esto sucede cuando se abre en una IP diferente a la que se abrio inicialmente* \n \n° *Si usted no respeta nuestras recomendaciones puede verse perjudicado.* \n \nPra mas informacion escribenos al *3012673944* *_RedFlix..._*
-            `,
-            to: 'whatsapp:+573007753983'
-        })
-        .then(message => console.log(message.sid));
-    /*client.messages
-        .create({
-            from: '+14155238886',
-            body: 'Hello there!',
-            to: '+573007753983'
-        })
-        .then(message => datos = message.sid);*/
+    });
 
     res.send(true);
 });
