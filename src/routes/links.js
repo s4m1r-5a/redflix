@@ -17,7 +17,7 @@ const accountSid = 'AC0db7285fa004f3706457d39b73e8bb37';
 const authToken = '28e8f6c7f5108bae9c8d834620a96986';
 const client = require('twilio')(accountSid, authToken);
 
-cron.schedule("30 13 * * *", async () => {
+cron.schedule("30 10 * * *", async () => {
     var options = {
         method: 'POST',
         url: 'https://eu89.chat-api.com/instance107218/sendMessage?token=5jn3c5dxvcj27fm0',
@@ -280,7 +280,13 @@ router.post('/cobro', isLoggedIn, async (req, res) => {
     res.send(persona);
 });
 router.put('/cobro', isLoggedIn, async (req, res) => {
-    const { vendedor, primera, utilidad, ultima, fechaun, total, fechado, precio, neto, movil, rango } = req.body
+    const { vendedor, primera, utilidad, ultima, fechaun, total, fechado, precio, neto, movil, rango, id, fecha } = req.body
+    const cobro = {
+        fecha, ventas: total, facturas: primera + '-' + ultima,
+        fechas: fechaun + '_' + fechado, contratista: id,
+        noutilidad: utilidad - neto, utilidad: neto,
+        redflix: precio - neto, total: precio
+    }
 
     var options = {
         method: 'POST',
@@ -306,6 +312,7 @@ router.put('/cobro', isLoggedIn, async (req, res) => {
         if (error) return console.error('Failed: %s', error.message);
         console.log('Success: ', body);
     });
+    await pool.query('INSERT INTO reportes SET ?', cobro);
     res.send(true);
 });
 ////////////////////////////* SOAT *////////////////////////////////////////

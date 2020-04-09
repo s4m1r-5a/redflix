@@ -1769,6 +1769,7 @@ if (window.location.pathname == `/links/reportes`) {
                 $('#nomvend').html(data[0].fullname);
                 $("#CuentaCobro .img").attr('src', data[0].imagen);
                 $('#celular').val(data[0].movil);
+                $('#idcontratista').val(data[0].id);
                 switch (data[0].nrango) {
                     case 6:
                         $('#rango').html(`<span class="badge badge-pill badge-danger">Cajero</span>`);
@@ -1796,6 +1797,7 @@ if (window.location.pathname == `/links/reportes`) {
         })
     })
     $('#enviarcuenta').on('click', () => {
+        $('#CuentaCobro').modal('hide');
         $('#ModalEventos').modal({
             toggle: true,
             backdrop: 'static',
@@ -1808,12 +1810,12 @@ if (window.location.pathname == `/links/reportes`) {
                 vendedor: $('#nomvend').html(),
                 primera, ultima, utilidad,
                 fechaun, fechado, total, rango: $('#rango').text(),
-                precio, neto, movil: $('#celular').cleanVal()
+                precio, neto, movil: $('#celular').cleanVal(),
+                id: $('#idcontratista').val(), fecha: moment().format('YYYY-MM-DD HH:mm')
             },
             async: true,
             success: function (data) {
                 $('#ModalEventos').modal('hide');
-                $('#CuentaCobro').modal('hide');
                 SMSj('success', 'Cuenta de cobro enviada con esxito')
             }
         })
