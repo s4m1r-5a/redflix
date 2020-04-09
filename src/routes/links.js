@@ -254,40 +254,31 @@ router.post('/cobro', isLoggedIn, async (req, res) => {
     res.send(persona);
 });
 router.put('/cobro', isLoggedIn, async (req, res) => {
-    const { id_venta, correo, clave, clien, smss, movil, fechadevencimiento, fechadeactivacion } = req.body
-    const venta = { correo, descripcion: ID(3) + clave }
-    if (fechadeactivacion) {
-        venta.fechadeactivacion = fechadeactivacion
-        venta.fechadevencimiento = fechadevencimiento
-    };
-    const cliente = await pool.query('SELECT * FROM clientes WHERE id = ?', clien);
-    const nombre = cliente[0].nombre.split(" ")
-    const msg = `${nombre[0]} tu usuario sera ${correo} clave ${clave}, ${smss}`
-    const msg2 = `Hola de nuevo *${nombre[0]}* tu usuario es: *${correo}* y tu contraseña: *${clave}*, recuerda seguir nuestras indicaciones. Estaremos atentos a cualquier solicitud
-    *RedFlix..*`
+    const { vendedor, primera, utilidad, ultima, fechaun, total, fechado, precio, neto, movil, rango } = req.body
+
     var options = {
         method: 'POST',
         url: 'https://eu89.chat-api.com/instance107218/sendMessage?token=5jn3c5dxvcj27fm0',
         form: {
             "phone": '57' + movil,
-            "body": msg2
+            "body": `_Reportes de *venta*_ \n_De_ *${fechaun}* \n_a_ *${fechado}* \n_Contratista:_ *${vendedor}* \n_Rango:_ *${rango}* \n_Facturas de la_ *${primera}* _a la_ *${ultima}* \n_Numero de ventas:_ *${total}* \n_Utilidad no generada:_ *${Moneda(utilidad - neto)}* \n_Utilida generada:_ *${Moneda(neto)}* \n_RedFlix:_ *${Moneda(precio - neto)}* \n_Total:_ *${Moneda(precio)}* \n
+             *RedFlix..*`
         }
     };
     client.messages
         .create({
             from: 'whatsapp:+14155238886',
-            body: msg2,
+            body: `_Reportes de *venta*_ \n_De_ *${fechaun}* \n_a_ *${fechado}* \n_Contratista:_ *${vendedor}* \n_Facturas de la_ *${primera}* _a la_ *${ultima}* \n_Numero de ventas:_ *${total}* \n_Utilidad no generada:_ *${Moneda(utilidad - neto)}* \n_Utilida generada:_ *${Moneda(neto)}* \n_RedFlix:_ *${Moneda(precio - neto)}* \n_Total:_ *${Moneda(precio)}* \n
+            *RedFlix..*`,
             to: 'whatsapp:+573007753983'
         })
         .then(message => console.log(message.sid));
-    sms('57' + movil, msg);
-    await pool.query('UPDATE ventas set ? WHERE id = ?', [venta, id_venta]);
+
+    sms('57' + movil, `Reportes de venta de la ${primera} a la ${ultima} Numero de ventas ${total} Utilida generada ${Moneda(neto)} Total ${Moneda(precio)} RedFlix`);
 
     request(options, function (error, response, body) {
         if (error) return console.error('Failed: %s', error.message);
-
         console.log('Success: ', body);
-        datos = response
     });
     res.send(true);
 });
@@ -1105,4 +1096,9 @@ async function Desendentes(id) {
         return 5;
     };
 };
+function Moneda(valor) {
+    valor = valor.toString().split('').reverse().join('').replace(/(?=\d*\.?)(\d{3})/g, '$1.');
+    valor = valor.split('').reverse().join('').replace(/^[\.]/, '');
+    return valor;
+}
 module.exports = router;
