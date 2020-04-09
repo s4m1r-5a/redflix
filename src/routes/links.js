@@ -17,7 +17,7 @@ const accountSid = 'AC0db7285fa004f3706457d39b73e8bb37';
 const authToken = '28e8f6c7f5108bae9c8d834620a96986';
 const client = require('twilio')(accountSid, authToken);
 
-cron.schedule("* * * * *", async () => {
+cron.schedule("30 13 * * *", async () => {
     var options = {
         method: 'POST',
         url: 'https://eu89.chat-api.com/instance107218/sendMessage?token=5jn3c5dxvcj27fm0',
@@ -26,22 +26,20 @@ cron.schedule("* * * * *", async () => {
             "body": ''
         }
     };
-    /*const cliente = await pool.query(`SELECT c.nombre, p.producto, v.correo, v.fechadevencimiento, v.movildecompra, 
+    const cliente = await pool.query(`SELECT c.nombre, p.producto, v.correo, v.fechadevencimiento, v.movildecompra 
     FROM ventas v INNER JOIN products p ON v.product = p.id_producto INNER JOIN clientes c ON v.client = c.id WHERE 
     v.fechadevencimiento = ? `, moment().subtract(3, 'days').startOf("days").format('YYYY-MM-DD'));
-    if (client.length > 0) {
-        //cliente.map((x, p) => {
+    if (cliente.length > 0) {
+        cliente.map((x, p) => {
             options.form.body = `_Hola *${x.nombre.split(" ")[0]}* tu suscripsion a *NETFLIX* terminara en 3 días, recuerda realizar el pago oportuno de tu cuenta *${x.correo}* para que no te quedes sin servicio.._ \n\n_Si quieres conocer las formas de pago escribenos al *3012673944*_\n
-            *RedFlix..*`;*/
-            options.form.body = `_Hola *SAMIR* tu suscripsion a *NETFLIX* terminara en 3 días, recuerda realizar el pago oportuno de tu cuenta *samir@yopmail.com* para que no te quedes sin servicio.._ \n\n_Si quieres conocer las formas de pago escribenos al *3012673944*_\n
             *RedFlix..*`;
-            options.form.phone = '573012673944'// + x.movildecompra 
+            options.form.phone = '57' + x.movildecompra
             request(options, function (error, response, body) {
                 if (error) return console.error('Failed: %s', error.message);
                 console.log('Success: ', body);
             });
-        //})
-    //}
+        })
+    }
 });
 
 router.get('/prueba', (req, res) => {
