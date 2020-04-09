@@ -158,7 +158,6 @@ router.post('/proveedores', isLoggedIn, async (req, res) => {
 });
 router.put('/reportes', isLoggedIn, async (req, res) => {
     const { id_venta, correo, clave, clien, smss, movil, fechadevencimiento, fechadeactivacion } = req.body
-    console.log(req.body)
     const venta = { correo, descripcion: ID(3) + clave }
     if (fechadeactivacion) {
         venta.fechadeactivacion = fechadeactivacion
@@ -240,7 +239,7 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
 
         d = req.user.admin > 0 ? '' : 'v.vendedor = ? AND';
 
-        sql = `SELECT v.id, v.fechadecompra, c.nombre, v.cajero, p.producto, v.rango, p.precio, p.utilidad, r.comision, p.utilidad * r.comision / 100 neta
+        sql = `SELECT v.id, v.fechadecompra, c.nombre, v.vendedor, v.cajero, p.producto, v.rango, p.precio, p.utilidad, r.comision, p.utilidad * r.comision / 100 neta
         FROM ventas v INNER JOIN products p ON v.product = p.id_producto INNER JOIN rangos r ON v.rango = r.id
         INNER JOIN clientes c ON v.client = c.id WHERE ${d} v.product != 25 AND YEAR(v.fechadecompra) = YEAR(CURDATE()) AND MONTH(v.fechadecompra) BETWEEN 1 and 12`
         const ventas = await pool.query(sql, req.user.id);
@@ -248,6 +247,49 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
         res.send(respuesta);
     }
 
+});
+router.post('/cobro', isLoggedIn, async (req, res) => {
+    const { vendedor } = req.body;
+    const persona = await pool.query(`SELECT * FROM users WHERE id = ?`, vendedor);
+    res.send(persona);
+});
+router.put('/cobro', isLoggedIn, async (req, res) => {
+    const { id_venta, correo, clave, clien, smss, movil, fechadevencimiento, fechadeactivacion } = req.body
+    const venta = { correo, descripcion: ID(3) + clave }
+    if (fechadeactivacion) {
+        venta.fechadeactivacion = fechadeactivacion
+        venta.fechadevencimiento = fechadevencimiento
+    };
+    const cliente = await pool.query('SELECT * FROM clientes WHERE id = ?', clien);
+    const nombre = cliente[0].nombre.split(" ")
+    const msg = `${nombre[0]} tu usuario sera ${correo} clave ${clave}, ${smss}`
+    const msg2 = `Hola de nuevo *${nombre[0]}* tu usuario es: *${correo}* y tu contraseña: *${clave}*, recuerda seguir nuestras indicaciones. Estaremos atentos a cualquier solicitud
+    *RedFlix..*`
+    var options = {
+        method: 'POST',
+        url: 'https://eu89.chat-api.com/instance107218/sendMessage?token=5jn3c5dxvcj27fm0',
+        form: {
+            "phone": '57' + movil,
+            "body": msg2
+        }
+    };
+    client.messages
+        .create({
+            from: 'whatsapp:+14155238886',
+            body: msg2,
+            to: 'whatsapp:+573007753983'
+        })
+        .then(message => console.log(message.sid));
+    sms('57' + movil, msg);
+    await pool.query('UPDATE ventas set ? WHERE id = ?', [venta, id_venta]);
+
+    request(options, function (error, response, body) {
+        if (error) return console.error('Failed: %s', error.message);
+
+        console.log('Success: ', body);
+        datos = response
+    });
+    res.send(true);
 });
 ////////////////////////////* SOAT *////////////////////////////////////////
 router.post('/soat', isLoggedIn, (req, res) => {

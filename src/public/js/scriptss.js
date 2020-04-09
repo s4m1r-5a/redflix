@@ -1192,7 +1192,7 @@ if (window.location.pathname == `/links/reportes`) {
                     plan: data.producto,
                     hora: fechs.getHours() + ":" + fechs.getMinutes() + ":" + fechs.getSeconds() + "." + fechs.getMilliseconds()
                 },
-                async: false,
+                async: true,
                 success: function (data) {
                     $('#ModalEventos').one('shown.bs.modal', function () {
                         $('#ModalEventos').modal('hide')
@@ -1234,6 +1234,7 @@ if (window.location.pathname == `/links/reportes`) {
                     correo: $("#correo").val(),
                     hora: fechs.getHours() + ":" + fechs.getMinutes() + ":" + fechs.getSeconds() + "." + fechs.getMilliseconds()
                 },
+                async: true,
                 success: function (data) {
                     $('#ModalEventos').modal('hide')
                     if (data.estado && data.min) {
@@ -1270,6 +1271,7 @@ if (window.location.pathname == `/links/reportes`) {
             type: 'PUT',
             url: '/links/reportes',
             data: dts,
+            async: false,
             success: function (data) {
                 tableOrden.ajax.reload(function (json) {
                     $('#ModalEventos').modal('hide');
@@ -1696,19 +1698,24 @@ if (window.location.pathname == `/links/reportes`) {
         table3.draw();
         table4.draw();
     });
+    var primera, ultima, precio = 0, utilidad = 0, neto = 0, vendedor, fecha1, fecha2;
     $('.calcular').on('click', function () {
-        var precio = 0, utilidad = 0, neto = 0;
         table4.page.len(-1).draw();
         var data = table4.rows(':visible').data();
         $('#datatable2_filter').hide('slow')
         $('#datatable2').hide('slow')
         $('#datatable2_paginate').hide('slow')
         $('#quitartodo').show('slow')
+        $('#cuentadecobro').show('slow')
         $('#tablaprecio').removeClass()
         $('#tablaprecio').addClass("col-12")
         $('#tablaprecio').next().removeClass()
         $('#tablaprecio').next().addClass("col-12")
-        data.map((t) => {
+        primera = data[data.length - 1].id
+        vendedor = data[0].vendedor
+        ultima = data[0].id
+        data.map((t, i) => {
+
             precio += t.precio
             utilidad += t.utilidad
             neto += t.neta
@@ -1729,6 +1736,7 @@ if (window.location.pathname == `/links/reportes`) {
         table3.draw();
         table4.draw();
         $('#quitartodo').hide('slow')
+        $('#cuentadecobro').hide('slow')
         $('#datatable2_filter').show('slow')
         $('#datatable2').show('slow')
         $('#datatable2_paginate').show('slow')
@@ -1736,6 +1744,90 @@ if (window.location.pathname == `/links/reportes`) {
         $('#tablaprecio').addClass("col-12 col-sm-12 col-md-6")
         $('#tablaprecio').next().removeClass()
         $('#tablaprecio').next().addClass("col-12 col-sm-12 col-md-6")
+    })
+    $('#cuentadecobro').on('click', () => {
+        $('#ModalEventos').modal({
+            toggle: true,
+            backdrop: 'static',
+            keyboard: true,
+        })
+        $.ajax({
+            type: 'POST',
+            url: '/links/cobro',
+            data: { vendedor: vendedor },
+            async: true,
+            success: function (data) {
+                console.log(data)
+                $('#nomvend').html(data[0].fullname)
+                $("#CuentaCobro .img").attr('src', data[0].imagen);
+                $('#celular').val(data[0].movil)
+                switch (data[0].nrango) {
+                    case 6:
+                        $('#rango').html(`<span class="badge badge-pill badge-danger">Cajero</span>`);
+                        break;
+                    case 5:
+                        $('#rango').html(`<span class="badge badge-pill badge-warning">Vendedor</span>`);
+                        break;
+                    case 4:
+                        $('#rango').html(`<span class="badge badge-pill badge-success">Contratista</span>`);
+                        break;
+                    case 3:
+                        $('#rango').html(`<span class="badge badge-pill badge-info">Distribuidor</span>`);
+                        break;
+                    case 2:
+                        $('#rango').html(`<span class="badge badge-pill badge-secondary">Mayorista</span>`);
+                        break;
+                    case 1:
+                        $('#rango').html(`<span class="badge badge-pill badge-primary">Master</span>`);
+                        break;
+                }
+                $('#CuentaCobro').one('shown.bs.modal', function () {
+                    $('#ModalEventos').modal('toggle');
+                }).modal('show');
+            }
+        })
+    })
+    $('#enviarcuenta').on('click', () => {
+        $('#ModalEventos').modal({
+            toggle: true,
+            backdrop: 'static',
+            keyboard: true,
+        })
+        $.ajax({
+            type: 'PUT',
+            url: '/links/cobro',
+            data: { vendedor: vendedor },
+            async: true,
+            success: function (data) {
+                console.log(data)
+                $('#nomvend').html(data[0].fullname)
+                $("#CuentaCobro .img").attr('src', data[0].imagen);
+                $('#celular').val(data[0].movil)
+                switch (data[0].nrango) {
+                    case 6:
+                        $('#rango').html(`<span class="badge badge-pill badge-danger">Cajero</span>`);
+                        break;
+                    case 5:
+                        $('#rango').html(`<span class="badge badge-pill badge-warning">Vendedor</span>`);
+                        break;
+                    case 4:
+                        $('#rango').html(`<span class="badge badge-pill badge-success">Contratista</span>`);
+                        break;
+                    case 3:
+                        $('#rango').html(`<span class="badge badge-pill badge-info">Distribuidor</span>`);
+                        break;
+                    case 2:
+                        $('#rango').html(`<span class="badge badge-pill badge-secondary">Mayorista</span>`);
+                        break;
+                    case 1:
+                        $('#rango').html(`<span class="badge badge-pill badge-primary">Master</span>`);
+                        break;
+                }
+                $('#CuentaCobro').one('shown.bs.modal', function () {
+                    $('#ModalEventos').modal('toggle');
+                }).modal('show');
+            }
+        })
     })
 }
 //////////////////////////////////* PRODUCTOS */////////////////////////////////////////////////////////////
