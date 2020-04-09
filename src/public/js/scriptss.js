@@ -1143,8 +1143,6 @@ if (window.location.pathname == `/links/reportes`) {
     );
 
     $(document).ready(function () {
-        //var table = $('#example').DataTable();
-        // Event listener to the two range filtering inputs to redraw on input
         $('#min, #max').keyup(function () {
             table4.draw();
         });
@@ -1213,11 +1211,6 @@ if (window.location.pathname == `/links/reportes`) {
         } else {
             SMSj('info', 'Aun no se encuentra disponible este boton')
         }
-    });
-    $(document).ready(function () {
-        /*var column = tableOrden.column('2');
-        //column.visible();
-        column.visible(!column.visible());*/
     });
     $('#seleccionaproveedor').on('change', function () {
         if ($(this).val()) {
@@ -1319,7 +1312,7 @@ if (window.location.pathname == `/links/reportes`) {
             },
             {
                 text: `<div class="mb-0">
-                    <i class="align-middle mr-2" data-feather="dollar-sign"></i> <span class="align-middle">Calc</span>
+                    <i class="align-middle mr-2" data-feather="check-circle"></i> <span class="align-middle">Calc</span>
                </div>`,
                 attr: {
                     title: 'calculo',
@@ -1693,7 +1686,8 @@ if (window.location.pathname == `/links/reportes`) {
             'Ultimos 30 Días': [moment().subtract(29, 'days'), moment().endOf("days")],
             'Mes Pasado': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')],
             'Este Mes': [moment().startOf('month'), moment().endOf('month')],
-            'Hoy': [moment().startOf('days'), moment().endOf("days")]
+            'Hoy': [moment().startOf('days'), moment().endOf("days")],
+            'Restablecer': [moment().subtract(1, 'year'), moment().endOf("days")]
         }
     }, function (start, end, label) {
         maxDateFilter = end;
@@ -1709,6 +1703,7 @@ if (window.location.pathname == `/links/reportes`) {
         $('#datatable2_filter').hide('slow')
         $('#datatable2').hide('slow')
         $('#datatable2_paginate').hide('slow')
+        $('#quitartodo').show('slow')
         $('#tablaprecio').removeClass()
         $('#tablaprecio').addClass("col-12")
         $('#tablaprecio').next().removeClass()
@@ -1722,13 +1717,26 @@ if (window.location.pathname == `/links/reportes`) {
         <span id="neto" class="badge badge-pill badge-secondary">Total utilida: $${Moneda(neto)}</span>
         <br>
         <span id="utilidad" class="badge badge-pill badge-danger">Utilidad no generada: $${Moneda(utilidad - neto)}</span>
-        <span id="totalingreso" class="badge badge-pill badge-primary">RedFlix: $${Moneda(precio - neto)}</span>`)
-        /*$('#precio').html(`Total venta: $${Moneda(precio)}`)
-        $('#neto').html(`Total utilida: $${Moneda(neto)}`)
-        $('#utilidad').html(`Utilidad no generada: $${Moneda(utilidad - neto)}`)
-        $('#totalingreso').html(`RedFlix: $${Moneda(precio - neto)}`)*/
-
+        <span id="totalingreso" class="badge badge-pill badge-primary">RedFlix: $${Moneda(precio - neto)}</span>`);
     });
+    $('#quitartodo').on('click', function () {
+        $('#datatable4_length label').html('');
+        $('#min, #max').val('');
+        table4.page.len(10).draw();
+        maxDateFilter = moment().endOf("days");
+        minDateFilter = moment().subtract(1, 'year');
+        tableOrden.draw();
+        table3.draw();
+        table4.draw();
+        $('#quitartodo').hide('slow')
+        $('#datatable2_filter').show('slow')
+        $('#datatable2').show('slow')
+        $('#datatable2_paginate').show('slow')
+        $('#tablaprecio').removeClass()
+        $('#tablaprecio').addClass("col-12 col-sm-12 col-md-6")
+        $('#tablaprecio').next().removeClass()
+        $('#tablaprecio').next().addClass("col-12 col-sm-12 col-md-6")
+    })
 }
 //////////////////////////////////* PRODUCTOS */////////////////////////////////////////////////////////////
 if (window.location == `${window.location.origin}/links/productos`) {
