@@ -1820,7 +1820,7 @@ if (window.location.pathname == `/links/reportes`) {
             }
         })
     })
-}
+} ///ESTO ES PARA QUE APRENDAS PENDEJO QUE PRIMERO TIENES QUE ACTUALÑIZAR///////////////////////
 //////////////////////////////////* PRODUCTOS */////////////////////////////////////////////////////////////
 if (window.location == `${window.location.origin}/links/productos`) {
     minDateFilter = "";
