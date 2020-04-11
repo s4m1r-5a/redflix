@@ -939,14 +939,14 @@ async function rango(id) {
         await reporte.filter((repor) => {
             return repor.Mes === m.getMonth() + 1;
         }).map((repor) => {
-            if (repor.CantMes >= 1 && repor.CantMes <= 24) {
+            if (repor.CantMes >= 1 && repor.CantMes <= 49) {
                 d = `${repor.Mes} ${repor.CantMes} 5`
                 return reportes[0] = 5;
-            } else if (repor.CantMes >= 25 && repor.CantMes <= 54) {
+            } else if (repor.CantMes >= 50 && repor.CantMes <= 99) {
                 return reportes[0] = 4;
-            } else if (repor.CantMes >= 55 && repor.CantMes <= 99) {
+            } else if (repor.CantMes >= 100 && repor.CantMes <= 199) {
                 return reportes[0] = 3;
-            } else if (repor.CantMes >= 100 && repor.CantMes <= 499) {
+            } else if (repor.CantMes >= 200 && repor.CantMes <= 499) {
                 return reportes[0] = 2;
             } else if (repor.CantMes >= 500) {
                 return reportes[0] = 1;
