@@ -1454,7 +1454,6 @@ if (window.location.pathname == `/links/reportes`) {
             }
         ]
     });
-
     //////////////////////* Table3 *///////////////////////    
     var table3 = $('#datatable3').DataTable({
         deferRender: true,
@@ -1698,8 +1697,16 @@ if (window.location.pathname == `/links/reportes`) {
         table3.draw();
         table4.draw();
     });
-    var primera, ultima, precio = 0, utilidad = 0, neto = 0, vendedor, fecha1, fecha2;
+    var primera, ultima, precio = 0, utilidad = 0, neto = 0, vendedor, fechaun, fechado, total, movil;
     $('.calcular').on('click', function () {
+        primera = '';
+        ultima = '';
+        precio = 0;
+        utilidad = 0;
+        neto = 0;
+        fechaun = '';
+        fechado = '';
+        total = '';
         table4.page.len(-1).draw();
         var data = table4.rows(':visible').data();
         $('#datatable2_filter').hide('slow')
@@ -1714,8 +1721,10 @@ if (window.location.pathname == `/links/reportes`) {
         primera = data[data.length - 1].id
         vendedor = data[0].vendedor
         ultima = data[0].id
+        fechaun = data[data.length - 1].fechadecompra
+        fechado = data[0].fechadecompra
+        total = data.length
         data.map((t, i) => {
-
             precio += t.precio
             utilidad += t.utilidad
             neto += t.neta
@@ -1757,10 +1766,10 @@ if (window.location.pathname == `/links/reportes`) {
             data: { vendedor: vendedor },
             async: true,
             success: function (data) {
-                console.log(data)
-                $('#nomvend').html(data[0].fullname)
+                $('#nomvend').html(data[0].fullname);
                 $("#CuentaCobro .img").attr('src', data[0].imagen);
-                $('#celular').val(data[0].movil)
+                $('#celular').val(data[0].movil);
+                $('#idcontratista').val(data[0].id);
                 switch (data[0].nrango) {
                     case 6:
                         $('#rango').html(`<span class="badge badge-pill badge-danger">Cajero</span>`);
@@ -1788,6 +1797,7 @@ if (window.location.pathname == `/links/reportes`) {
         })
     })
     $('#enviarcuenta').on('click', () => {
+        $('#CuentaCobro').modal('hide');
         $('#ModalEventos').modal({
             toggle: true,
             backdrop: 'static',
@@ -1796,36 +1806,17 @@ if (window.location.pathname == `/links/reportes`) {
         $.ajax({
             type: 'PUT',
             url: '/links/cobro',
-            data: { vendedor: vendedor },
+            data: {
+                vendedor: $('#nomvend').html(),
+                primera, ultima, utilidad,
+                fechaun, fechado, total, rango: $('#rango').text(),
+                precio, neto, movil: $('#celular').cleanVal(),
+                id: $('#idcontratista').val(), fecha: moment().format('YYYY-MM-DD HH:mm')
+            },
             async: true,
             success: function (data) {
-                console.log(data)
-                $('#nomvend').html(data[0].fullname)
-                $("#CuentaCobro .img").attr('src', data[0].imagen);
-                $('#celular').val(data[0].movil)
-                switch (data[0].nrango) {
-                    case 6:
-                        $('#rango').html(`<span class="badge badge-pill badge-danger">Cajero</span>`);
-                        break;
-                    case 5:
-                        $('#rango').html(`<span class="badge badge-pill badge-warning">Vendedor</span>`);
-                        break;
-                    case 4:
-                        $('#rango').html(`<span class="badge badge-pill badge-success">Contratista</span>`);
-                        break;
-                    case 3:
-                        $('#rango').html(`<span class="badge badge-pill badge-info">Distribuidor</span>`);
-                        break;
-                    case 2:
-                        $('#rango').html(`<span class="badge badge-pill badge-secondary">Mayorista</span>`);
-                        break;
-                    case 1:
-                        $('#rango').html(`<span class="badge badge-pill badge-primary">Master</span>`);
-                        break;
-                }
-                $('#CuentaCobro').one('shown.bs.modal', function () {
-                    $('#ModalEventos').modal('toggle');
-                }).modal('show');
+                $('#ModalEventos').modal('hide');
+                SMSj('success', 'Cuenta de cobro enviada con esxito')
             }
         })
     })
