@@ -1,3 +1,4 @@
+
 var scaling = 1;
 //count
 var currentSliderCount = 0;
@@ -21,13 +22,32 @@ $(document).ready(function () {
     var player5 = new Playerjs({ id: "player5" });
     $(".tile").on({
         mouseenter: function () {
-            play = $(this).children('.tile__media').attr("id");
-            pley = play + '.api("play", "https://mdstrm.com/live-stream-playlist/57d01d6c28b263eb73b59a5a.m3u8");';
-            sto = play + '.api("stop");';
-            eval(pley);
+            /*$(this).mousemove(function () {                
+                setTimeout(function () { $('.tile__details').hide('slow') }, 1000);
+            });*/
+            console.log($(this).offset().left)
+            if ($(this).children('input').val()) {
+                play = $(this).children('.tile__media').attr("id");
+                pley = play + `.api("play", "${$(this).children('input').val()}");`;
+                sto = play + '.api("stop");';
+                eval(pley);
+            }
         },
         mouseleave: function () {
-            eval(sto);
+            if ($(this).children('input').val()) {
+                eval(sto);
+            }
+            //$('.tile__details').show('slow')
+            /*$(this).parents('.row').velocity({
+                left: $(this).parents(".px").val()
+            }, {
+                duration: 700,
+                easing: "swing",
+                queue: "",
+                loop: false, // Si la animación debe ciclarse
+                delay: false, // Demora
+                mobileHA: true // Acelerado por hardware, activo por defecto
+            });*/
         }
     });
     init();
