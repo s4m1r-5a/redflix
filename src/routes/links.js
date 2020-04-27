@@ -17,6 +17,53 @@ const accountSid = 'AC0db7285fa004f3706457d39b73e8bb37';
 const authToken = '28e8f6c7f5108bae9c8d834620a96986';
 const client = require('twilio')(accountSid, authToken);
 
+/*cron.schedule("33 20 * * *", async () => {
+    var options = {
+        method: 'POST',
+        url: 'https://eu89.chat-api.com/instance107218/sendMessage?token=5jn3c5dxvcj27fm0',
+        form: {
+            "phone": '',
+            "body": ''
+        }
+    };
+    var confir = 0;
+    var datos = `_LISTA DE *CLIENTES*_`;
+    for (var i = 0; i < 3; i++) {
+        datos += `\n_*Cuentas a vencer ${i == 0 ? 'hoy' : i == 1 ? 'mañana' : 'pasado mañana'} ${moment().add(i, 'days').startOf("days").format('ll')}*_\n\n`;
+        const cliente = await pool.query(`SELECT c.nombre, p.producto, v.correo, v.movildecompra, v.client
+        FROM ventas v INNER JOIN products p ON v.product = p.id_producto INNER JOIN clientes c ON v.client = c.id WHERE 
+        v.fechadevencimiento = ? `, moment().add(i, 'days').startOf("days").format('YYYY-MM-DD'));
+        if (cliente.length > 0) {
+            confir = 2
+            let m = new Date()
+            cliente.map((x, p) => {
+                pool.query(`SELECT * FROM ventas WHERE client = ${x.client} AND MONTH(fechadevencimiento) BETWEEN ${m.getMonth()} AND 12`)
+                    .then(function () {
+                        options.form.body = `_Hola *${x.nombre.split(" ")[0]}* tu suscripsion a *NETFLIX* terminara ${i == 0 ? 'hoy' : i == 1 ? 'mañana' : 'pasado mañana'} *${moment().add(i, 'days').startOf("days").format('ll')}*. Realiza el pago oportuno de tu cuenta *${x.correo}* para que no te quedes sin servicio.._ \n\n_Recuerda que si pagas despues de tu fecha de corte ya no podras conservar la misma cuenta se te asignara una nueva_ \n\n_Si quieres conocer las formas de pago escribenos al *3012673944*_\n
+                            *RedFlix..*`;
+                        options.form.phone = '57' + x.movildecompra
+                        request(options, function (error, response, body) {
+                            if (error) return console.error('Failed: %s', error.message);
+                            console.log('Success: ', body);
+                        });
+                        datos += `_*${x.nombre.toLowerCase()}* email: *${x.correo}* tel: *${x.movildecompra}*_\n`;
+                    })
+                    .catch(function () {
+                        datos += `_*${x.nombre.toLowerCase()}* email: *${x.correo}* tel: *${x.movildecompra} PAGO*_\n`;
+                    });
+            });
+        }
+    }
+    if (confir === 2) {
+        datos += '\n_Informes *RedFlix...*_'
+        options.form.phone = '573012673944'
+        options.form.body = datos
+        request(options, function (error, response, body) {
+            if (error) return console.error('Failed: %s', error.message);
+            console.log('Success: ', body);
+        });
+    };
+});*/
 cron.schedule("30 10 * * *", async () => {
     var options = {
         method: 'POST',
@@ -26,20 +73,37 @@ cron.schedule("30 10 * * *", async () => {
             "body": ''
         }
     };
-    const cliente = await pool.query(`SELECT c.nombre, p.producto, v.correo, v.fechadevencimiento, v.movildecompra 
-    FROM ventas v INNER JOIN products p ON v.product = p.id_producto INNER JOIN clientes c ON v.client = c.id WHERE 
-    v.fechadevencimiento = ? `, moment().subtract(3, 'days').startOf("days").format('YYYY-MM-DD'));
-    if (cliente.length > 0) {
-        cliente.map((x, p) => {
-            options.form.body = `_Hola *${x.nombre.split(" ")[0]}* tu suscripsion a *NETFLIX* terminara en 3 días, recuerda realizar el pago oportuno de tu cuenta *${x.correo}* para que no te quedes sin servicio.._ \n\n_Si quieres conocer las formas de pago escribenos al *3012673944*_\n
-            *RedFlix..*`;
-            options.form.phone = '57' + x.movildecompra
-            request(options, function (error, response, body) {
-                if (error) return console.error('Failed: %s', error.message);
-                console.log('Success: ', body);
+    var confir = 0;
+    var datos = `_LISTA DE *CLIENTES*_`;
+    for (var i = 0; i < 3; i++) {
+        datos += `\n_*Cuentas a vencer ${i == 0 ? 'hoy' : i == 1 ? 'mañana' : 'pasado mañana'} ${moment().add(i, 'days').startOf("days").format('ll')}*_\n\n`;
+        const cliente = await pool.query(`SELECT c.nombre, p.producto, v.correo, v.movildecompra, v.client
+        FROM ventas v INNER JOIN products p ON v.product = p.id_producto INNER JOIN clientes c ON v.client = c.id WHERE 
+        v.fechadevencimiento = ? `, moment().add(i, 'days').startOf("days").format('YYYY-MM-DD'));
+        if (cliente.length > 0) {
+            confir = 2
+            let m = new Date()
+            cliente.map((x, p) => {
+                options.form.body = `_Hola *${x.nombre.split(" ")[0]}* tu suscripsion a *NETFLIX* terminara ${i == 0 ? 'hoy' : i == 1 ? 'mañana' : 'pasado mañana'} *${moment().add(i, 'days').startOf("days").format('ll')}*. Realiza el pago oportuno de tu cuenta *${x.correo}* para que no te quedes sin servicio.._ \n\n_Recuerda que si pagas despues de tu fecha de corte ya no podras conservar la misma cuenta se te asignara una nueva_ \n\n_Si quieres conocer las formas de pago escribenos al *3012673944*_\n
+                            *RedFlix..*`;
+                options.form.phone = '57' + x.movildecompra
+                request(options, function (error, response, body) {
+                    if (error) return console.error('Failed: %s', error.message);
+                    console.log('Success: ', body);
+                });
+                datos += `_*${x.nombre.toLowerCase()}* email: *${x.correo}* tel: *${x.movildecompra}*_\n`;
             });
-        })
+        }
     }
+    if (confir === 2) {
+        datos += '\n_Informes *RedFlix...*_'
+        options.form.phone = '573012673944'
+        options.form.body = datos
+        request(options, function (error, response, body) {
+            if (error) return console.error('Failed: %s', error.message);
+            console.log('Success: ', body);
+        });
+    };
 });
 
 router.get('/prueba', (req, res) => {
