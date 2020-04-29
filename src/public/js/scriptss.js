@@ -1092,6 +1092,7 @@ if (window.location.pathname == `/tablero`) {
 
 //////////////////////////////////* REPORTES */////////////////////////////////////////////////////////////
 if (window.location.pathname == `/links/reportes`) {
+    
     let p = '', fecha = new Date(), fechs = new Date();
     fecha.setDate(fecha.getDate() + 30)
     function RecogerDatos() {

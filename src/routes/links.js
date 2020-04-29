@@ -16,6 +16,7 @@ const cron = require("node-cron");
 const accountSid = 'AC0db7285fa004f3706457d39b73e8bb37';
 const authToken = '28e8f6c7f5108bae9c8d834620a96986';
 const client = require('twilio')(accountSid, authToken);
+moment.locale('es');
 
 /*cron.schedule("33 20 * * *", async () => {
     var options = {
@@ -364,7 +365,7 @@ router.put('/cobro', isLoggedIn, async (req, res) => {
     client.messages
         .create({
             from: 'whatsapp:+14155238886',
-            body: `_Reportes de *venta*_ \n_De_ *${fechaun}* \n_a_ *${fechado}* \n_Contratista:_ *${vendedor}* \n_Facturas de la_ *${primera}* _a la_ *${ultima}* \n_Numero de ventas:_ *${total}* \n_Utilidad no generada:_ *${Moneda(utilidad - neto)}* \n_Utilida generada:_ *${Moneda(neto)}* \n_RedFlix:_ *${Moneda(precio - neto)}* \n_Total:_ *${Moneda(precio)}* \n
+            body: `_Reportes de *venta*_ \n_De_ *${moment(fechaun).format('lll')}* \n_a_ *${moment(fechado).format('lll')}* \n_Contratista:_ *${vendedor}* \n_Facturas de la_ *${primera}* _a la_ *${ultima}* \n_Numero de ventas:_ *${total}* \n_Utilidad no generada:_ *${Moneda(utilidad - neto)}* \n_Utilida generada:_ *${Moneda(neto)}* \n_RedFlix:_ *${Moneda(precio - neto)}* \n_Total:_ *${Moneda(precio)}* \n
             *RedFlix..*`,
             to: 'whatsapp:+573007753983'
         })
