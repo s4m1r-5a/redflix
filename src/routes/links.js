@@ -65,7 +65,7 @@ moment.locale('es');
         });
     };
 });*/
-cron.schedule("17 10 * * *", async () => {
+cron.schedule("13 10 * * *", async () => {
     var options = {
         method: 'POST',
         url: 'https://eu89.chat-api.com/instance107218/sendMessage?token=5jn3c5dxvcj27fm0',
@@ -85,7 +85,7 @@ cron.schedule("17 10 * * *", async () => {
             confir = 2
             let m = new Date()
             cliente.map((x, p) => {
-                options.form.body = `_Hola *${x.nombre.split(" ")[0]}* tu suscripsion a *NETFLIX* terminara ${i == 0 ? 'hoy' : i == 1 ? 'mañana' : 'pasado mañana'} *${moment().add(i, 'days').startOf("days").format('ll')}*. Realiza el pago oportuno de tu cuenta *${x.correo}* para que no te quedes sin servicio.._ \n\n_Recuerda que si pagas despues de tu fecha de corte ya no podras conservar la misma cuenta se te asignara una nueva_ \n\n_Si quieres conocer las formas de pago escribenos al *3012673944*_\n
+                options.form.body = `_Hola *${x.nombre.split(" ")[0]}* tu suscripsion a *NETFLIX* terminara ${i == 0 ? 'hoy' : i == 1 ? 'mañana' : 'pasado mañana'} *${moment().add(i, 'days').startOf("days").format('ll')}*. Realiza el pago oportuno de tu cuenta *${x.correo}* para que no te quedes sin servicio.._ \n\n_Recuerda que si pagas despues de tu fecha de corte ya no podras conservar la misma cuenta se te asignara una nueva_ \n\n_Si quieres conocer las formas de pago escribenos al *3012673944*_\n\n_Si ya realizaste el pago haz caso omiso a este mensaje_\n
                             *RedFlix..*`;
                 options.form.phone = '57' + x.movildecompra
                 request(options, function (error, response, body) {
