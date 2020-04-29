@@ -64,7 +64,7 @@ const client = require('twilio')(accountSid, authToken);
         });
     };
 });*/
-cron.schedule("30 10 * * *", async () => {
+cron.schedule("17 10 * * *", async () => {
     var options = {
         method: 'POST',
         url: 'https://eu89.chat-api.com/instance107218/sendMessage?token=5jn3c5dxvcj27fm0',
@@ -202,7 +202,7 @@ router.get('/reportes', isLoggedIn, async (req, res) => {
     res.render('links/reportes', { proveedores });
 });
 router.post('/proveedores', isLoggedIn, async (req, res) => {
-    const { evento, idv, idp, plan, clave, nombre, correo, hora } = req.body;
+    const { evento, idv, idp, plan, clave, nombre, correo, hora, corte } = req.body;
     var e;
     if (idp) {
         const horas = await pool.query('SELECT anular FROM ventas WHERE id = ?', idv);
@@ -226,7 +226,7 @@ router.post('/proveedores', isLoggedIn, async (req, res) => {
                 url: 'https://eu89.chat-api.com/instance107218/sendMessage?token=5jn3c5dxvcj27fm0',
                 form: {
                     "phone": '57' + movil,
-                    "body": `Evento: *${evento}* \nNombre: *${nombre}* \nEmail: *${correo}* ${clave ? '\nClave: *' + clave + '*' : ''}\nPantallas: *${plan.slice(5, -16)}*
+                    "body": `_Evento: *${evento}*_\n_Nombre: *${nombre}*_\n_Email: *${correo}*_${clave ? '\n_Clave: *' + clave + '*_' : ''}\n_Pantallas: *${plan.slice(5, -16)}*_${corte ? '\n_Corte: *' + moment(corte).format('ll') + '*_' : ''}
             \n*RedFlix..*`
                 }
             };

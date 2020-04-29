@@ -1103,7 +1103,7 @@ if (window.location.pathname == `/links/reportes`) {
             smss: $('#smsdescripcion').text(),
             movil: $("#cels").val(),
             fechadeactivacion: $("#fechadeactivacion").val() ? '' : moment(fechs).format('YYYY-MM-DD'),
-            fechadevencimiento: $("#fechadevencimiento").val() ? '' : moment(fecha).format('YYYY-MM-DD')
+            fechadevencimiento: $("#fechadeactivacion ").val() ? '' : $("#fechadevencimiento").val() ? moment($("#fechadevencimiento").val()).add(1, 'month').format('YYYY-MM-DD') : moment(fecha).format('YYYY-MM-DD')
         };
     };
     minDateFilter = "";
@@ -1220,7 +1220,8 @@ if (window.location.pathname == `/links/reportes`) {
                 backdrop: 'static',
                 keyboard: true,
             });
-            var clave = $("#contraseña").val();
+            var clave = $("#contraseña").val(),
+                corte = $("#fechadevencimiento").val();
             $.ajax({
                 type: 'POST',
                 url: '/links/proveedores',
@@ -1230,6 +1231,7 @@ if (window.location.pathname == `/links/reportes`) {
                     idp: $(this).val(),
                     plan: $("#plan").val(),
                     clave,
+                    corte,
                     nombre: $("#nombrec").val(),
                     correo: $("#correo").val(),
                     hora: fechs.getHours() + ":" + fechs.getMinutes() + ":" + fechs.getSeconds() + "." + fechs.getMilliseconds()
