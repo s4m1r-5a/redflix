@@ -1,18 +1,19 @@
 
 module.exports = {
-    /*database: {
-        connectionLimit: 1000,
-        host: '64.251.19.144',
-        user: 'redflixx',
-        password: 'colomb1@',
-        database: 'redflix'
-    },*/
     database: {
         connectionLimit: 1000,
-        host: '213.190.6.64',
-        user: 'u152781536_s',
-        password: 'cinetflix',
-        database: 'u152781536_redf'
+        host: '96.43.143.58',
+        user: 'samir',
+        password: 'Abcd1234@',
+        database: 'redflix',
+        port: 3306
+    },
+    database0: {
+        connectionLimit: 50000,
+        host: '96.43.143.58',
+        user: 'samir',
+        password: 'Abcd1234@',
+        database: 'trae'
     },
     /*database: {
         connectionLimit: 1000,

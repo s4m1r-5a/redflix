@@ -65,7 +65,7 @@ moment.locale('es');
         });
     };
 });*/
-cron.schedule("13 10 * * *", async () => {
+cron.schedule("10 9 * * *", async () => {
     var options = {
         method: 'POST',
         url: 'https://eu89.chat-api.com/instance107218/sendMessage?token=5jn3c5dxvcj27fm0',

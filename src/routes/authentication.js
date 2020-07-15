@@ -101,8 +101,6 @@ router.get('/tablero', isLoggedIn, async (req, res) => {
   GROUP BY MONTH(v.fechadecompra)
   ORDER BY 1`, [req.user.id]);
   links.desendente = link;
-  console.log(links);
-  //console.log(ambos);
   res.render('tablero', { links });
   //res.render('tablero')
 });
