@@ -56,10 +56,10 @@ module.exports = {
         v: `sT6rX2wH4iL4jJ8qQ8eV6bL5iJ8cM2gS1eL8sY2pY0hL5vX4eM`
     },
     Contactos: {
-        client_secret: 'lIFar1pydYRrcArlKxTe3S8h',
-        client_id: '358691758390-ea426ocipho2d13q7aku48q3gmo9ktal.apps.googleusercontent.com',
+        client_secret: 'QRAaQqm5PmIA55bw6N2-hpE2',
+        client_id: '507038552414-0d2oul1ks021a2ajvh7p2771qmoel9ln.apps.googleusercontent.com',
         redirect_uris: 'http://localhost:3000/contactos'
-    } 
+    }
 };
 
 

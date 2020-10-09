@@ -401,9 +401,11 @@ $(`.movil`).change(function () {
             data: fd,
             type: 'POST',
             success: function (data) {
-                $(`#Modalventa input[name="nombre"]`).val(data[0].nombre);
-                $(`#Modalventa .user`).val(data[0].id);
-                $(`#Modalventa .contacto`).val(data[0].email3);
+                if (data.length) {
+                    $(`#Modalventa input[name="nombre"]`).val(data[0].nombre);
+                    $(`#Modalventa .user`).val(data[0].id);
+                    $(`#Modalventa .contacto`).val(data[0].email3);
+                }
             }
         });
         $(`#Modalventa input[name="nombre"]`).attr("disabled", true);
@@ -1092,7 +1094,7 @@ if (window.location.pathname == `/tablero`) {
 
 //////////////////////////////////* REPORTES */////////////////////////////////////////////////////////////
 if (window.location.pathname == `/links/reportes`) {
-    
+
     let p = '', fecha = new Date(), fechs = new Date();
     fecha.setDate(fecha.getDate() + 30)
     function RecogerDatos() {
