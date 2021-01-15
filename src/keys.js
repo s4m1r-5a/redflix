@@ -9,11 +9,12 @@ module.exports = {
         port: 3306
     },
     database0: {
-        connectionLimit: 50000,
+        connectionLimit: 1000,
         host: '96.43.143.58',
         user: 'samir',
         password: 'Abcd1234@',
-        database: 'trae'
+        database: 'pruebaRedflix',
+        port: 3306
     },
     /*database: {
         connectionLimit: 1000,

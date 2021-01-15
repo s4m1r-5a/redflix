@@ -30,7 +30,7 @@ let languag = {
         "sSortDescending": ": Activar para ordenar la columna de manera descendente"
     }
 };
-/*let languag = {
+let languag2 = {
     "lengthMenu": "Ver 10 filas",
     "sProcessing": "Procesando...",
     "sLengthMenu": "Ver _MENU_ filas",
@@ -54,7 +54,7 @@ let languag = {
         "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
         "sSortDescending": ": Activar para ordenar la columna de manera descendente"
     }
-};*/
+};
 //mensajes
 function SMSj(tipo, mensaje) {
     var message = mensaje;
@@ -1089,9 +1089,6 @@ if (window.location.pathname == `/tablero`) {
         ]
     });
 };
-
-
-
 //////////////////////////////////* REPORTES */////////////////////////////////////////////////////////////
 if (window.location.pathname == `/links/reportes`) {
 
@@ -1825,7 +1822,7 @@ if (window.location.pathname == `/links/reportes`) {
             }
         })
     })
-} ///ESTO ES PARA QUE APRENDAS PENDEJO QUE PRIMERO TIENES QUE ACTUALÑIZAR///////////////////////
+}
 //////////////////////////////////* PRODUCTOS */////////////////////////////////////////////////////////////
 if (window.location == `${window.location.origin}/links/productos`) {
     minDateFilter = "";
@@ -1881,7 +1878,12 @@ if (window.location == `${window.location.origin}/links/productos`) {
             [10, 25, 50, -1],
             ['10 filas', '25 filas', '50 filas', 'Ver todo']
         ],
-        buttons: ['pageLength',
+        buttons: [
+            {
+                extend: 'pageLength',
+                text: 'Ver',
+                orientation: 'landscape'
+            },
             {
                 text: `Ocultar
                 <div class="dropdown-menu" x-placement="bottom-start" >
@@ -1929,33 +1931,21 @@ if (window.location == `${window.location.origin}/links/productos`) {
             regex: true,
             caseInsensitive: false,
         },
-        responsive: true,
-        order: [[0, 'desc']],
-        language: {
-            "lengthMenu": "Mostrar 10 filas",
-            "sProcessing": "Procesando...",
-            "sLengthMenu": "Mostrar _MENU_ registros",
-            "sZeroRecords": "No se encontraron resultados",
-            "sEmptyTable": "Ningún dato disponible en esta tabla",
-            "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
-            "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
-            "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
-            "sInfoPostFix": "",
-            "sSearch": "Buscar : ",
-            "sUrl": "",
-            "sInfoThousands": ",",
-            "sLoadingRecords": "Cargando...",
-            "oPaginate": {
-                "sFirst": "Primero",
-                "sLast": "Último",
-                "sNext": "Siguiente",
-                "sPrevious": "Anterior"
-            },
-            "oAria": {
-                "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
-                "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+        language: languag2,
+        responsive: {
+            details: {
+                type: 'column'
             }
         },
+        columnDefs: [{
+            className: 'control',
+            orderable: true,
+            targets: 0
+        },
+        { responsivePriority: 1, targets: -1 },
+        { responsivePriority: 1, targets: -2 }],
+        //{className: "dt-center", targets: "_all"}],
+        order: [[1, "desc"]],
         ajax: {
             method: "POST",
             url: "/links/productos",
@@ -1987,7 +1977,49 @@ if (window.location == `${window.location.origin}/links/productos`) {
             { data: "credito" },
             { data: "stock" },
             { data: "descripcion" },
-            { data: "estado" },
+            {
+                data: "estado",
+                render: function (data, method, row) {
+                    switch (data) {
+                        case 7:
+                            return `<span class="badge badge-pill badge-success">Activo</span>`
+                            break;
+                        case 9:
+                            return `<span class="badge badge-pill badge-danger">Agotado</span>`
+                            break;
+                        case 10:
+                            return `<span class="badge badge-pill badge-success">Separado</span>`
+                            break;
+                        case 12:
+                            return `<span class="badge badge-pill badge-dark">Apartado</span>`
+                            break;
+                        case 13:
+                            return `<span class="badge badge-pill badge-primary">Vendido</span>`
+                            break;
+                        case 15:
+                            return `<span class="badge badge-pill badge-tertiary">Inactivo</span>` //secondary
+                            break;
+                    }
+                }
+            },
+            {
+                className: 't',
+                data: "id_producto",
+                render: function (data, method, row) {
+                    return `<div class="btn-group btn-group-sm">
+                                            <button type="button" class="btn btn-secondary dropdown-toggle btnaprobar" data-toggle="dropdown"
+                                             aria-haspopup="true" aria-expanded="false">Acción</button>
+                                                <div class="dropdown-menu">
+                                                    <a class="dropdown-item" href="/links/ordn/${data}"><i class="fas fa-edit"></i> Ediar</a>
+                                                    <a class="dropdown-item" href="#" data-toggle="modal" data-target="#Anulacion"><i class="fas fa-ban"></i> Anular</a>
+                                                    <a class="dropdown-item" href="/links/ordendeseparacion/${data}" target="_blank"><i class="fas fa-print"></i> Imprimir</a>
+                                                    <a class="dropdown-item"><i class="fas fa-paperclip"></i> Adjunar</a>
+                                                    <a class="dropdown-item" onclick="Eliminar(${data})"><i class="fas fa-trash-alt"></i> Eliminar</a>
+                                                    <a class="dropdown-item" onclick="Verificar(${data})"><i class="fas fa-glasses"></i> Verificar Estado</a>
+                                                </div>
+                                        </div>`
+                }
+            }
         ]
     }); //table.buttons().container().appendTo("#datatable_wrapper .col-sm-12 .col-md-6");
 

@@ -149,9 +149,7 @@ router.post('/productos', Admins, async (req, res) => {
     respuesta = { "data": fila };
     res.send(respuesta);
 });
-
 /////////////////////////////////////////////////////
-
 router.get('/social', isLoggedIn, (req, res) => {
     var options = {
         method: 'POST',
@@ -220,7 +218,7 @@ router.post('/proveedores', isLoggedIn, async (req, res) => {
         }
         if (e > 9) {
             const proveedores = await pool.query('SELECT * FROM proveedores WHERE id = ?', idp);
-            console.log(proveedores[0])
+            //console.log(proveedores[0])
             const { movil } = proveedores[0];
             var options = {
                 method: 'POST',
@@ -293,7 +291,7 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
 
         sql = `SELECT v.id, v.fechadecompra, c.id cliente, v.pin, c.nombre, v.cajero, p.producto, v.correo, v.fechadeactivacion, v.fechadevencimiento, v.movildecompra, 
         v.anular, v.descripcion, v.proveedor FROM ventas v INNER JOIN products p ON v.product = p.id_producto INNER JOIN clientes c ON v.client = c.id WHERE ${d} 
-        v.product != 25 AND YEAR(v.fechadecompra) = YEAR(CURDATE()) AND MONTH(v.fechadecompra) BETWEEN 1 and 12`
+        v.product != 25 AND MONTH(v.fechadecompra) BETWEEN 1 and 12`
         const ventas = await pool.query(sql, req.user.id);
         respuesta = { "data": ventas };
         res.send(respuesta);
@@ -307,8 +305,7 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
         r.transaccion, r.fecha fechtrans, r.saldoanterior, r.numeroventas FROM transacciones t 
         INNER JOIN users u ON t.remitente = u.id INNER JOIN users us ON t.acreedor = us.id 
         INNER JOIN recargas r ON r.transaccion = t.id INNER JOIN metodos m ON t.metodo = m.id 
-        INNER JOIN estados e ON t.estado = e.id WHERE ${d} YEAR(t.fecha) = YEAR(CURDATE()) 
-        AND MONTH(t.fecha) BETWEEN 1 and 12`
+        INNER JOIN estados e ON t.estado = e.id WHERE ${d} MONTH(t.fecha) BETWEEN 1 and 12`
 
         const solicitudes = await pool.query(sql, req.user.id);
         respuesta = { "data": solicitudes };
@@ -332,7 +329,7 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
 
         sql = `SELECT v.id, v.fechadecompra, c.nombre, v.vendedor, v.cajero, p.producto, v.rango, p.precio, p.utilidad, r.comision, p.utilidad * r.comision / 100 neta
         FROM ventas v INNER JOIN products p ON v.product = p.id_producto INNER JOIN rangos r ON v.rango = r.id
-        INNER JOIN clientes c ON v.client = c.id WHERE ${d} v.product != 25 AND YEAR(v.fechadecompra) = YEAR(CURDATE()) AND MONTH(v.fechadecompra) BETWEEN 1 and 12`
+        INNER JOIN clientes c ON v.client = c.id WHERE ${d} v.product != 25 AND MONTH(v.fechadecompra) BETWEEN 1 and 12`
         const ventas = await pool.query(sql, req.user.id);
         respuesta = { "data": ventas };
         res.send(respuesta);
@@ -967,6 +964,35 @@ router.post('/edit/:id', async (req, res) => {
 });
 
 //"a0Ab1Bc2Cd3De4Ef5Fg6Gh7Hi8Ij9Jk0KLm1Mn2No3Op4Pq5Qr6Rs7St8Tu9Uv0Vw1Wx2Xy3Yz4Z"
+/*IF NEW.product = 30 THEN
+UPDATE ventas v INNER JOIN products p ON v.product = p.id_producto INNER JOIN users u ON v.vendedor = u.id INNER JOIN recargas r ON u.recarga = r.id INNER JOIN rangos rng ON v.rango = rng.id INNER JOIN transferencias t ON v.transferencia = t.id_tranf
+SET u.saldoactual = u.saldoactual - (t.monto - t.utilidad), r.numeroventas = (r.numeroventas + 1), u.nrango = NEW.rango, p.stock = p.stock - 1 WHERE v.id = NEW.id;
+ELSE
+UPDATE ventas v INNER JOIN products p ON v.product = p.id_producto INNER JOIN users u ON v.vendedor = u.id INNER JOIN recargas r ON u.recarga = r.id INNER JOIN rangos rng ON v.rango = rng.id
+SET u.saldoactual = (u.saldoactual - p.precio) + (p.utilidad*rng.comision/100), r.numeroventas = (r.numeroventas + 1), u.nrango = NEW.rango, p.stock = p.stock - 1 WHERE v.id = NEW.id;
+END IF
+
+
+IF OLD.product != 30 THEN
+UPDATE ventas v INNER JOIN products p ON v.product = p.id_producto INNER JOIN users u ON v.vendedor = u.id INNER JOIN recargas r ON u.recarga = r.id INNER JOIN rangos rng ON v.rango = rng.id
+SET u.saldoactual = u.saldoactual + (p.precio -(p.utilidad*rng.comision/100)), r.numeroventas = (r.numeroventas - 1), u.nrango = OLD.rango, p.stock = p.stock + 1 WHERE v.id = OLD.id;
+END IF*/
+function EnviarWTSAP(movil, body, smsj) {
+    var cel = movil.indexOf("-") > 0 ? '57' + movil.replace(/-/g, "") : movil.indexOf(" ") > 0 ? movil : '57' + movil;
+    var options = {
+        method: 'POST',
+        url: 'https://eu89.chat-api.com/instance107218/sendMessage?token=5jn3c5dxvcj27fm0',
+        form: {
+            phone: cel,
+            body
+        }
+    };
+    request(options, function (error, response, body) {
+        if (error) return console.error('Failed: %s', error.message);
+        console.log('Success: ', body);
+    });
+    smsj ? sms(cel, smsj) : '';
+}
 function ID(lon) {
     let chars = "0A1B2C3D4E5F6G7H8I9J0KL1M2N3O4P5Q6R7S8T9U0V1W2X3Y4Z",
         code = "";
